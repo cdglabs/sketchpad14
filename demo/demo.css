@@ -1,0 +1,114 @@
+body {
+    font-family: "PT Sans", Arial, Helvetica, sans-serif;
+}
+
+canvas {
+    position: absolute; 
+    top: 0;
+    left: 0;
+}
+
+demos, constraints, classes, tiles, shortcuts {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 2000;
+    height: 680px;
+    overflow-y: scroll;
+
+}
+
+actions {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 2000;
+}
+
+bins {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    z-index: 2000;
+}
+
+buttons {
+    position: absolute;
+    z-index: 2000;
+}
+
+button {
+    position: absolute;
+    z-index: 2000;
+    left: 730px;
+    top: 550px;
+}
+
+demo, constraint, class, tile, shortcut, action, bin, iterationsPerFrame, showEachIterationButton {
+    display: block;
+    margin: 10pt;
+    padding: 4pt 4pt;
+    background: #eee;
+    border: 1px solid #ddd;
+    border-radius: 4pt;
+    box-shadow: 4px 4px 6px 0px rgba(0, 0, 0, .4);
+    -webkit-user-select: none;
+}
+
+demo:hover, constraint:hover, class:hover, tile:hover, shortcut:hover, action:hover, bin:hover, button:hover {
+    background: #ddd;
+    box-shadow: 2px 2px 2px 0px rgba(0, 0, 0, .4);
+}
+
+action {
+    background: #F6CED8;
+}
+
+action:hover {
+    background: #D382B7;
+}
+
+bin {
+    background: #ccffcc;
+}
+
+bin:hover {
+    background: #99cc99
+}
+
+button {
+    background: #66FF66;
+}
+
+button:hover {
+    background: #66CC66;
+}
+
+showEachIterationButton {
+    padding: 4pt;
+    background: #eef;
+    position: absolute;
+    bottom: 20px;
+    left: 40%;
+    color: blue;
+}
+
+showEachIterationButton:hover {
+    background: #dde;
+    box-shadow: 2px 2px 2px 0px rgba(0, 0, 0, .4);
+}
+
+iterationsPerFrame {
+    padding: 4pt;
+    background: #f8f8f8;
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    color: blue;
+}
+
+iterationsPerFrame:after {
+    content: ' iterations / frame';
+}
+
+

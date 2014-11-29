@@ -1,0 +1,30 @@
+{
+  "name": "sketchpad14",
+  "version": "0.0.0",
+  "description": "Sketchpad14 based an implementation of van Overveld's relaxation algorithm",
+  "keywords": [
+    "sketchpad",
+    "relaxation",
+    "constraints",
+    "arithmetic constraints",
+    "geometric constraints"
+  ],
+  "homepage": "tinlizzie.org/~hesam/cdg-c/sketchpad14/tool",
+  "bugs": "http://github.com/hesam/issues",
+  "main": "src/main.js",
+  "scripts": {
+    "clean": "rm -f dist/sketchpad14.js dist/sketchpad14.min.js",
+    "build-debug": "browserify src/main.js -d -s Sketchpad -o dist/sketchpad14.js",
+    "build-min": "browserify src/main.js -s Sketchpad -o dist/_sketchpad14.js && uglifyjs dist/_sketchpad14.js -o dist/sketchpad14.min.js && rm dist/_sketchpad14.js",
+    "build": "npm run build-debug && npm run build-min",
+    "watch": "watchify src/main.js -d -s Sketchpad -o dist/sketchpad14.js",
+    "prepublish": "npm run build"
+  },
+  "license": "MIT",
+  "author": "Alex Warth <alexwarth@gmail.com> (http://tinlizzie.org/~awarth), Hesam Samimi <hesam.samimi.cs@gmail.com",
+  "devDependencies": {
+    "watchify": "^0.6.1",
+    "uglify-js": "^2.4.12",
+    "browserify": "^3.30.4"
+  }
+}
