@@ -1,12 +1,14 @@
 // --- User Classes -------------------------------------------------------------
 
-function Point(x, y, optColor, optRadius, optUnfilled, optOpacity) {
+function Point(x, y, optColor, optRadius, optUnfilled, optOpacity, optTextColor, optTextSize) {
     this.x = x
     this.y = y
     this.color = optColor || 'slateBlue'
     this.radius = (optRadius || 8)// * (isTablet ? 2 : 1)
     this.unfilled = optUnfilled
     this.opacity = optOpacity
+    this.optTextColor = optTextColor
+    this.optTextSize = optTextSize
     this._selectionIndices = []
 }
 
@@ -33,7 +35,7 @@ Point.prototype.draw = function(canvas, origin) {
     ctxt.closePath()
     ctxt[this.unfilled ? 'stroke' : 'fill']()
     if (this._selectionIndices.length > 0) {
-	this.drawSelectionIndices(ctxt, this.radius, origin)
+	this.drawSelectionIndices(ctxt, this.radius, origin, this.color, this.optTextColor, this.optTextSize)
     }
 }
 
@@ -50,18 +52,19 @@ Point.prototype.grabPoint = function() {
     return this
 }
 
-Point.prototype.drawSelectionIndices = function(ctxt, radius, origin) {
+Point.prototype.drawSelectionIndices = function(ctxt, radius, origin, pointColor, optTextColor, optTextSize) {
     var text = this._selectionIndices.join(', ')
     var x = this.x + origin.x, y = this.y + origin.y
+    ctxt.shadowOffsetX = 0
+    ctxt.shadowOffsetY = 0
     ctxt.textAlign = 'center'
     ctxt.textBaseline = 'middle'
     ctxt.lineWidth = 1
-    ctxt.strokeStyle = 'blue'
-    ctxt.font = (this.radius * 2) + 'px Arial'  
-    ctxt.strokeText(text, x - 1, y - 1)
-    ctxt.stroke()
-    ctxt.strokeStyle = 'yellow'
-    ctxt.strokeText(text, x, y)
+    ctxt.font = (optTextSize || (this.radius * 2)) + 'px Arial'
+    var color = optTextColor || 'yellow'
+    ctxt.strokeStyle = pointColor
+    ctxt.fillStyle = color
+    ctxt.fillText(text, x, y)
     ctxt.stroke()
 }
 
@@ -92,13 +95,14 @@ Point.prototype.set = function(p) {
     return this
 }
 
-function Line(p1, p2, optColor, optWidth, optLineDash) {
+function Line(p1, p2, optColor, optWidth, optLineDash, optOpacity) {
     this.p1 = p1
     this.p2 = p2
     this.color = optColor || 'gray'
     if (optWidth)
 	this.width = optWidth
     this.lineDash = optLineDash
+    this.opacity = optOpacity
 }
 
 Line.prototype.propertyTypes = {p1: 'Point', p2: 'Point', color: 'String', width: 'Number'}
@@ -112,6 +116,8 @@ sketchpad.addClass(Line)
 Line.prototype.draw = function(canvas, origin, options) {
     var ctxt = canvas.ctxt
     var p1 = this.p1, p2 = this.p2
+    if (this.opacity)
+	ctxt.globalAlpha = this.opacity
     ctxt.beginPath()
     ctxt.moveTo(p1.x + origin.x, p1.y + origin.y)
     ctxt.lineWidth = this.width || 3
