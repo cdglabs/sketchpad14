@@ -8,7 +8,7 @@ Getting inspiration from Sutherland's 1961 Sketchpad and C.W.A.M van Overveld's 
 
 ## Demo
 
-[Coming soon](http://hesam.github.io/sketchpad14/) 
+[Try it](http://hesam.github.io/sketchpad14/demo/demos.html) 
 
 ## Authors
 
