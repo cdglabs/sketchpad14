@@ -1,6 +1,6 @@
 // --- User Classes -------------------------------------------------------------
 
-function Point(x, y, optColor, optRadius, optUnfilled, optOpacity, optTextColor, optTextSize) {
+function Point(x, y, optColor, optRadius, optUnfilled, optOpacity, optTextColor, optTextSize, optTextFont) {
     this.x = x
     this.y = y
     this.color = optColor || 'slateBlue'
@@ -9,6 +9,7 @@ function Point(x, y, optColor, optRadius, optUnfilled, optOpacity, optTextColor,
     this.opacity = optOpacity
     this.optTextColor = optTextColor
     this.optTextSize = optTextSize
+    this.optTextFont = optTextFont
     this._selectionIndices = []
 }
 
@@ -35,7 +36,7 @@ Point.prototype.draw = function(canvas, origin) {
     ctxt.closePath()
     ctxt[this.unfilled ? 'stroke' : 'fill']()
     if (this._selectionIndices.length > 0) {
-	this.drawSelectionIndices(ctxt, this.radius, origin, this.color, this.optTextColor, this.optTextSize)
+	this.drawSelectionIndices(ctxt, this.radius, origin, this.color, this.optTextColor, this.optTextSize, this.optTextFont)
     }
 }
 
@@ -52,7 +53,7 @@ Point.prototype.grabPoint = function() {
     return this
 }
 
-Point.prototype.drawSelectionIndices = function(ctxt, radius, origin, pointColor, optTextColor, optTextSize) {
+Point.prototype.drawSelectionIndices = function(ctxt, radius, origin, pointColor, optTextColor, optTextSize, optTextFont) {
     var text = this._selectionIndices.join(', ')
     var x = this.x + origin.x, y = this.y + origin.y
     ctxt.shadowOffsetX = 0
@@ -60,7 +61,7 @@ Point.prototype.drawSelectionIndices = function(ctxt, radius, origin, pointColor
     ctxt.textAlign = 'center'
     ctxt.textBaseline = 'middle'
     ctxt.lineWidth = 1
-    ctxt.font = (optTextSize || (this.radius * 2)) + 'px Arial'
+    ctxt.font = (optTextSize || (this.radius * 2)) + 'px ' + (optTextFont || 'Arial')
     var color = optTextColor || 'yellow'
     ctxt.strokeStyle = pointColor
     ctxt.fillStyle = color

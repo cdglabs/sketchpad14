@@ -8,7 +8,7 @@ log2 = function() { var args = []; for (var i = 0; i < arguments.length; i++) ar
 function SketchpadCanvas(sketchpad, canvas) {
     this.sketchpad = sketchpad
     this.millisecondsPerFrame = 1000 / 65
-    this.optionsRequiringSIILableUpdate = ['millisecondsPerFrame',  'onlyRenderOnConvergence', 'showEachIteration']
+    this.optionsRequiringSIILableUpdate = ['renderMode', 'millisecondsPerFrame',  'onlyRenderOnConvergence', 'showEachIteration']
     this.renderMode = 0
     this.onlyRenderOnConvergence = false
     this.showConstraints = false
@@ -95,24 +95,24 @@ SketchpadCanvas.prototype.initCanvas = function(canvas) {
 
     var sii = document.getElementById('sii')
 
-    sii.onclick = function() {
-	this.renderMode = (this.renderMode + 1) % 3
-	if (this.renderMode == 0) {
-	    this.showEachIteration = false
-	    this.onlyRenderOnConvergence = false
-	} else if (this.renderMode == 1) {
-	    this.showEachIteration = true
-	    
-	    this.onlyRenderOnConvergence = false
-	} else {
-	    this.showEachIteration = false
-	    this.onlyRenderOnConvergence = true
-	}
-	this.updateSIILabel()
-    }.bind(this)
-
+    sii.onclick = function() { this.setRenderMode((this.renderMode + 1) % 3) }.bind(this)
 }
 
+SketchpadCanvas.prototype.setRenderMode = function(mode) {
+    this.renderMode = mode
+    if (this.renderMode == 0) {
+	this.showEachIteration = false
+	this.onlyRenderOnConvergence = false
+    } else if (this.renderMode == 1) {
+	this.showEachIteration = true	
+	this.onlyRenderOnConvergence = false
+    } else {
+	this.showEachIteration = false
+	this.onlyRenderOnConvergence = true
+    }
+    this.updateSIILabel()
+}
+    
 SketchpadCanvas.prototype.initThingCodeInspector = function() {
     // editor
     this.thingCodeInspectorDiv = document.getElementById('code-inspector-div')
@@ -1244,7 +1244,9 @@ SketchpadCanvas.prototype.updateSIILabel = function() {
 
 SketchpadCanvas.prototype.setOption = function(opt, val) {
     this[opt] = val
-    if (this.optionsRequiringSIILableUpdate.indexOf(opt) >= 0)
+    if (opt === 'renderMode')
+	this.setRenderMode(val)
+    else if (this.optionsRequiringSIILableUpdate.indexOf(opt) >= 0)
 	this.updateSIILabel()
 }
 
