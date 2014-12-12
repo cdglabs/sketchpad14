@@ -67,7 +67,7 @@ examples['bounce'] = function() {
     
 // --- Constraints ---------------------------------------------------------
 
-    rc.addConstraint(Sketchpad.simulation.TimerConstraint, rc.add(new Sketchpad.simulation.Timer(1)))
+    rc.addConstraint(Sketchpad.simulation.TimerConstraint, rc.add(new Timer(1)))
     rc.addConstraint(Sketchpad.simulation.BounceConstraint, rocketLength, rocket, velocity, ground1.p1, ground1.p2)
     rc.addConstraint(Sketchpad.simulation.BounceConstraint, rocketLength, rocket, velocity, ground2.p1, ground2.p2)
     rc.addConstraint(Sketchpad.simulation.BounceConstraint, rocketLength, rocket, velocity, wall1.p1, wall1.p2)
