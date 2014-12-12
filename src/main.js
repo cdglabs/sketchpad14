@@ -2,10 +2,11 @@
 // Imports
 // ------------- -------------------------------------------------------
 
-var installArithmeticConstraints = require('./arithmetic-constraints.js').install
-var installGeometricConstraints = require('./geometric-constraints.js').install
-var installSimulationConstraints = require('./simulation-constraints.js').install
-var installZ3Constraints = require('./z3-constraints.js').install
+var installArithmeticConstraints = require('./2d/arithmetic-constraints.js').install
+var installGeometricConstraints = require('./2d/geometric-constraints.js').install
+var installSimulationConstraints = require('./2d/simulation-constraints.js').install
+var install3DGeometricConstraints = require('./3d/geometric-constraints.js').install
+var install3DSimulationConstraints = require('./3d/simulation-constraints.js').install
 
 // --------------------------------------------------------------------
 // Global Messy Stuff
@@ -441,6 +442,7 @@ Sketchpad.prototype.iterateForUpToMillis = function(tMillis) {
 }
 
 // various ways we can join solutions from all solvers
+// damped average join fn:
 Sketchpad.prototype.sumJoinSolutions = function(curr, solutions) {
     //var res = curr
     var rho = this.rho
@@ -453,6 +455,10 @@ Sketchpad.prototype.sumJoinSolutions = function(curr, solutions) {
 
 Sketchpad.prototype.lastOneWinsJoinSolutions = function(curr, solutions) {
     return solutions[solutions.length - 1]
+}
+
+Sketchpad.prototype.randomChoiceJoinSolutions = function(curr, solutions) {
+    return solutions[Math.floor(Math.random() * solutions.length)]
 }
 
 Sketchpad.prototype.arrayAddJoinSolutions = function(curr, solutions) {
@@ -605,7 +611,8 @@ sketchpad = new Sketchpad()
 installArithmeticConstraints(Sketchpad)
 installGeometricConstraints(Sketchpad)
 installSimulationConstraints(Sketchpad)
-installZ3Constraints(Sketchpad)
+install3DGeometricConstraints(Sketchpad)
+install3DSimulationConstraints(Sketchpad)
 
 // --------------------------------------------------------------------
 // Exports

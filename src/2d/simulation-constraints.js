@@ -13,45 +13,7 @@ function installSimulationConstraints(Sketchpad) {
     var distance = Sketchpad.geom.distance
 
     // Classes
-
-    Sketchpad.simulation.Timer = function Sketchpad__simulation__Timer(stepSize, optPos) {
-	this.stepSize = stepSize
-	this.position = optPos || new Point(150,25)
-    }
-
-    sketchpad.addClass(Sketchpad.simulation.Timer)
     
-    Sketchpad.simulation.Timer.prototype.propertyTypes = {stepSize: 'Number', position: 'Point'}
-
-    Sketchpad.simulation.Timer.dummy = function(x, y) {
-	// we don't want multiple timers being running around!
-	if (!Sketchpad.simulation.Timer.timer)
-	    Sketchpad.simulation.Timer.timer = new Sketchpad.simulation.Timer(1, new Point(x, y))
-	return Sketchpad.simulation.Timer.timer
-    }
-
-    Sketchpad.simulation.Timer.prototype.grabPoint = function() {
-	return this.position
-    }
-
-    Sketchpad.simulation.Timer.prototype.border = function() {
-	return new Box(new Point(this.position.x - 50, this.position.y - 25), 100, 75).border()
-    }
-
-    Sketchpad.simulation.Timer.prototype.containsPoint = function(x, y) {
-	return new Box(new Point(this.position.x - 25, this.position.y + 5), 50, 50).containsPoint(x, y)
-    }
-
-    Sketchpad.simulation.Timer.prototype.center = function(x, y) {
-	return this.position
-    }
-
-    Sketchpad.simulation.Timer.prototype.draw = function(canvas, origin) {
-	this.position.draw(canvas, origin)
-	var txt = 'time: ' + Math.floor(rc.sketchpad.pseudoTime) + ', step: ' + this.stepSize
-	rc.ctxt.fillText(txt, this.position.x + origin.x - 30, this.position.y + origin.y + 25)
-    }
-
     Sketchpad.simulation.Spring = function Sketchpad__simulation__Spring(line, k, length, tearPointAmount) {
 	this.line = line
 	this.k = k

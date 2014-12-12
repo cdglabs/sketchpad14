@@ -3,13 +3,13 @@
     <meta name="viewport" content="user-scalable=no"></meta>
     <title>DON'T PANIC - Sketchpad14</title>
     <link href="demo.css" rel="stylesheet"></link>
-    <link rel="stylesheet" href="../3rdparty/codemirror/codemirror.css">
+    <link rel="stylesheet" href="../../3rdparty/codemirror/codemirror.css">
   </head>
   <body>
-    <script src="../3rdparty/pointerevents.js"></script>
-    <script src="../3rdparty/canvasinput.js"></script>
-    <script src="../3rdparty/codemirror/codemirror.js"></script>
-    <script src="../dist/sketchpad14.js"></script>
+    <script src="../../3rdparty/pointerevents.js"></script>
+    <script src="../../3rdparty/canvasinput.js"></script>
+    <script src="../../3rdparty/codemirror/codemirror.js"></script>
+    <script src="../../dist/sketchpad14.js"></script>
     <script src="user-classes.js"></script>
     <script src="sketchpad-canvas.js"></script>
     <canvas id="canvas" touch-action="none" tabindex="0"></canvas>
@@ -87,6 +87,8 @@ for (var idx = 0; idx < actions.length; idx++) {
     actFn = function() { rc.clear(); rc.redraw(); }
   } else if (actName === 'pause') {
     actFn = function() { rc.togglePause() }
+  } else if (actName === '3d') {
+    actFn = function() { rc.toggle3D() }
   } 
   action.onclick = actFn			
 }

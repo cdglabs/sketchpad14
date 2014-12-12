@@ -358,3 +358,41 @@ PointVector.prototype.draw = function(canvas, origin) {
 PointVector.prototype.magnitude = function() {
     return scaledBy(minus(this.end, this.origin), this.scale)
 }
+
+function Timer(stepSize, optPos) {
+    this.stepSize = stepSize
+    this.position = optPos || new Point(150,25)
+}
+
+sketchpad.addClass(Timer)
+    
+Timer.prototype.propertyTypes = {stepSize: 'Number', position: 'Point'}
+
+Timer.dummy = function(x, y) {
+    // we don't want multiple timers being running around!
+    if (!Timer.timer)
+	Timer.timer = new Timer(1, new Point(x, y))
+    return Timer.timer
+}
+
+Timer.prototype.grabPoint = function() {
+    return this.position
+}
+
+Timer.prototype.border = function() {
+    return new Box(new Point(this.position.x - 50, this.position.y - 25), 100, 75).border()
+}
+
+Timer.prototype.containsPoint = function(x, y) {
+    return new Box(new Point(this.position.x - 25, this.position.y + 5), 50, 50).containsPoint(x, y)
+}
+
+Timer.prototype.center = function(x, y) {
+    return this.position
+}
+
+Timer.prototype.draw = function(canvas, origin) {
+    this.position.draw(canvas, origin)
+    var txt = 'time: ' + Math.floor(rc.sketchpad.pseudoTime) + ', step: ' + this.stepSize
+    rc.ctxt.fillText(txt, this.position.x + origin.x - 30, this.position.y + origin.y + 25)
+}
