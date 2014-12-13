@@ -147,6 +147,7 @@ SketchpadScene.prototype.preventBrowserDefaultKeyEvents = function() {
 }
 
 SketchpadScene.prototype.keydown = function(e) {
+    /*
     var c = e.which // 16: sfht, 17: ctrl, 18: opt, 91: cmd    	
     var k = String.fromCharCode(c)
     var delta = 0.1
@@ -181,6 +182,7 @@ SketchpadScene.prototype.keydown = function(e) {
 	this.updateCamera()
 	this.redraw()
     }
+*/
 }
 
 SketchpadScene.prototype.updateCamera = function() {
