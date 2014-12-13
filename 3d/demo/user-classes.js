@@ -24,8 +24,8 @@ function Line3D(p1, p2, optColor, optWidth, optLineDash, optOpacity) {
     this.opacity = optOpacity
     var geometry = new THREE.Geometry()
     geometry.vertices.push(
-	new THREE.Vector3( p1.x, p1.y, p1.z ),
-	new THREE.Vector3( p2.x, p2.y, p2.z )
+	p1._sceneObj.position,
+	p2._sceneObj.position
     )
     this._sceneObj = new THREE.Line( geometry, new THREE.LineBasicMaterial({color: this.color}))
 }

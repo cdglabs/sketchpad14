@@ -10,6 +10,7 @@
     <script src="../../3rdparty/canvasinput.js"></script>
     <script src="../../3rdparty/codemirror/codemirror.js"></script>
     <script src="../../3rdparty/three/three.min.js"></script>
+    <script src="../../3rdparty/three/orbit-controls.js"></script>
     <script src="../../dist/sketchpad14.js"></script>
     <script src="../../2d/demo/user-classes.js"></script>
     <script src="user-classes.js"></script>
@@ -133,7 +134,7 @@ for (var idx = 0; idx < bins.length; idx++) {
     }})(itemDOMNodes, itemNames, binKind)
 }
     </script>
-    <script src="example-orbit.js"></script>
+    <script src="example-chain.js"></script>
     <script>
 var ipf = document.getElementById('ipf')
 setInterval(function() { ipf.innerHTML = rc.iterationsPerFrame }, 100)

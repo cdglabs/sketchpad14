@@ -45,11 +45,20 @@ function install3DGeometricConstraints(Sketchpad) {
 	var s = Math.sin(dTheta)
 	return {x: c*p.x - s*p.y, y: s*p.x + c*p.y, z: p.z}
     }
-
+    
     function rotatedAround(p, dTheta, axis) {
 	return plus(axis, rotatedBy(minus(p, axis), dTheta))
+	/*
+	// rotate the point (x,y,z) about the vector ⟨u,v,w⟩ by the angle θ (around origin?)
+	var x = p.x, y = p.y, z = p.z, u = axis.x, v = axis.y, w = axis.z
+	var c = Math.cos(dTheta), s = Math.sin(dTheta)
+	var one = (u * x) + (v * y) + (w * z), two = (u * u) + (v * v) + (w * w), three = Math.sqrt(two)
+	return {x: ((u * one * (1 - c))  + (two * x * c) + (three * s * ((v * z) - (w * y)))) / two,
+	y: ((v * one * (1 - c))  + (two * y * c) + (three * s * ((w * x) - (u * z)))) / two,
+ 	z: ((w * one * (1 - c))  + (two * z * c) + (three * s * ((u * y) - (v * x)))) / two}
+	*/
     }
-
+    
     function setDelta(d, p, scale) {
 	d.x = p.x * scale
 	d.y = p.y * scale
@@ -68,6 +77,41 @@ function install3DGeometricConstraints(Sketchpad) {
     Sketchpad.geom3d.rotatedAround = rotatedAround
     Sketchpad.geom3d.setDelta = setDelta
 
+    // Length constraint - maintains distance between P1 and P2 at L.
+
+    Sketchpad.geom3d.LengthConstraint = function Sketchpad__geom3d__LengthConstraint(p1, p2, l) {
+	this.p1 = p1
+	this.p2 = p2
+	this.l = l
+    }
+
+    sketchpad.addClass(Sketchpad.geom3d.LengthConstraint, true)
+
+    Sketchpad.geom3d.LengthConstraint.prototype.description = function() { return  "Sketchpad.geom3d.LengthConstraint(Point3D P1, Point3D P2, Number L) says points P1 and P2 always maintain a distance of L." }
+
+    Sketchpad.geom3d.LengthConstraint.prototype.propertyTypes = {p1: 'Point3D', p2: 'Point3D', l: 'Number'}
+
+    Sketchpad.geom3d.LengthConstraint.prototype.effects = function() {
+	return [{obj: this.p1, props: ['x', 'y', 'z']}, {obj: this.p2, props: ['x', 'y', 'z']}]
+    }
+
+    Sketchpad.geom3d.LengthConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
+	var l12 = magnitude(minus(this.p1, this.p2))
+	return l12 - this.l
+    }
+
+    Sketchpad.geom3d.LengthConstraint.prototype.solve = function(pseudoTime, prevPseudoTime) {
+	var p1 = this.p1, p2 = this.p2
+	var l12 = magnitude(minus(p1, p2))
+	if (l12 == 0) {
+	    p1 = plus(p1, {x: 0.1, y: 0, z: 0})
+	    p2 = plus(p2, {x: -0.1, y: 0, z: 0})
+	}
+	var delta = (l12 - this.l) / 2
+	var e12 = scaledBy(Sketchpad.geom3d.normalized(minus(p2, p1)), delta)
+	return {p1: plus(this.p1, e12), p2: plus(this.p2, scaledBy(e12, -1))}
+    }
+
     // Motor constraint - causes P1 and P2 to orbit their midpoint at the given rate.
     // w is in units of Hz - whole rotations per second.
 
@@ -83,11 +127,6 @@ function install3DGeometricConstraints(Sketchpad) {
 
     Sketchpad.geom3d.MotorConstraint.prototype.propertyTypes = {p1: 'Point', p2: 'Point', w: 'Number'}
     
-    Sketchpad.geom3d.MotorConstraint.dummy = function(x, y) {
-	var l = Line.dummy(x, y)
-	return new Sketchpad.geom3d.MotorConstraint(l.p1, l.p2, 1)
-    }
-
     Sketchpad.geom3d.MotorConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
 	return 1
     }

@@ -88,7 +88,7 @@ SketchpadScene.prototype.initCanvas = function(canvas) {
 
 SketchpadScene.prototype.initCanvas3D = function() {
     this.renderer = new THREE.WebGLRenderer()
-    this.renderer.setSize( window.innerWidth, window.innerHeight )
+    this.renderer.setSize( window.innerWidth, window.innerHeight - 75)
     document.body.appendChild( this.renderer.domElement )
     //this.cameraControls = new THREE.OrbitControls(this.camera, this.renderer.domElement )
     // create an array with six textures for a cool cube
@@ -96,6 +96,7 @@ SketchpadScene.prototype.initCanvas3D = function() {
     this.cameraRefObj.position.set(0, 0, 0)
     var viewAngle = 45, aspect = window.innerWidth /  window.innerHeight, near = 1, far = 10000
     this.camera = new THREE.PerspectiveCamera(viewAngle, aspect, near, far)
+    this.cameraControls = new THREE.OrbitControls( this.camera, this.renderer.domElement )
     this.resetScene()
 }
 
@@ -150,40 +151,41 @@ SketchpadScene.prototype.keydown = function(e) {
     var k = String.fromCharCode(c)
     var delta = 0.1
     var moveDistance = 200 * delta // 200 pixels per second
-    var rotateAngle = Math.PI / 180 * 5   // pi/2 radians (90 degrees) per second
+    var rotateAngle = (Math.PI / 180) * 5   // pi/2 radians (90 degrees) per second
     var cameraRefObj = this.cameraRefObj
     // rotate left/right/up/down    
-    var rotation_matrix = new THREE.Matrix4().identity()
     // move forwards/backwards/left/right
-    if (k === "W")
-	cameraRefObj.translateZ( -moveDistance )
-    else if (k === "S")
-	cameraRefObj.translateZ(  moveDistance )
-    else if (k === "Q")
-	cameraRefObj.translateX( -moveDistance )
-    else if (k === "E")
-	cameraRefObj.translateX(  moveDistance )	
-    else if (k === "A")
-	cameraRefObj.rotateOnAxis( new THREE.Vector3(0,1,0), rotateAngle)
-    else if (k === "D")
-	cameraRefObj.rotateOnAxis( new THREE.Vector3(0,1,0), -rotateAngle)
-    else if (k === "R")
-	cameraRefObj.rotateOnAxis( new THREE.Vector3(1,0,0), rotateAngle)
-    else if (k === "F")
-	cameraRefObj.rotateOnAxis( new THREE.Vector3(1,0,0), -rotateAngle)
-    else if (k === "O")
-	this.cameraOffset.z -= 100
-    else if (k === "P")
-	this.cameraOffset.z += 100
-    else if (k === "Z")
-	this.resetCamera()
-    this.updateCamera()
-    this.redraw()
+    if (["W", "S", "Q", "E", "A", "D", "R", "F", "O", "P", "Z"].indexOf(k) >= 0) {
+	if (k === "W")
+	    cameraRefObj.translateZ( -moveDistance )
+	else if (k === "S")
+	    cameraRefObj.translateZ(  moveDistance )
+	else if (k === "Q")
+	    cameraRefObj.translateX( -moveDistance )
+	else if (k === "E")
+	    cameraRefObj.translateX(  moveDistance )	
+	else if (k === "A")
+	    cameraRefObj.rotateOnAxis( new THREE.Vector3(0,1,0), rotateAngle)
+	else if (k === "D")
+	    cameraRefObj.rotateOnAxis( new THREE.Vector3(0,1,0), -rotateAngle)
+	else if (k === "R")
+	    cameraRefObj.rotateOnAxis( new THREE.Vector3(1,0,0), rotateAngle)
+	else if (k === "F")
+	    cameraRefObj.rotateOnAxis( new THREE.Vector3(1,0,0), -rotateAngle)
+	else if (k === "O")
+	    this.cameraOffset.z -= 100
+	else if (k === "P")
+	    this.cameraOffset.z += 100
+	else if (k === "Z")
+	    this.resetCamera()
+	this.updateCamera()
+	this.redraw()
+    }
 }
 
 SketchpadScene.prototype.updateCamera = function() {
-    var offset = this.cameraOffset.applyMatrix4(this.cameraRefObj.matrixWorld )
     var camera = this.camera
+    var offset = this.cameraOffset.applyMatrix4(this.cameraRefObj.matrixWorld )
     camera.position.x = offset.x
     camera.position.y = offset.y
     camera.position.z = offset.z
@@ -477,6 +479,7 @@ SketchpadScene.prototype.redraw = function() {
     }
     this.ctxt.restore()
     */
+    this.cameraControls.update()
     this.renderer.render(this.scene, this.camera)
 }
 
@@ -766,10 +769,10 @@ SketchpadScene.prototype.clear = function() {
 SketchpadScene.prototype.resetScene = function() {
     this.scene = new THREE.Scene()
     // draw axes
-    var origin = {x: 0, y: 0, z: 0}
-    this.scene.add(new Line3D(origin, {x: 200, y: 0, z: 0}, 'red')._sceneObj)
-    this.scene.add(new Line3D(origin, {x: 0, y: 200, z: 0}, 'green')._sceneObj)
-    this.scene.add(new Line3D(origin, {x: 0, y: 0, z: 200}, 'blue')._sceneObj)
+    var origin = new Point3D(0, 0, 0)
+    this.scene.add(new Line3D(origin, new Point3D(500, 0, 0), 'red')._sceneObj)
+    this.scene.add(new Line3D(origin, new Point3D(0, 500, 0), 'green')._sceneObj)
+    this.scene.add(new Line3D(origin, new Point3D(0, 0, 500), 'blue')._sceneObj)
     this.scene.add(this.cameraRefObj)
     this.resetCamera()
     this.updateCamera()
