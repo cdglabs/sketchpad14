@@ -129,7 +129,7 @@ examples['hello world'] = function() {
 
     // runs at end of every time tick (after solving done)
 
-    rc.sketchpad.onSolvingDone = function(pseudoTime, prevPseudoTime) {
+    rc.sketchpad.afterEachTimeStep = function(pseudoTime, prevPseudoTime) {
 	// ...
     }
     
