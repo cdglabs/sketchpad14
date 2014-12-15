@@ -483,7 +483,7 @@ SketchpadCanvas.prototype.step = function() {
 	    } else {
 		this.iterationsPerFrame = 0
 	    }  
-	    this.sketchpad.doTasksOnSolvingDone(t0)
+	    this.sketchpad.doTasksAfterEachTimeStep(t0)
 	} else {
 	    var iterations = this.sketchpad.solveForUpToMillis(this.millisecondsPerFrame)
 	    this.iterationsPerFrame = iterations.count
@@ -617,7 +617,9 @@ SketchpadCanvas.prototype.add = function(t, container, toEnd) {
 	    this.addGrabPointFor(t, false, isTopLevel, container, toEnd)
     }
     if (t.onEachTimeStep)
-	this.sketchpad.constraintsWithOnEachTimeStepFn.push(t)
+	this.sketchpad.thingsWithOnEachTimeStepFn.push(t)
+    if (t.afterEachTimeStep)
+	this.sketchpad.thingsWithAfterEachTimeStepFn.push(t)
     return t
 }
 
@@ -646,7 +648,9 @@ SketchpadCanvas.prototype.addNewConstraint = function(c) {
     if (c.grabPoint)
 	this.addGrabPointFor(c, true, true)
     if (c.onEachTimeStep)
-	this.sketchpad.constraintsWithOnEachTimeStepFn.push(c)
+	this.sketchpad.thingsWithOnEachTimeStepFn.push(c)
+    if (c.afterEachTimeStep)
+	this.sketchpad.thingsWithAfterEachTimeStepFn.push(c)
     return c
 }
 
@@ -758,7 +762,8 @@ SketchpadCanvas.prototype.remove = function(unwanted, notInvolvingConstraintsOrO
             this.removeGrabPoint(gPoint)
 	}
     }
-    this.sketchpad.constraintsWithOnEachTimeStepFn = this.sketchpad.constraintsWithOnEachTimeStepFn.filter(function(thing) { return thing !== unwantedThing })
+    this.sketchpad.thingsWithOnEachTimeStepFn = this.sketchpad.thingsWithOnEachTimeStepFn.filter(function(thing) { return thing !== unwantedThing })
+    this.sketchpad.thingsWithAfterEachTimeStepFn = this.sketchpad.thingsWithAfterEachTimeStepFn.filter(function(thing) { return thing !== unwantedThing })
     this.clearSelections()
     this.redraw()
 }

@@ -147,6 +147,7 @@ SketchpadScene.prototype.preventBrowserDefaultKeyEvents = function() {
 }
 
 SketchpadScene.prototype.keydown = function(e) {
+    /*
     var c = e.which // 16: sfht, 17: ctrl, 18: opt, 91: cmd    	
     var k = String.fromCharCode(c)
     var delta = 0.1
@@ -181,6 +182,7 @@ SketchpadScene.prototype.keydown = function(e) {
 	this.updateCamera()
 	this.redraw()
     }
+*/
 }
 
 SketchpadScene.prototype.updateCamera = function() {
@@ -197,6 +199,9 @@ SketchpadScene.prototype.resetCamera = function() {
     this.cameraRefObj.position.set(0, 0, 0)
     this.cameraRefObj.rotation.set(0,0,0)
     this.cameraOffset = new THREE.Vector3(1000,1000,1000)
+    this.light = new THREE.PointLight(0xffffff)
+    this.light.position.set(1000,1000,1000)
+    this.scene.add(this.light)
 }
 
 SketchpadScene.prototype.keyup = function(e) {
@@ -408,7 +413,7 @@ SketchpadScene.prototype.step = function() {
 	    } else {
 		this.iterationsPerFrame = 0
 	    }  
-	    this.sketchpad.doTasksOnSolvingDone(t0)
+	    this.sketchpad.doTasksAfterEachTimeStep(t0)
 	} else {
 	    var iterations = this.sketchpad.solveForUpToMillis(this.millisecondsPerFrame)
 	    this.iterationsPerFrame = iterations.count
@@ -461,7 +466,7 @@ SketchpadScene.prototype.redraw = function() {
     this.ctxt.fillStyle = 'white'
     this.ctxt.fillRect(0, 0, this.canvas.width, this.canvas.height)
     this.ctxt.save()
-    this.things.forEach(function(t) { draw(t, this) }.bind(this))    
+    this.things.forEach(function(t) { draw(t, this) }.bind(this))
     this.temps.forEach(function(t) { draw(t, this) }.bind(this))    
     if (this.showConstraints)
 	this.sketchpad.constraints.forEach(function(c) { draw(c, self) })
@@ -547,7 +552,9 @@ SketchpadScene.prototype.add = function(t, container, toEnd) {
 	    this.addGrabPointFor(t, false, isTopLevel, container, toEnd)
     }
     if (t.onEachTimeStep)
-	this.sketchpad.constraintsWithOnEachTimeStepFn.push(t)
+	this.sketchpad.thingsWithOnEachTimeStepFn.push(t)
+    if (t.afterEachTimeStep)
+	this.sketchpad.thingsWithAfterEachTimeStepFn.push(t)
     return t
 }
 
@@ -576,7 +583,9 @@ SketchpadScene.prototype.addNewConstraint = function(c) {
     if (c.grabPoint)
 	this.addGrabPointFor(c, true, true)
     if (c.onEachTimeStep)
-	this.sketchpad.constraintsWithOnEachTimeStepFn.push(c)
+	this.sketchpad.thingsWithOnEachTimeStepFn.push(c)
+    if (c.afterEachTimeStep)
+	this.sketchpad.thingsWithAfterEachTimeStepFn.push(c)
     return c
 }
 
@@ -688,7 +697,8 @@ SketchpadScene.prototype.remove = function(unwanted, notInvolvingConstraintsOrOw
             this.removeGrabPoint(gPoint)
 	}
     }
-    this.sketchpad.constraintsWithOnEachTimeStepFn = this.sketchpad.constraintsWithOnEachTimeStepFn.filter(function(thing) { return thing !== unwantedThing })
+    this.sketchpad.thingsWithOnEachTimeStepFn = this.sketchpad.thingsWithOnEachTimeStepFn.filter(function(thing) { return thing !== unwantedThing })
+    this.sketchpad.thingsWithAfterEachTimeStepFn = this.sketchpad.thingsWithAfterEachTimeStepFn.filter(function(thing) { return thing !== unwantedThing })
     this.clearSelections()
     this.redraw()
 }

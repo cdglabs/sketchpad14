@@ -72,7 +72,8 @@ function Sketchpad() {
     this.eventDescriptions = {}
     this.onEachTimeStepHandlerDescriptions = {}
     this.events = []
-    this.constraintsWithOnEachTimeStepFn = []
+    this.thingsWithOnEachTimeStepFn = []
+    this.thingsWithAfterEachTimeStepFn = []
     this.startTime = Date.now()
     this.pseudoTime = 0
     this.prevPseudoTime = 0
@@ -142,7 +143,8 @@ Sketchpad.prototype.clear = function() {
     this.objMap = {}
     this.eventHandlers = []
     this.events = []
-    this.constraintsWithOnEachTimeStepFn = []
+    this.thingsWithOnEachTimeStepFn = []
+    this.thingsWithAfterEachTimeStepFn = []
     this.perThingPerPropEffectingConstraints = {}
     this.startTime = Date.now()
     this.pseudoTime = 0
@@ -300,14 +302,15 @@ Sketchpad.prototype.currentTime = function() {
 
 Sketchpad.prototype.doTasksOnEachTimeStep = function(pseudoTime, prevPseudoTime) {
     this.handleEvents()
-    this.onEachTimeStepConstraints(pseudoTime, prevPseudoTime)
+    this.doOnEachTimeStepFns(pseudoTime, prevPseudoTime)
     if (this.onEachTimeStep) 
 	(this.onEachTimeStep)(pseudoTime, prevPseudoTime)
 }
 
-Sketchpad.prototype.doTasksOnSolvingDone = function(pseudoTime, prevPseudoTime) {
-    if (this.onSolvingDone) 
-	(this.onSolvingDone)(pseudoTime, prevPseudoTime)
+Sketchpad.prototype.doTasksAfterEachTimeStep = function(pseudoTime, prevPseudoTime) {
+    this.doAfterEachTimeStepFns(pseudoTime, prevPseudoTime)
+    if (this.afterEachTimeStep) 
+	(this.afterEachTimeStep)(pseudoTime, prevPseudoTime)
     this.maybeStepPseudoTime()
 }
 
@@ -412,7 +415,7 @@ Sketchpad.prototype.solveForUpToMillis = function(tMillis) {
 	res = this.iterateSearchChoicesForUpToMillis(tMillis)
     else
 	res = this.iterateForUpToMillis(tMillis)
-    this.doTasksOnSolvingDone(this.pseudoTime, this.prevPseudoTime)
+    this.doTasksAfterEachTimeStep(this.pseudoTime, this.prevPseudoTime)
     return res
 }
 
@@ -499,8 +502,12 @@ Sketchpad.prototype.handleEvents = function() {
     this.events = []
 }
 
-Sketchpad.prototype.onEachTimeStepConstraints = function(pseudoTime, prevPseudoTime) {
-    this.constraintsWithOnEachTimeStepFn.forEach(function(t) { t.onEachTimeStep(pseudoTime, prevPseudoTime) })
+Sketchpad.prototype.doOnEachTimeStepFns = function(pseudoTime, prevPseudoTime) {
+    this.thingsWithOnEachTimeStepFn.forEach(function(t) { t.onEachTimeStep(pseudoTime, prevPseudoTime) })
+}
+
+Sketchpad.prototype.doAfterEachTimeStepFns = function(pseudoTime, prevPseudoTime) {
+    this.thingsWithAfterEachTimeStepFn.forEach(function(t) { t.afterEachTimeStep(pseudoTime, prevPseudoTime) })
 }
 
 Sketchpad.prototype.setOnEachTimeStep = function(onEachTimeFn, optDescription) {

@@ -65,6 +65,15 @@ function install3DGeometricConstraints(Sketchpad) {
 	d.z = p.z * scale
     }
 
+    function angle(v1, v2) {
+	var v1m = magnitude(v1), v2m = magnitude(v2)
+	var prod = v1.x * v2.x + v1.y * v2.y + v1.z * v2.z
+	var angle = Math.acos(prod / (v1m * v2m))
+	angle += (Math.PI / 2) //HACK FIXME??
+	if (v1.y < v2.y) angle *= -1 //HACK FIXME??
+	return angle
+    }
+    
     Sketchpad.geom3d.plus = plus
     Sketchpad.geom3d.minus = minus
     Sketchpad.geom3d.scaledBy = scaledBy
@@ -74,6 +83,7 @@ function install3DGeometricConstraints(Sketchpad) {
     Sketchpad.geom3d.normalized = normalized
     Sketchpad.geom3d.distance = distance
     Sketchpad.geom3d.rotatedBy = rotatedBy
+    Sketchpad.geom3d.angle = angle
     Sketchpad.geom3d.rotatedAround = rotatedAround
     Sketchpad.geom3d.setDelta = setDelta
 
