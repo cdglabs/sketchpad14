@@ -34,7 +34,9 @@ function SketchpadScene(sketchpad, canvas) {
     }
 
     this.keyShortcuts = {
-	"A-Z: Camera move": {}
+	"Mouse click+move: Camera Rotate": {},
+	"Mouse scroll: Camera Zoom": {},
+	"Opt/Alt + X: Describe program": {}
     }
 
     this.fingers = {}
@@ -147,42 +149,34 @@ SketchpadScene.prototype.preventBrowserDefaultKeyEvents = function() {
 }
 
 SketchpadScene.prototype.keydown = function(e) {
-    /*
     var c = e.which // 16: sfht, 17: ctrl, 18: opt, 91: cmd    	
     var k = String.fromCharCode(c)
     var delta = 0.1
     var moveDistance = 200 * delta // 200 pixels per second
-    var rotateAngle = (Math.PI / 180) * 5   // pi/2 radians (90 degrees) per second
-    var cameraRefObj = this.cameraRefObj
-    // rotate left/right/up/down    
-    // move forwards/backwards/left/right
-    if (["W", "S", "Q", "E", "A", "D", "R", "F", "O", "P", "Z"].indexOf(k) >= 0) {
-	if (k === "W")
-	    cameraRefObj.translateZ( -moveDistance )
-	else if (k === "S")
-	    cameraRefObj.translateZ(  moveDistance )
-	else if (k === "Q")
-	    cameraRefObj.translateX( -moveDistance )
-	else if (k === "E")
-	    cameraRefObj.translateX(  moveDistance )	
-	else if (k === "A")
-	    cameraRefObj.rotateOnAxis( new THREE.Vector3(0,1,0), rotateAngle)
-	else if (k === "D")
-	    cameraRefObj.rotateOnAxis( new THREE.Vector3(0,1,0), -rotateAngle)
-	else if (k === "R")
-	    cameraRefObj.rotateOnAxis( new THREE.Vector3(1,0,0), rotateAngle)
-	else if (k === "F")
-	    cameraRefObj.rotateOnAxis( new THREE.Vector3(1,0,0), -rotateAngle)
-	else if (k === "O")
-	    this.cameraOffset.z -= 100
-	else if (k === "P")
-	    this.cameraOffset.z += 100
-	else if (k === "Z")
-	    this.resetCamera()
-	this.updateCamera()
-	this.redraw()
+    var c = e.which // 16: sfht, 17: ctrl, 18: opt, 91: cmd    	
+    switch (c) {
+	//case 16: this.enterStartDragSelectMode(); return
+	//case 32: this.enterClickSelectMode(); return
+	case 18: this.optKeyDown = true; break
     }
-*/
+    if (!this.optKeyDown || this.disableDefaultKeyEvents)
+	return
+    var k = String.fromCharCode(c)
+    switch (k) {
+    //case 'P': this.enterPointMode();  break
+    //case 'Z': this.enterPointMode();  break
+    //case 'D': this.removeAll(this.selection ? [this.selection] : this.secondarySelections); break
+    //case 'C': this.showConstraints = !this.showConstraints; break
+    //case 'G': this.showGrabPoints = !this.showGrabPoints; break
+    //case 'I': this.inspectState(this.selection); break
+    case 'X': this.toggleProgramExplainMode(); break
+    //case 'E': this.toggleCodeEditMode(); break
+    //case 'S': this.saveCodeEdit(); break
+    //case 'N': this.newUserClassFromThings(this.selection ? [this.selection] : this.secondarySelections, false); break
+   // case 'B': this.newUserClassFromThings(this.selection ? [this.selection] : this.secondarySelections, true); break
+    default:;	
+    }
+    //this.redraw()
 }
 
 SketchpadScene.prototype.updateCamera = function() {
@@ -535,7 +529,8 @@ SketchpadScene.prototype.markIfNew = function(t) {
 }
 
 SketchpadScene.prototype.add = function(t, container, toEnd) {
-    this.scene.add(t._sceneObj)
+    if (t._sceneObj)
+	this.scene.add(t._sceneObj)
     var isTopLevel = container === undefined
     var set = isTopLevel ? this.things : this.nonTopLevelThings
     if (set.indexOf(t) > 0)

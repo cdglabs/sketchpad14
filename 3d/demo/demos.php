@@ -135,6 +135,7 @@ for (var idx = 0; idx < bins.length; idx++) {
 }
     </script>
     <script src="example-chain.js"></script>
+    <script src="example-pendulum.js"></script>
     <script>
 var ipf = document.getElementById('ipf')
 setInterval(function() { ipf.innerHTML = rc.iterationsPerFrame }, 100)
