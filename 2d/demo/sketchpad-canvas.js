@@ -762,8 +762,8 @@ SketchpadCanvas.prototype.remove = function(unwanted, notInvolvingConstraintsOrO
             this.removeGrabPoint(gPoint)
 	}
     }
-    this.sketchpad.thingsWithOnEachTimeStepFn = this.sketchpad.thingsWithOnEachTimeStepFn.filter(function(thing) { return thing !== unwantedThing })
-    this.sketchpad.thingsWithAfterEachTimeStepFn = this.sketchpad.thingsWithAfterEachTimeStepFn.filter(function(thing) { return thing !== unwantedThing })
+    this.sketchpad.thingsWithOnEachTimeStepFn = this.sketchpad.thingsWithOnEachTimeStepFn.filter(function(thing) { return thing !== unwanted })
+    this.sketchpad.thingsWithAfterEachTimeStepFn = this.sketchpad.thingsWithAfterEachTimeStepFn.filter(function(thing) { return thing !== unwanted })
     this.clearSelections()
     this.redraw()
 }
@@ -1219,20 +1219,31 @@ SketchpadCanvas.prototype.newPrimitiveTile = function(name) {
 }
 
 SketchpadCanvas.prototype.unparseJS = function(value, hideThingTypes) {
+    return this.unparseJSHelper(value, hideThingTypes, 0)
+}
+
+SketchpadCanvas.prototype.unparseJSHelper = function(value, hideThingTypes, depth) {
     var self = this
     var res = undefined
     var t = typeof value
-    if (t === 'object') {
+    if (t === 'object' && value !== null) {
 	if (value.__isSketchpadThing)
 	    res = hideThingTypes ? '' : value.__toString
-	else if (value instanceof Array)
-	    res = '[' + (value.map(function(e) { return self.unparseJS(e, hideThingTypes) }).join(', ')) + ']'
-	else {
-	    var es = []
-	    for (var k in value)
-		if (value.hasOwnProperty(k))
-		    es.push(k + ': ' + self.unparseJS(value[k], hideThingTypes))
-	    res = '{' + es.join(', ') + '}'
+	else if (value instanceof Array) {
+	    var els = ''
+	    if (depth < 4)
+		els = (value.map(function(e) { return self.unparseJSHelper(e, hideThingTypes, depth + 1) }).join(', '))
+	    res = '[' + els + ']'
+	} else {
+	    var els = ''
+	    if (depth < 4) {
+		var es = []
+		for (var k in value)
+		    if (value.hasOwnProperty(k))
+			es.push(k + ': ' + self.unparseJSHelper(value[k], hideThingTypes, depth + 1))
+		els = es.join(', ')
+	    }
+	    res = '{' + els + '}'
 	}
     }
     if (res === undefined)

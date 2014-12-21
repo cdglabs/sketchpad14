@@ -65,15 +65,36 @@ function install3DGeometricConstraints(Sketchpad) {
 	d.z = p.z * scale
     }
 
-    function angle(v1, v2) {
-	var v1m = magnitude(v1), v2m = magnitude(v2)
-	var prod = v1.x * v2.x + v1.y * v2.y + v1.z * v2.z
-	var angle = Math.acos(prod / (v1m * v2m))
-	angle += (Math.PI / 2) //HACK FIXME??
-	if (v1.y < v2.y) angle *= -1 //HACK FIXME??
-	return angle
+    function dotProduct(v1, v2) {
+	return (v1.x * v2.x) + (v1.y * v2.y) + (v1.z * v2.z)
     }
-    
+
+    function crossProduct(v1, v2) {
+	var a = new THREE.Vector3(v1.x, v1.y, v1.z)
+	var b = new THREE.Vector3(v2.x, v2.y, v2.z)
+	var c = new THREE.Vector3()
+	c.crossVectors( a, b )
+	return new Point3D(c.x, c.y, c.z)
+    }
+
+    function angle(v1, v2, axis) {
+	//var langle = Math.acos(Math.min(1, dotProduct(normalized(v1), normalized(v2))))
+	var v1m = Sketchpad.geom3d.magnitude(v1), v2m = Sketchpad.geom3d.magnitude(v2)
+	var prod2 = (v1m * v2m)
+	if (prod2 == 0)
+	    langle = 0
+	else {
+	    var prod1 = dotProduct(v1, v2)
+	    var div = Math.min(1, prod1 / prod2)
+	    langle = Math.acos(div)
+	    var cross = crossProduct(v1, v2)
+	    var dot = dotProduct(axis, cross)
+	    if (dot > 0) // Or > 0
+		langle = -langle
+	}	
+	return langle
+    }
+        
     Sketchpad.geom3d.plus = plus
     Sketchpad.geom3d.minus = minus
     Sketchpad.geom3d.scaledBy = scaledBy
@@ -84,6 +105,8 @@ function install3DGeometricConstraints(Sketchpad) {
     Sketchpad.geom3d.distance = distance
     Sketchpad.geom3d.rotatedBy = rotatedBy
     Sketchpad.geom3d.angle = angle
+    Sketchpad.geom3d.dotProduct = dotProduct
+    Sketchpad.geom3d.crossProduct = crossProduct
     Sketchpad.geom3d.rotatedAround = rotatedAround
     Sketchpad.geom3d.setDelta = setDelta
 

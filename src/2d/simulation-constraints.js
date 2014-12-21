@@ -9,6 +9,7 @@ function installSimulationConstraints(Sketchpad) {
     var minus = Sketchpad.geom.minus
     var plus = Sketchpad.geom.plus
     var scaledBy = Sketchpad.geom.scaledBy
+    var normalized = Sketchpad.geom.normalized
     var magnitude = Sketchpad.geom.magnitude
     var distance = Sketchpad.geom.distance
 
@@ -607,21 +608,15 @@ function installSimulationConstraints(Sketchpad) {
 	    var j = (i + 1) % 2
 	    var mass = masses[j]
 	    var d = {x: 0, y: 0}
-	    if (mass > 0) { // if not anchored		
+	    if (mass > 0) { // if not anchored
 		var acceleration = accelerations[j]
 		var position1 = positions[i]
 		var position2 = positions[j]
-		var positionX1 = position1.x
-		var positionY1 = position1.y
-		var positionX2 = position2.x
-		var positionY2 = position2.y
-		var slope = Math.abs(Math.atan((positionY2 - positionY1) / (positionX2 - positionX1)))
-		var springCurrLen = Math.sqrt(((positionX1 - positionX2) * (positionX1 - positionX2)) + ((positionY1 - positionY2) * (positionY1 - positionY2)))
+		var vector = minus(position2, position1)
+		var springCurrLen = magnitude(vector)		
 		var stretchLen =  springCurrLen - spring.length
-		var newAccelerationMag2 = spring.k * stretchLen / mass
-		var directionX = positionX2 >= positionX1 ? -1 : 1
-		var directionY = positionY2 >= positionY1 ? -1 : 1
-		var acc = {x: newAccelerationMag2 * Math.cos(slope) * directionX, y: newAccelerationMag2 * Math.sin(slope) * directionY}
+		var newAccelerationMag = spring.k * stretchLen / mass
+		var acc = scaledBy(normalized(vector), -newAccelerationMag)
 		err += magnitude(minus(plus(this._lastVelocities[j], scaledBy(acc, dt)), velocities[j]))
 	    }
 	}
@@ -640,23 +635,17 @@ function installSimulationConstraints(Sketchpad) {
 	    var j = (i + 1) % 2
 	    var mass = masses[j]
 	    var d = {x: 0, y: 0}
-	    if (mass > 0) { // if not anchored		
-		var acceleration = accelerations[j]
+	    if (mass > 0) { // if not anchored
+				var acceleration = accelerations[j]
 		var position1 = positions[i]
 		var position2 = positions[j]
-		var positionX1 = position1.x
-		var positionY1 = position1.y
-		var positionX2 = position2.x
-		var positionY2 = position2.y
-		var slope = Math.abs(Math.atan((positionY2 - positionY1) / (positionX2 - positionX1)))
-		var springCurrLen = Math.sqrt(((positionX1 - positionX2) * (positionX1 - positionX2)) + ((positionY1 - positionY2) * (positionY1 - positionY2)))
+		var vector = minus(position2, position1)
+		var springCurrLen = magnitude(vector)
 		var stretchLen =  springCurrLen - spring.length
 		// if not torn apart...
 		if (stretchLen < spring.tearPointAmount) {
-		    var newAccelerationMag2 = spring.k * stretchLen / mass
-		    var directionX = positionX2 >= positionX1 ? -1 : 1
-		    var directionY = positionY2 >= positionY1 ? -1 : 1
-		    var acc = {x: newAccelerationMag2 * Math.cos(slope) * directionX, y: newAccelerationMag2 * Math.sin(slope) * directionY}
+		    var newAccelerationMag = spring.k * stretchLen / mass
+		    var acc = scaledBy(normalized(vector), -newAccelerationMag)
 		    d = plus(this._lastVelocities[j], scaledBy(acc, dt))
 		} else {
 		    soln['spring'] = {torn: true}
