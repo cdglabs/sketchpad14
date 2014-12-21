@@ -7,7 +7,7 @@ log2 = function() { var args = []; for (var i = 0; i < arguments.length; i++) ar
 
 function SketchpadScene(sketchpad, canvas) {
     this.sketchpad = sketchpad
-    this.millisecondsPerFrame = 1000 / 65
+    this.millisecondsPerFrame = 1000 / 65 //* 65
     this.optionsRequiringSIILableUpdate = ['renderMode', 'millisecondsPerFrame',  'onlyRenderOnConvergence', 'showEachIteration']
     this.renderMode = 0
     this.onlyRenderOnConvergence = false
@@ -192,10 +192,13 @@ SketchpadScene.prototype.resetCamera = function() {
     this.camera.position.set(0,0,0);
     this.cameraRefObj.position.set(0, 0, 0)
     this.cameraRefObj.rotation.set(0,0,0)
-    this.cameraOffset = new THREE.Vector3(1000,1000,1000)
-    this.light = new THREE.PointLight(0xffffff)
-    this.light.position.set(1000,1000,1000)
-    this.scene.add(this.light)
+    this.cameraOffset = new THREE.Vector3(500,500,500)
+    var lights = [[0xffffff, 500,500,500]] //[0xffffff, 500,0,0], [0xffffff, 0,500,0], [0xffffff, 0,0,500]]
+    lights.forEach(function(l) { 
+	var light = new THREE.PointLight(l[0])
+	light.position.set(l[1], l[2], l[3])
+	this.scene.add(light)
+    }.bind(this))
 }
 
 SketchpadScene.prototype.keyup = function(e) {
@@ -456,28 +459,6 @@ SketchpadScene.prototype.resume = function() {
 
 SketchpadScene.prototype.redraw = function() {
     var self = this
-    /*
-    this.ctxt.fillStyle = 'white'
-    this.ctxt.fillRect(0, 0, this.canvas.width, this.canvas.height)
-    this.ctxt.save()
-    this.things.forEach(function(t) { draw(t, this) }.bind(this))
-    this.temps.forEach(function(t) { draw(t, this) }.bind(this))    
-    if (this.showConstraints)
-	this.sketchpad.constraints.forEach(function(c) { draw(c, self) })
-    if (this.selection && this.selection.border) {
-	drawBorderOf(this.selection, 'orange', this)
-    }
-    this.secondarySelections.forEach(function(t) { if (t.border) drawBorderOf(t, 'green', self) })
-    if (this.inDragSelectMode)
-	draw(this.selectionBox, self, {color: 'green'})
-    if (this.showGrabPoints) {
-	this.ctxt.globalAlpha = this.grabPointOpacity
-	this.thingGrabPoints.forEach(function(t) { draw(t, this) }.bind(this))    
-	if (this.showConstraints)
-	    this.constraintGrabPoints.forEach(function(t) { draw(t, this) }.bind(this))
-    }
-    this.ctxt.restore()
-    */
     this.cameraControls.update()
     this.renderer.render(this.scene, this.camera)
 }
@@ -682,6 +663,8 @@ SketchpadScene.prototype.removeAll = function(unwanteds, notInvolvingConstraints
 }
 
 SketchpadScene.prototype.remove = function(unwanted, notInvolvingConstraintsOrOwnedThings) {
+    if (unwanted._sceneObj)
+	this.scene.remove(unwanted._sceneObj)
     this.things = this.things.filter(function(t) { return t !== unwanted && !thingInvolvesThing(t, unwanted, {}) && (notInvolvingConstraintsOrOwnedThings || !(unwanted.isOwnerOf && unwanted.isOwnerOf.indexOf(t) >= 0)) })
     if (!notInvolvingConstraintsOrOwnedThings) {
 	this.removeConstraintsInvolving(unwanted)
@@ -692,8 +675,8 @@ SketchpadScene.prototype.remove = function(unwanted, notInvolvingConstraintsOrOw
             this.removeGrabPoint(gPoint)
 	}
     }
-    this.sketchpad.thingsWithOnEachTimeStepFn = this.sketchpad.thingsWithOnEachTimeStepFn.filter(function(thing) { return thing !== unwantedThing })
-    this.sketchpad.thingsWithAfterEachTimeStepFn = this.sketchpad.thingsWithAfterEachTimeStepFn.filter(function(thing) { return thing !== unwantedThing })
+    this.sketchpad.thingsWithOnEachTimeStepFn = this.sketchpad.thingsWithOnEachTimeStepFn.filter(function(thing) { return thing !== unwanted })
+    this.sketchpad.thingsWithAfterEachTimeStepFn = this.sketchpad.thingsWithAfterEachTimeStepFn.filter(function(thing) { return thing !== unwanted })
     this.clearSelections()
     this.redraw()
 }
@@ -1160,20 +1143,31 @@ SketchpadScene.prototype.newPrimitiveTile = function(name) {
 }
 
 SketchpadScene.prototype.unparseJS = function(value, hideThingTypes) {
+    return this.unparseJSHelper(value, hideThingTypes, 0)
+}
+
+SketchpadScene.prototype.unparseJSHelper = function(value, hideThingTypes, depth) {
     var self = this
     var res = undefined
     var t = typeof value
-    if (t === 'object') {
+    if (t === 'object' && value !== null) {
 	if (value.__isSketchpadThing)
 	    res = hideThingTypes ? '' : value.__toString
-	else if (value instanceof Array)
-	    res = '[' + (value.map(function(e) { return self.unparseJS(e, hideThingTypes) }).join(', ')) + ']'
-	else {
-	    var es = []
-	    for (var k in value)
-		if (value.hasOwnProperty(k))
-		    es.push(k + ': ' + self.unparseJS(value[k], hideThingTypes))
-	    res = '{' + es.join(', ') + '}'
+	else if (value instanceof Array) {
+	    var els = ''
+	    if (depth < 4)
+		els = (value.map(function(e) { return self.unparseJSHelper(e, hideThingTypes, depth + 1) }).join(', '))
+	    res = '[' + els + ']'
+	} else {
+	    var els = ''
+	    if (depth < 4) {
+		var es = []
+		for (var k in value)
+		    if (value.hasOwnProperty(k))
+			es.push(k + ': ' + self.unparseJSHelper(value[k], hideThingTypes, depth + 1))
+		els = es.join(', ')
+	    }
+	    res = '{' + els + '}'
 	}
     }
     if (res === undefined)
@@ -1258,6 +1252,22 @@ function drawBorderOf(thing, color, canvas) {
     border.bgColor = undefined
     draw(border, canvas, {color: color})
     border.bgColor = bgColor
+}
+
+function rotateAroundObjectAxis(object, axis, radians) {
+    var rotObjectMatrix = new THREE.Matrix4();
+    rotObjectMatrix.makeRotationAxis(axis.normalize(), radians);
+    object.matrix.multiply(rotObjectMatrix);
+    object.rotation.setFromRotationMatrix(object.matrix);
+}
+
+// Rotate an object around an arbitrary axis in world space       
+function rotateAroundWorldAxis(object, axis, radians) {
+    var rotWorldMatrix = new THREE.Matrix4();
+    rotWorldMatrix.makeRotationAxis(axis.normalize(), radians);
+    rotWorldMatrix.multiply(object.matrix);                // pre-multiply
+    object.matrix = rotWorldMatrix;
+    object.rotation.setFromRotationMatrix(object.matrix);
 }
 
 
