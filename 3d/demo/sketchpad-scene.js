@@ -7,7 +7,8 @@ log2 = function() { var args = []; for (var i = 0; i < arguments.length; i++) ar
 
 function SketchpadScene(sketchpad, canvas) {
     this.sketchpad = sketchpad
-    this.millisecondsPerFrame = 1000 / 65 //* 65
+    this.millisecondsPerFrame = 1000 / 4 //65
+    this.renderFrequencySlowdown = 5
     this.optionsRequiringSIILableUpdate = ['renderMode', 'millisecondsPerFrame',  'onlyRenderOnConvergence', 'showEachIteration']
     this.renderMode = 0
     this.onlyRenderOnConvergence = false
@@ -15,7 +16,7 @@ function SketchpadScene(sketchpad, canvas) {
     this.showConstraints = false
     this.showEachIteration = false
     this.showGrabPoints = true
-    this.iterationsPerFrame = 0
+    this.iterationsPerFrame = 0    
     this.paused = false
     this.things = []
     this.points = []
@@ -23,6 +24,7 @@ function SketchpadScene(sketchpad, canvas) {
     this.constraintGrabPoints = []
     this.nonTopLevelThings = []
     this.temps = []
+    this.sceneObjects = []
     this.selection = undefined
     this.secondarySelections = []
     this.selectionChoiceIdx = 0
@@ -34,8 +36,9 @@ function SketchpadScene(sketchpad, canvas) {
     }
 
     this.keyShortcuts = {
-	"Mouse click+move: Camera Rotate": {},
+	"Mouse click on space + move: Camera rotate": {},
 	"Mouse scroll: Camera Zoom": {},
+	"Mouse click on thing + move: Drag thing": {},
 	"Opt/Alt + X: Describe program": {}
     }
 
@@ -98,6 +101,13 @@ SketchpadScene.prototype.initCanvas3D = function() {
     this.cameraRefObj.position.set(0, 0, 0)
     var viewAngle = 45, aspect = window.innerWidth /  window.innerHeight, near = 1, far = 10000
     this.camera = new THREE.PerspectiveCamera(viewAngle, aspect, near, far)
+    this.mouse = { x: 0, y: 0 }
+    this.mouseClickOffset = new THREE.Vector3()
+    this.mouseClickPlane = new THREE.Mesh(
+	new THREE.PlaneBufferGeometry( 2000, 2000, 8, 8 ),
+	new THREE.MeshBasicMaterial( { color: 0x000000, opacity: 0.25, transparent: true } )
+    )
+    this.mouseClickPlane.visible = false
     this.cameraControls = new THREE.OrbitControls( this.camera, this.renderer.domElement )
     this.resetScene()
 }
@@ -322,44 +332,90 @@ SketchpadScene.prototype.computeAllSelectableThings = function() {
 }
 
 SketchpadScene.prototype.findThingPointedTo = function(e) {
-    var thing, point, pointIdx, count = 0, indexWanted = this.selectionChoiceIdx
-    var all = this.computeAllSelectableThings()
-    var found = false
-    for (var idx = 0; idx < all.length; idx++) {
-	var t = all[idx]
-	if (t.containsPoint) {
-	    var origin = t.__container.__origin
-	    var x = e.clientX - origin.x
-	    var y = e.clientY - origin.y
-	    if (t.containsPoint(x, y)) {		
-		thing = t
-		if (t instanceof Point) { 
-		    var p = t
-		    point = p
-		    pointIdx = idx
-		}
-		if (count == indexWanted) {
-		    found = true
-		    break
-		} else
-		    count++
-	    }
+    var thing = undefined, point = undefined, scenePoint = undefined
+
+    e.preventDefault()
+    var vector = new THREE.Vector3( this.mouse.x, this.mouse.y, 0.5 ).unproject( this.camera )
+    this.raycaster = new THREE.Raycaster( this.camera.position, vector.sub( this.camera.position ).normalize() )
+    var intersects = this.raycaster.intersectObjects(this.sceneObjects)
+    // if there is one (or more) intersections
+    if (intersects.length > 0) {
+	var pointedSceneObj = intersects[ 0 ].object
+	if (pointedSceneObj.__sketchpadThing.position) {
+	    thing = pointedSceneObj.__sketchpadThing
+	    this.selectedSceneObject = pointedSceneObj
+	    point = thing.position
+	    scenePoint = intersects[0].point
 	}
     }
-    if (found)
-	this.selectionChoiceIdx++
-    if (!found || this.selectionChoiceIdx == all.length)
-	this.selectionChoiceIdx = 0
-    return {thing: thing, point: point, pointIdx: pointIdx}
+    return {thing: thing, point: point, scenePoint: scenePoint}
 }
 
 SketchpadScene.prototype.pointerdown = function(e) {
+    var self = this
+    var pointedToThing = this.findThingPointedTo(e)
+    var thing = pointedToThing.thing
+    var point = pointedToThing.point
+    if (thing) {
+	if (this.selection)
+	    this.selection._isSelected = false	
+	thing._isSelected = true
+	this.setSelection(thing)
+    } else {
+	if (this.selection)
+	    this.selection._isSelected = false	
+	this.clearSelections()
+    }
+    if (point) {
+	var scenePoint = pointedToThing.scenePoint
+	this.cameraControls.enabled = false
+	var intersects = this.raycaster.intersectObject( this.mouseClickPlane)
+	this.mouseClickOffset.copy(scenePoint).sub( this.mouseClickPlane.position )
+	var x = point.x
+	var y = point.y
+	var z = point.z
+	this.mouseDragCoordConstraint = this.addConstraint(Sketchpad.geom3d.CoordinateConstraint, point, x, y, z)
+	this.mouseDragCoordConstraint.__priority = 10
+    } 
+    this.redraw()
 }
 
 SketchpadScene.prototype.pointermove = function(e) {
+    e.preventDefault()
+    this.mouse.x = ( e.clientX / window.innerWidth ) * 2 - 1
+    this.mouse.y = - ( (e.clientY + 30) / window.innerHeight ) * 2 + 1
+    var vector = new THREE.Vector3( this.mouse.x, this.mouse.y, 0.5 ).unproject( this.camera )
+    this.raycaster = new THREE.Raycaster( this.camera.position, vector.sub( this.camera.position ).normalize() )
+    if (this.selectedSceneObject && this.mouseDragCoordConstraint) {
+	var intersects = this.raycaster.intersectObject(this.mouseClickPlane)
+	this.selectedSceneObject.position.copy( intersects[ 0 ].point.sub(this.mouseClickOffset))
+	var pos = this.selectedSceneObject.position, ref = this.mouseDragCoordConstraint.c
+	ref.x = pos.x
+	ref.y = pos.y
+	ref.z = pos.z
+	return
+    }
+    var intersects = this.raycaster.intersectObjects( this.sceneObjects)
+    if ( intersects.length > 0 ) {
+	if ( this.selectedSceneObject != intersects[ 0 ].object ) {
+	    this.selectedSceneObject = intersects[ 0 ].object
+	    this.mouseClickPlane.position.copy( this.selectedSceneObject.position )
+	    this.mouseClickPlane.lookAt( this.camera.position )    
+	}
+    } else {
+	this.selectedSceneObject = undefined
+    }
 }
 
 SketchpadScene.prototype.pointerup = function(e) {
+    event.preventDefault()
+    this.cameraControls.enabled = true
+    if (this.selectedSceneObject) {
+	this.mouseClickPlane.position.copy( this.selectedSceneObject.position )
+	this.selectedSceneObject = undefined
+	this.removeConstraint(this.mouseDragCoordConstraint)
+	this.mouseDragCoordConstraint = undefined
+   }
 }
 
 SketchpadScene.prototype.selectThingsWithinSelectionBox = function() {
@@ -381,25 +437,9 @@ SketchpadScene.prototype.forEachFinger = function(fn) {
     }
 }
 
-SketchpadScene.prototype.updateCoordinateConstraints = function() {
-    var self = this
-    this.sketchpad.constraints.forEach(function(constraint) {
-	if (constraint instanceof Sketchpad.geom.CoordinateConstraint) {
-	    self.forEachFinger(function(finger) {
-		if (finger.point === constraint.p) {
-		    var origin = finger.point.__container.__origin
-		    constraint.c.x = finger.x - origin.x
-		    constraint.c.y = finger.y - origin.y
-		}
-	    })
-	}
-    })
-}
-
 SketchpadScene.prototype.step = function() {
     if (!this.paused) {
 	var totalError = 0, didSomething = false
-	this.updateCoordinateConstraints()
 	if (this.showEachIteration) {
 	    var t0 = this.sketchpad.currentTime()
 	    this.sketchpad.doTasksOnEachTimeStep(t0)
@@ -416,8 +456,7 @@ SketchpadScene.prototype.step = function() {
 	    this.iterationsPerFrame = iterations.count
 	    totalError = iterations.error
 	}
-	if (//this.iterationsPerFrame > 0 &&
-	    this.renderEvenOnConvergence || 
+	if (this.renderEvenOnConvergence || 
 		!(this.lastIterationError == totalError)) {
 	    didSomething = true
 	    this.alreadyRenderedConvergence = false
@@ -458,9 +497,11 @@ SketchpadScene.prototype.resume = function() {
 }
 
 SketchpadScene.prototype.redraw = function() {
-    var self = this
     this.cameraControls.update()
-    this.renderer.render(this.scene, this.camera)
+    if (this.renderSkipCount == 0) {
+	this.renderer.render(this.scene, this.camera)
+    }
+    this.renderSkipCount = (this.renderSkipCount + 1) % this.renderFrequencySlowdown
 }
 
 SketchpadScene.prototype.drawArrow = function(from, to, origin, label, color) {
@@ -510,8 +551,12 @@ SketchpadScene.prototype.markIfNew = function(t) {
 }
 
 SketchpadScene.prototype.add = function(t, container, toEnd) {
-    if (t._sceneObj)
-	this.scene.add(t._sceneObj)
+    var sceneObj = t._sceneObj
+    if (sceneObj) {
+	this.sceneObjects.push(sceneObj)
+	this.scene.add(sceneObj)
+	sceneObj.__sketchpadThing = t
+    }
     var isTopLevel = container === undefined
     var set = isTopLevel ? this.things : this.nonTopLevelThings
     if (set.indexOf(t) > 0)
@@ -663,8 +708,11 @@ SketchpadScene.prototype.removeAll = function(unwanteds, notInvolvingConstraints
 }
 
 SketchpadScene.prototype.remove = function(unwanted, notInvolvingConstraintsOrOwnedThings) {
-    if (unwanted._sceneObj)
-	this.scene.remove(unwanted._sceneObj)
+    var sceneObj = unwanted._sceneObj
+    if (sceneObj) {
+	this.scene.remove(sceneObj)
+	this.sceneObjects = this.sceneObjects.filter(function(t) { return t !== sceneObj })
+    }
     this.things = this.things.filter(function(t) { return t !== unwanted && !thingInvolvesThing(t, unwanted, {}) && (notInvolvingConstraintsOrOwnedThings || !(unwanted.isOwnerOf && unwanted.isOwnerOf.indexOf(t) >= 0)) })
     if (!notInvolvingConstraintsOrOwnedThings) {
 	this.removeConstraintsInvolving(unwanted)
@@ -737,6 +785,7 @@ SketchpadScene.prototype.clear = function() {
     this.constraintGrabPoints = []
     this.nonTopLevelThings = []
     this.temps = []
+    this.sceneObjects = []
     this.lastIterationError = undefined
     this.selection = undefined
     this.secondarySelections = []
@@ -750,6 +799,7 @@ SketchpadScene.prototype.clear = function() {
     this.grabPointOpacity = 0.5
     this.fingers = {} // because fingers can refer to points
     this.disableDefaultKeyEvents = false
+    this.renderSkipCount = 0
     this.clearTemps()
     this.resetScene()
 }
@@ -762,6 +812,7 @@ SketchpadScene.prototype.resetScene = function() {
     this.scene.add(new Line3D(origin, new Point3D(0, 500, 0), 'green')._sceneObj)
     this.scene.add(new Line3D(origin, new Point3D(0, 0, 500), 'blue')._sceneObj)
     this.scene.add(this.cameraRefObj)
+    this.scene.add( this.mouseClickPlane)
     this.resetCamera()
     this.updateCamera()
 }

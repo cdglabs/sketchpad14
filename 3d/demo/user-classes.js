@@ -54,7 +54,7 @@ PointVector3D.prototype.magnitude = function() {
 function Sphere(position, optColor, optRadius, optUnfilled, optOpacity) {
     this.position = position
     this.color = optColor || 0x8888ff
-    this.radius = (optRadius || 10)
+    this.radius = (optRadius || 15)
     this.unfilled = optUnfilled
     this.opacity = optOpacity
     var sphereMaterial = 
@@ -73,7 +73,7 @@ function Cylinder(p1, p2, optColor, optWidth, optLineDash, optOpacity) {
     this.p1 = p1 
     this.p2 = p2
     this.color = optColor || 'gray'
-    this.width = optWidth || 2
+    this.width = optWidth || 3
     this.lineDash = optLineDash
     this.opacity = optOpacity
     this._sceneObj = new THREE.Mesh(new THREE.CylinderGeometry(this.width, this.width, 0), 

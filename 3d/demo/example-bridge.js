@@ -53,7 +53,7 @@ examples['bridge']= function() {
     // wind
     var windOrigin = new Point3D(0, 0, -300)
     var windEnd = new Point3D(0, 0, -200)
-    var wind = rc.add(new PointVector3D(windOrigin, windEnd, 0.01, 'brown', 'wind'))
+    var wind = rc.add(new PointVector3D(windOrigin, windEnd, 0.05, 'brown', 'wind'))
     
     // nodes
     for (var i = 0; i < massCount; i++) {
@@ -77,7 +77,7 @@ examples['bridge']= function() {
 	var end2 = ends[1] 
 	var position1 = positions[end1]
 	var position2 = positions[end2]
-	springs.push(rc.add(new Sketchpad.simulation3d.Spring(new Cylinder(position1, position2), springK, springLen, springTearPointAmount)))
+	springs.push(rc.add(new Sketchpad.simulation3d.Spring(new Cylinder(position1, position2, 'blue'), springK, springLen, springTearPointAmount)))
     }
 
     // --- Constraints ---------------------------------------------------------
