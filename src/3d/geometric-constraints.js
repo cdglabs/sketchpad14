@@ -110,6 +110,31 @@ function install3DGeometricConstraints(Sketchpad) {
     Sketchpad.geom3d.rotatedAround = rotatedAround
     Sketchpad.geom3d.setDelta = setDelta
 
+    // Coordinate Constraint, i.e., "I want this point to be here".
+
+    Sketchpad.geom3d.CoordinateConstraint = function Sketchpad__geom3__CoordinateConstraint(p, x, y, z) {
+	this.p = p
+	this.c = new Point3D(x, y, z)
+    }
+
+    sketchpad.addClass(Sketchpad.geom3d.CoordinateConstraint, true)
+
+    Sketchpad.geom3d.CoordinateConstraint.prototype.description = function() { return  "Sketchpad.geom3d.CoordinateConstraint(Point P, Number X, Number Y, Number Z) states that point P should stay at coordinate (X, Y, Z)." }
+
+    Sketchpad.geom3d.CoordinateConstraint.prototype.propertyTypes = {p: 'Point3D', c: 'Point3D'}
+
+    Sketchpad.geom3d.CoordinateConstraint.prototype.effects = function() {
+	return [{obj: this.p, props: ['x', 'y', 'z']}]
+    }
+
+    Sketchpad.geom3d.CoordinateConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
+	return magnitude(minus(this.c, this.p))
+    }
+
+    Sketchpad.geom3d.CoordinateConstraint.prototype.solve = function(pseudoTime, prevPseudoTime) {
+	return {p: {x: this.c.x, y: this.c.y, z: this.c.z}}
+    }
+
     // Length constraint - maintains distance between P1 and P2 at L.
 
     Sketchpad.geom3d.LengthConstraint = function Sketchpad__geom3d__LengthConstraint(p1, p2, l) {

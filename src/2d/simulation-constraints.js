@@ -634,7 +634,7 @@ function installSimulationConstraints(Sketchpad) {
 	for (var i = 0; i <= 1; i++) {
 	    var j = (i + 1) % 2
 	    var mass = masses[j]
-	    var d = {x: 0, y: 0}
+	    var d = {x: 0, y: 0}, torn = false
 	    if (mass > 0) { // if not anchored
 				var acceleration = accelerations[j]
 		var position1 = positions[i]
@@ -643,14 +643,15 @@ function installSimulationConstraints(Sketchpad) {
 		var springCurrLen = magnitude(vector)
 		var stretchLen =  springCurrLen - spring.length
 		// if not torn apart...
-		if (stretchLen < spring.tearPointAmount) {
+		torn = stretchLen > spring.tearPointAmount
+		if (!torn) {
 		    var newAccelerationMag = spring.k * stretchLen / mass
 		    var acc = scaledBy(normalized(vector), -newAccelerationMag)
 		    d = plus(this._lastVelocities[j], scaledBy(acc, dt))
-		} else {
-		    soln['spring'] = {torn: true}
-		}
+		} 
 	    }
+	    if (torn)
+		soln['spring'] = {torn: true}
 	    soln['velocity' + (j+1)] = d
 	}	
 	return soln
