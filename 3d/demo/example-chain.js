@@ -1,5 +1,7 @@
 examples['chain']= function() {
+
     rc.setOption('renderMode', 1)    
+
     var points = [], count = 9
     var x = -200, y = 100, z = 50
     var p1 = new Point3D(x, 0, 0)

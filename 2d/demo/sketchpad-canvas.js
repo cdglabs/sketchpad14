@@ -482,7 +482,8 @@ SketchpadCanvas.prototype.step = function() {
 		totalError = iteration
 	    } else {
 		this.iterationsPerFrame = 0
-	    }  
+	    }
+	    didSomething = true
 	    this.sketchpad.doTasksAfterEachTimeStep(t0)
 	} else {
 	    var iterations = this.sketchpad.solveForUpToMillis(this.millisecondsPerFrame)
@@ -890,7 +891,7 @@ SketchpadCanvas.prototype.inspectState = function(thing) {
     getPublicNotFnProperties(thing).forEach(function(p) {
 	var pVal = thing[p]
 	var defined = pVal !== undefined
-	props.push({name: p, type: defined ? pVal.__shortType : undefined, value: pVal, expr: defined ? self.unparseJS(pVal, true) : undefined, hiddenExpr: defined ? self.unparseJS(pVal, false) : undefined})
+	props.push({name: p, type: defined ? pVal.__shortType : undefined, value: pVal, expr: defined ? self.unparseJS(pVal, true, false) : undefined, hiddenExpr: defined ? self.unparseJS(pVal, false, false) : undefined})
     })
     var randP = this.getRandomPoint()
     var posX = 50 + (thing.x ? thing.x : (thing.position ? thing.position.x : randP.x))
@@ -918,7 +919,7 @@ SketchpadCanvas.prototype.stateToString = function(thing) {
 		first = false 
 	    else 
 		res += ', '
-	    res += p + ': ' + (self.unparseJS(pVal, false))
+	    res += p + ': ' + (self.unparseJS(pVal, false, true))
 	}
     }
     return res + '}'
@@ -1218,11 +1219,11 @@ SketchpadCanvas.prototype.newPrimitiveTile = function(name) {
     rc.redraw()
 }
 
-SketchpadCanvas.prototype.unparseJS = function(value, hideThingTypes) {
-    return this.unparseJSHelper(value, hideThingTypes, 0)
+SketchpadCanvas.prototype.unparseJS = function(value, hideThingTypes, hideNonThingTypes) {
+    return this.unparseJSHelper(value, hideThingTypes, hideNonThingTypes, 0)
 }
 
-SketchpadCanvas.prototype.unparseJSHelper = function(value, hideThingTypes, depth) {
+SketchpadCanvas.prototype.unparseJSHelper = function(value, hideThingTypes, hideNonThingTypes, depth) {
     var self = this
     var res = undefined
     var t = typeof value
@@ -1232,16 +1233,18 @@ SketchpadCanvas.prototype.unparseJSHelper = function(value, hideThingTypes, dept
 	else if (value instanceof Array) {
 	    var els = ''
 	    if (depth < 4)
-		els = (value.map(function(e) { return self.unparseJSHelper(e, hideThingTypes, depth + 1) }).join(', '))
+		els = (value.map(function(e) { return self.unparseJSHelper(e, hideThingTypes, hideNonThingTypes, depth + 1) }).join(', '))
 	    res = '[' + els + ']'
 	} else {
 	    var els = ''
-	    if (depth < 4) {
-		var es = []
-		for (var k in value)
-		    if (value.hasOwnProperty(k))
-			es.push(k + ': ' + self.unparseJSHelper(value[k], hideThingTypes, depth + 1))
-		els = es.join(', ')
+	    if (!hideNonThingTypes) {
+		if (depth < 4) {
+		    var es = []
+		    for (var k in value)
+			if (value.hasOwnProperty(k))
+			    es.push(k + ': ' + self.unparseJSHelper(value[k], hideThingTypes, hideNonThingTypes, depth + 1))
+		    els = es.join(', ')
+		}
 	    }
 	    res = '{' + els + '}'
 	}
