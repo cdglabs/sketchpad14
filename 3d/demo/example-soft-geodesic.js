@@ -126,6 +126,7 @@ examples['soft geodesic']= function() {
 	    removeDuplicateCoords[key] = p
 	    rc.add(new Sphere(p, 'yellow'))
 	    rc.addConstraint(Sketchpad.simulation3d.VelocityConstraint, p, velocity)
+	    rc.addConstraint(Sketchpad.simulation3d.AirResistanceConstraint, velocity, 0.005)
 	}
 	points.push(p)
 	i++
