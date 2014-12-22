@@ -1,4 +1,6 @@
 examples['bridge']= function() {
+
+    rc.setOption('renderMode', 2)
     
     // --- Data ----------------------------------------------------------------
 

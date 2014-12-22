@@ -134,7 +134,8 @@ for (var idx = 0; idx < bins.length; idx++) {
     }})(itemDOMNodes, itemNames, binKind)
 }
     </script>
-    <script src="example-geodesic.js"></script>
+    <script src="example-hard-geodesic.js"></script>
+    <script src="example-soft-geodesic.js"></script>
     <script src="example-bridge.js"></script>
     <script src="example-pendulum.js"></script>
     <script src="example-chain.js"></script>

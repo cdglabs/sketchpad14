@@ -1,6 +1,6 @@
-examples['geodesic']= function() {
+examples['soft geodesic']= function() {
 
-    rc.setOption('renderMode', 1)
+    rc.setOption('renderMode', 2)
     
     // --- Data ----------------------------------------------------------------
 
@@ -114,32 +114,31 @@ examples['geodesic']= function() {
 	    [4, 38], 
 	    [38, 27]
 	]
-    var points = [], foo = {}, i = 0
+    var points = [], velocities = [], removeDuplicateCoords = {}, i = 0
     coords.forEach(function(c) {
 	var p = new Point3D(c[0], c[1], c[2])
-	var key = '' + Math.floor(p.x) + Math.floor(p.y) + Math.floor(p.z)
-	if (foo[key]) {
-	    p = foo[key]
+	var velocity = new Vector3D(0, 0, 0)
+	velocities.push(velocity)	
+	var key = '' + Math.round(p.x) + Math.round(p.y) + Math.round(p.z)
+	if (removeDuplicateCoords[key]) {
+	    p = removeDuplicateCoords[key]
 	} else {
-	    foo[key] = p
+	    removeDuplicateCoords[key] = p
 	    rc.add(new Sphere(p, 'yellow'))
+	    rc.addConstraint(Sketchpad.simulation3d.VelocityConstraint, p, velocity)
 	}
 	points.push(p)
 	i++
     })
+    var mass = 10, springK = 50
     edges.forEach(function(e) {
 	var p1 = points[e[0]], p2 = points[e[1]]
-	rc.add(new Cylinder(p1, p2))
 	var d = Sketchpad.geom3d.distance(p1, p2)
+	var spring = rc.add(rc.add(new Sketchpad.simulation3d.Spring(new Cylinder(p1, p2), springK, d, d * 2)))
+	rc.addConstraint(Sketchpad.simulation3d.SpringConstraint, p1, velocities[e[0]], new Vector3D(0, 0, 0), mass, p2, velocities[e[1]], new Vector3D(0, 0, 0), mass, spring)	
     })
 
-    points.forEach(function(p1) {
-	points.forEach(function(p2) {
-	    if (p1 != p2) {
-		var d = Sketchpad.geom3d.distance(p1, p2)
-		rc.addConstraint(Sketchpad.geom3d.LengthConstraint, p1, p2, d)
-	    }})})
-		
-	    
+    rc.addConstraint(Sketchpad.simulation.TimerConstraint, rc.add(new Timer(.1)))
+
 };
 

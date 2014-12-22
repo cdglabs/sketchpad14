@@ -1,5 +1,7 @@
 examples['pendulum']= function() {
 
+    rc.setOption('renderMode', 1)
+
     // --- Data ----------------------------------------------------------------
 
     
@@ -7,7 +9,7 @@ examples['pendulum']= function() {
     var b1 = rc.add(new Sphere(p1))
     var p2 = new Point3D(100, -100, 100)
     var b2 = rc.add(new Sphere(p2))
-    var spring = rc.add(new Sketchpad.simulation3d.Spring(new Cylinder(p1, p2, 'blue'), 10, 100, 300))
+    var spring = rc.add(new Sketchpad.simulation3d.Spring(new Cylinder(p1, p2), 10, 100, 300))
     var zero = new Vector3D(0, 0, 0)
     var velocity2 = new Vector3D(0, 0, 0)
     var acceleration2 = new Vector3D(0, 0, 0)

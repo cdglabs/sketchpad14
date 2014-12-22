@@ -41,7 +41,7 @@ function install3DSimulationConstraints(Sketchpad) {
 		var height = this.line.getHeight(), length = this.length
 		var stretch = Math.abs(height - length) / length
 		var color = this.line._sceneObj.material.color
-		color.set('blue')
+		color.set('gray')
 		color.r += stretch
 	    }
 	}
