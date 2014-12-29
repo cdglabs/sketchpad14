@@ -249,9 +249,9 @@ Examples.qbf.FeederTileCountConstraint.prototype.solve = function(pseudoTime, pr
     return {feeder: {text: this.okCount}}
 }
 
-var qbf = {tileCount: 100, tileLength: 50, beltSpeed: 10, feederSpeed: 4, vowelRatio: .3}
+var qbf = {tileCount: 100, tileLength: 50, beltSpeed: 8, feederSpeed: 4, vowelRatio: .3}
 var tiles = []
-wordRack = new Examples.qbf.WordRack(8) // {count: 8, index: 0, tiles: []}
+wordRack = new Examples.qbf.WordRack(8)
 var plus = Sketchpad.geom.plus
 var minus = Sketchpad.geom.minus
 
@@ -273,7 +273,7 @@ examples['quick brown fox'] = function() {
 	return "Record the 'active' property in this.old copy."
     }
 
-    rc.sketchpad.onSolvingDone = function() {	
+    rc.sketchpad.afterEachTimeStep = function() {	
 	scratch.letterTyped = undefined
 	scratch.letterDeleted = undefined
 	scratch.wordRackIndex = wordRack.index
@@ -332,7 +332,7 @@ examples['quick brown fox'] = function() {
     var groundP6 = rc.add(new Point(900, 300))
     var platform = rc.add(new Line(groundP5, groundP6))
 
-    rc.addConstraint(Sketchpad.simulation.TimerConstraint, rc.add(new Sketchpad.simulation.Timer(.5)))
+    rc.addConstraint(Sketchpad.simulation.TimerConstraint, rc.add(new Timer(.5)))
 
     rc.add(new TextBox(new Point(550, 50), "-- ( 'backspace' to delete, 'enter' to submit ) --", 22))
 
@@ -378,17 +378,18 @@ examples['quick brown fox'] = function() {
     var numVowels = 0, numConsonants = 0
     for (var i = 0; i < qbf.tileCount; i++) {
 	var tilePos = new Point(feederBelt.position1.x + (i + 0.5) * tileLength, feederBelt.position1.y - tileLength, 'gray', 5)
+	var tileBody = new Sketchpad.simulation.FreeBody(tilePos, tileDLength)
 	var tile = rc.add(new Examples.qbf.Tile(i, tilePos, getRandomLetter(), false))
+	tile.body = tileBody
 	tiles.push(tile)
-	var tileVelocity = {y: 0, x: 0}
-	rc.addConstraint(Sketchpad.simulation.HitSurfaceConstraint, tileDLength, tilePos, tileVelocity, ground.p1, ground.p2)
-	rc.addConstraint(Sketchpad.simulation.HitSurfaceConstraint, tileDLength, tilePos, tileVelocity, belt.position1, belt.position2)
-	rc.addConstraint(Sketchpad.simulation.HitSurfaceConstraint, tileDLength, tilePos, tileVelocity, feederBelt.position1, feederBelt.position2)
-	rc.addConstraint(Sketchpad.simulation.HitSurfaceConstraint, tileDLength, tilePos, tileVelocity, platform.p1, platform.p2)
-	rc.addConstraint(Sketchpad.simulation.ConveyorBeltConstraint, tileDLength, tilePos, tileVelocity, belt)
-	rc.addConstraint(Sketchpad.simulation.ConveyorBeltConstraint, tileDLength, tilePos, tileVelocity, feederBelt)
-	rc.addConstraint(Sketchpad.simulation.AccelerationConstraint, tileVelocity, {x: 0, y: Sketchpad.simulation.g})
-	rc.addConstraint(Sketchpad.simulation.VelocityConstraint, tilePos, tileVelocity)
+	rc.addConstraint(Sketchpad.simulation.HitSurfaceConstraint, tileBody, ground.p1, ground.p2)
+	rc.addConstraint(Sketchpad.simulation.HitSurfaceConstraint, tileBody, belt.position1, belt.position2)
+	rc.addConstraint(Sketchpad.simulation.HitSurfaceConstraint, tileBody, feederBelt.position1, feederBelt.position2)
+	rc.addConstraint(Sketchpad.simulation.HitSurfaceConstraint, tileBody, platform.p1, platform.p2)
+	rc.addConstraint(Sketchpad.simulation.ConveyorBeltConstraint, tileBody, belt)
+	rc.addConstraint(Sketchpad.simulation.ConveyorBeltConstraint, tileBody, feederBelt)
+	rc.addConstraint(Sketchpad.simulation.AccelerationConstraint, tileBody, {x: 0, y: Sketchpad.simulation.g})
+	rc.addConstraint(Sketchpad.simulation.VelocityConstraint, tileBody)
 	rc.addConstraint(Examples.qbf.TileActivationConstraint, tile, platform.p1, platform.p2)
 	rc.addConstraint(Examples.qbf.TileChoosingConstraint, tile, tiles, wordRack)
     }
@@ -400,7 +401,7 @@ examples['quick brown fox'] = function() {
 	var tile1 = tiles[i]
 	for (var j = i + 1; j < qbf.tileCount; j++) {
 	    var tile2 = tiles[j]
-	    rc.addConstraint(Sketchpad.simulation.NoOverlapConstraint, tile2.length, tile2.position, tile2.velocity, tile1.length, tile1.position, tile1.velocity)
+	    rc.addConstraint(Sketchpad.simulation.NoOverlapConstraint, tile2.body, tile1.body)
 	}
     }
     rc.addConstraint(Examples.qbf.FeederTileCountConstraint, feeder, feederBelt, tiles)
