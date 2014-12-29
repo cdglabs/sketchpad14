@@ -114,32 +114,28 @@ examples['soft geodesic']= function() {
 	    [4, 38], 
 	    [38, 27]
 	]
-    var points = [], velocities = [], removeDuplicateCoords = {}, i = 0
+    var mass = 10, springK = 50
+    var bodies = [], removeDuplicateCoords = {}
     coords.forEach(function(c) {
 	var p = new Point3D(c[0], c[1], c[2])
-	var velocity = new Vector3D(0, 0, 0)
-	velocities.push(velocity)	
 	var key = '' + Math.round(p.x) + Math.round(p.y) + Math.round(p.z)
+	var b
 	if (removeDuplicateCoords[key]) {
-	    p = removeDuplicateCoords[key]
+	    b = removeDuplicateCoords[key]
 	} else {
-	    removeDuplicateCoords[key] = p
-	    rc.add(new Sphere(p, 'yellow'))
-	    rc.addConstraint(Sketchpad.simulation3d.VelocityConstraint, p, velocity)
-	    rc.addConstraint(Sketchpad.simulation3d.AirResistanceConstraint, velocity, 0.005)
+	    b = rc.add(new Sketchpad.simulation3d.FreeBody(p, undefined, undefined, mass, 'yellow'))
+	    rc.addConstraint(Sketchpad.simulation3d.VelocityConstraint, b)
+	    rc.addConstraint(Sketchpad.simulation3d.AirResistanceConstraint, b, 0.005)
+	    removeDuplicateCoords[key] = b
 	}
-	points.push(p)
-	i++
+	bodies.push(b)
     })
-    var mass = 10, springK = 50
     edges.forEach(function(e) {
-	var p1 = points[e[0]], p2 = points[e[1]]
-	var d = Sketchpad.geom3d.distance(p1, p2)
-	var spring = rc.add(rc.add(new Sketchpad.simulation3d.Spring(new Cylinder(p1, p2), springK, d, d * 2)))
-	rc.addConstraint(Sketchpad.simulation3d.SpringConstraint, p1, velocities[e[0]], new Vector3D(0, 0, 0), mass, p2, velocities[e[1]], new Vector3D(0, 0, 0), mass, spring)	
+	var b1 = bodies[e[0]], b2 = bodies[e[1]]
+	var d = Sketchpad.geom3d.distance(b1.position, b2.position)
+	var spring = rc.add(rc.add(new Sketchpad.simulation3d.Spring(b1, b2, springK, d, d * 2)))
+	rc.addConstraint(Sketchpad.simulation3d.SpringConstraint, b1, b2, spring)	
     })
-
     rc.addConstraint(Sketchpad.simulation.TimerConstraint, rc.add(new Timer(.1)))
 
 };
-
