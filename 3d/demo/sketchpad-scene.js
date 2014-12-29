@@ -345,7 +345,6 @@ SketchpadScene.prototype.findThingPointedTo = function(e) {
 	    thing = pointedSceneObj.__sketchpadThing
 	    this.selectedSceneObject = pointedSceneObj
 	    point = thing.position
-	    log(thing.position)
 	    scenePoint = intersects[0].point
 	}
     }

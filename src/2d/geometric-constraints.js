@@ -357,10 +357,11 @@ function installGeometricConstraints(Sketchpad) {
 
     // Length constraint - maintains distance between P1 and P2 at L.
 
-    Sketchpad.geom.LengthConstraint = function Sketchpad__geom__LengthConstraint(p1, p2, l) {
+    Sketchpad.geom.LengthConstraint = function Sketchpad__geom__LengthConstraint(p1, p2, l, onlyOneWritable) {
 	this.p1 = p1
 	this.p2 = p2
 	this.l = l
+	this._onlyOneWritable = onlyOneWritable
     }
 
     sketchpad.addClass(Sketchpad.geom.LengthConstraint, true)
@@ -388,10 +389,13 @@ function installGeometricConstraints(Sketchpad) {
 	if (l12 == 0) {
 	    p1 = plus(p1, {x: 0.1, y: 0})
 	    p2 = plus(p2, {x: -0.1, y: 0})
-	}
-	var delta = (l12 - this.l) / 2
+	}	
+	var delta = (l12 - this.l) / (this._onlyOneWritable ? 1 : 2)
 	var e12 = scaledBy(Sketchpad.geom.normalized(minus(p2, p1)), delta)
-	return {p1: plus(this.p1, e12), p2: plus(this.p2, scaledBy(e12, -1))}
+	var res = {p2: plus(this.p2, scaledBy(e12, -1))}
+	if (!this._onlyOneWritable)
+	    res['p1'] = plus(this.p1, e12)
+	return res
     }
 
     Sketchpad.geom.LengthConstraint.prototype.draw = function(canvas, origin) {

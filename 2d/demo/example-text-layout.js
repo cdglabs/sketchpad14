@@ -468,7 +468,7 @@ examples['text layout'] = function() {
     rc.grabPointOpacity = 0
     sketchpad.rho = 1//.25
     sketchpad.solveEvenWithoutErrorOnPriorityDifferences = true
-    rc.setOption('renderMode', 2)
+    rc.setOption('renderMode', 3)
     sketchpad.scratch.wordWrapModes = ['greedy', 'optimal', 'justify']
     sketchpad.scratch.wordWrapMode = 0
 

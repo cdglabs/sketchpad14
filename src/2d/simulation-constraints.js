@@ -4,7 +4,7 @@ function installSimulationConstraints(Sketchpad) {
     // arbitrary properties of arbitrary objects. "References" are represented
     // as (object, propertyName) tuples, e.g., {obj: yourMom, prop: 'weight'}.
 
-    Sketchpad.simulation = { g: 9.8 }
+    Sketchpad.simulation = { g: 9.8, G: 6.7e-11 } // G: Nm2/kg2 
 
     var minus = Sketchpad.geom.minus
     var plus = Sketchpad.geom.plus
@@ -15,8 +15,43 @@ function installSimulationConstraints(Sketchpad) {
 
     // Classes
     
-    Sketchpad.simulation.Spring = function Sketchpad__simulation__Spring(line, k, length, tearPointAmount) {
-	this.line = line
+    Sketchpad.simulation.FreeBody = function Sketchpad__simulation__FreeBody(position, optRadius, optMass) {
+	this.position = position
+	this.mass = optMass || 10
+	this.velocity = new Vector(0, 0)
+	this.acceleration = new Vector(0, 0)
+	this.radius = optRadius || this.position.radius
+	rc.add(position)
+    }
+
+    sketchpad.addClass(Sketchpad.simulation.FreeBody)
+
+    Sketchpad.simulation.FreeBody.prototype.propertyTypes = {position: 'Point', mass: 'Number', radius: 'Number'}
+
+    Sketchpad.simulation.FreeBody.dummy = function(x, y) {
+	return new Sketchpad.simulation.FreeBody(Point.dummy(x, y), 10, 10)
+    }
+    
+    Sketchpad.simulation.FreeBody.prototype.containsPoint = function(x, y) {
+	return this.position.containsPoint(x, y)
+    }
+
+    Sketchpad.simulation.FreeBody.prototype.center = function() {
+	return this.position
+    }
+
+    Sketchpad.simulation.FreeBody.prototype.border = function() {
+	return this.position.border()
+    }
+
+    Sketchpad.simulation.FreeBody.prototype.draw = function(canvas, origin) {
+	//this.position.draw(canvas, origin)
+    }
+
+    Sketchpad.simulation.Spring = function Sketchpad__simulation__Spring(body1, body2, k, length, tearPointAmount) {
+	this.body1 = body1
+	this.body1 = body2
+	this.line = new Line(body1.position, body2.position)
 	this.k = k
 	this.length = length    
 	this.tearPointAmount = tearPointAmount
@@ -25,12 +60,13 @@ function installSimulationConstraints(Sketchpad) {
 
     sketchpad.addClass(Sketchpad.simulation.Spring)
 
-    Sketchpad.simulation.Spring.prototype.propertyTypes = {line: 'Line', k: 'Number', length: 'Number', teatPointAmount: 'Number'}
+    Sketchpad.simulation.Spring.prototype.propertyTypes = {body1: 'FreeBody', body2: 'FreeBody', k: 'Number', length: 'Number', teatPointAmount: 'Number'}
 
     Sketchpad.simulation.Spring.dummy = function(x, y) {
-	var l = Line.dummy(x, y)
-	var d = distance(l.p1, l.p2)
-	return new Sketchpad.simulation.Spring(l, 10, d,  d * 5)
+	var b1 = FreeBody.dummy(x, y)
+	var b2 = FreeBody.dummy(x + 100, y + 100)
+	var d = distance(b1.p1, b2.p2)
+	return new Sketchpad.simulation.Spring(b1, b2, 10, d,  d * 5)
     }
     
     Sketchpad.simulation.Spring.prototype.containsPoint = function(x, y) {
@@ -133,8 +169,9 @@ function installSimulationConstraints(Sketchpad) {
     }
 
     Sketchpad.simulation.slopeVector = function(p1, p2) {
-	var slope = this.slope(p1, p2)
-	return {x: Math.sin(Math.atan(slope)), y: Math.cos(Math.atan(slope))}
+	var slope = this.slope(p1, p2), atn = Math.atan(slope)
+	var sign = p1.x < p2.x ? -1 : 1
+	return {x: sign * Math.sin(atn), y: sign * Math.cos(atn)}
     }
 
     // Timer Constraint
@@ -206,19 +243,20 @@ function installSimulationConstraints(Sketchpad) {
 
     // Motion Constraint
 
-    Sketchpad.simulation.VelocityConstraint = function Sketchpad__simulation__VelocityConstraint(position, velocity) {
-	this.position = position
-	this.velocity = velocity
+    Sketchpad.simulation.VelocityConstraint = function Sketchpad__simulation__VelocityConstraint(body) {
+	this.body = body
+	this.position = body.position
+	this.velocity = body.velocity
     }
 
     sketchpad.addClass(Sketchpad.simulation.VelocityConstraint, true)
 
-    Sketchpad.simulation.VelocityConstraint.prototype.description = function() { return  "Sketchpad.simulation.VelocityConstraint(Point Pos, Vector Velocity) states Pos = old(Pos) + Velocity * (pseudoTime - prevPseudoTime) ." }
+    Sketchpad.simulation.VelocityConstraint.prototype.description = function() { return  "Sketchpad.simulation.VelocityConstraint(FreeBody Body) states for Body: Pos = old(Pos) + Velocity * (pseudoTime - prevPseudoTime) ." }
 
-    Sketchpad.simulation.VelocityConstraint.prototype.propertyTypes = {position: 'Point', velocity: 'Vector'}
+    Sketchpad.simulation.VelocityConstraint.prototype.propertyTypes = {body: 'FreeBody'}
 
     Sketchpad.simulation.VelocityConstraint.dummy = function(x, y) {
-	return new Sketchpad.simulation.VelocityConstraint(Point.dummy(x, y), Sketchpad.geom.Vector.dummy(x + 50, y + 50))
+	return new Sketchpad.simulation.VelocityConstraint(FreeBody.dummy(x, y))
     }
 
     Sketchpad.simulation.VelocityConstraint.prototype.onEachTimeStep = function(pseudoTime, prevPseudoTime) {
@@ -239,25 +277,26 @@ function installSimulationConstraints(Sketchpad) {
 	var ctxt = canvas.ctxt
 	var slopeV = Sketchpad.simulation.slopeVector(this.position, this.velocity)	
 	var len = 50
-	var p = plus(this.position, {x: -slopeV.x * len, y: slopeV.y * len})
+	var p = plus(this.position, {x: slopeV.x * len, y: slopeV.y * len})
 	canvas.drawArrow(this.position, p, origin, 'v')
     }
     
     // Body With Velocity Constraint
 
-    Sketchpad.simulation.VelocityConstraint2 = function Sketchpad__simulation__VelocityConstraint2(position, velocity) {
-	this.position = position
+    Sketchpad.simulation.VelocityConstraint2 = function Sketchpad__simulation__VelocityConstraint2(body, velocity) {
+	this.body = body
+	this.position = body.position
 	this.velocity = velocity
     }
 
     sketchpad.addClass(Sketchpad.simulation.VelocityConstraint2, true)
 
-    Sketchpad.simulation.VelocityConstraint2.prototype.description = function() { return  "Sketchpad.simulation.VelocityConstraint2(Point Pos, PointVector Velocity) states Pos = old(Pos) + Velocity * (pseudoTime - prevPseudoTime) ." }
+    Sketchpad.simulation.VelocityConstraint2.prototype.description = function() { return  "Sketchpad.simulation.VelocityConstraint2(FreeBody Body, PointVector Velocity) states for Body: Pos = old(Pos) + Velocity * (pseudoTime - prevPseudoTime) ." }
 
-    Sketchpad.simulation.VelocityConstraint2.prototype.propertyTypes = {position: 'Point', velocity: 'Point'}
+    Sketchpad.simulation.VelocityConstraint2.prototype.propertyTypes = {body: 'FreeBody', velocity: 'PointVector'}
 
     Sketchpad.simulation.VelocityConstraint2.dummy = function(x, y) {
-	return new Sketchpad.simulation.VelocityConstraint2(Point.dummy(x, y), Point.dummy(x + 50, y + 50))
+	return new Sketchpad.simulation.VelocityConstraint2(FreeBody.dummy(x, y), PointVector.dummy(x, y))
     }
     
     Sketchpad.simulation.VelocityConstraint2.prototype.onEachTimeStep = function(pseudoTime, prevPseudoTime) {	
@@ -276,19 +315,20 @@ function installSimulationConstraints(Sketchpad) {
     
     // Acceleration Constraint
 
-    Sketchpad.simulation.AccelerationConstraint = function Sketchpad__simulation__AccelerationConstraint(velocity, acceleration) {
-	this.velocity = velocity
+    Sketchpad.simulation.AccelerationConstraint = function Sketchpad__simulation__AccelerationConstraint(body, acceleration) {
+	this.body = body
+	this.velocity = body.velocity
 	this.acceleration = acceleration
     }
 
     sketchpad.addClass(Sketchpad.simulation.AccelerationConstraint, true)
 
-    Sketchpad.simulation.AccelerationConstraint.prototype.description = function() { return  "Sketchpad.simulation.AccelerationConstraint(Vector Velocity, Vector Acceleration) states Velocity = old(Velocity) + Acceleration * (pseudoTime - prevPseudoTime) ." }
+    Sketchpad.simulation.AccelerationConstraint.prototype.description = function() { return  "Sketchpad.simulation.AccelerationConstraint(FreeBody Body, Vector Acceleration) states for Body: Velocity = old(Velocity) + Acceleration * (pseudoTime - prevPseudoTime) ." }
 
-    Sketchpad.simulation.AccelerationConstraint.prototype.propertyTypes = {position: 'Point', velocity: 'Vector'}
+    Sketchpad.simulation.AccelerationConstraint.prototype.propertyTypes = {body: 'FreeBody', acceleration: 'Vector'}
 
     Sketchpad.simulation.AccelerationConstraint.dummy = function(x, y) {
-	return new Sketchpad.simulation.AccelerationConstraint(Sketchpad.geom.Vector.dummy(x, y), Sketchpad.geom.Vector.dummy(x + 50, y + 50))
+	return new Sketchpad.simulation.AccelerationConstraint(FreeBody.dummy(x, y), Sketchpad.geom.Vector.dummy(x + 50, y + 50))
     }
 
     Sketchpad.simulation.AccelerationConstraint.prototype.onEachTimeStep = function(pseudoTime, prevPseudoTime) {	
@@ -307,14 +347,15 @@ function installSimulationConstraints(Sketchpad) {
 
     // Air Resistance Constraint
 
-    Sketchpad.simulation.AirResistanceConstraint = function Sketchpad__simulation__AirResistanceConstraint(velocity, scale) {
-	this.velocity = velocity
+    Sketchpad.simulation.AirResistanceConstraint = function Sketchpad__simulation__AirResistanceConstraint(body, scale) {
+	this.body = body
+	this.velocity = body.velocity
 	this.scale = -scale
     }
 
     sketchpad.addClass(Sketchpad.simulation.AirResistanceConstraint, true)
 
-    Sketchpad.simulation.AirResistanceConstraint.prototype.description = function() { return  "Sketchpad.simulation.AirResistanceConstraint(Vector Velocity, Number Scale) states Velocity = old(Velocity) * Scale ." }
+    Sketchpad.simulation.AirResistanceConstraint.prototype.description = function() { return  "Sketchpad.simulation.AirResistanceConstraint(FreeBody Body) states for Body: Velocity = old(Velocity) * Scale ." }
 
     Sketchpad.simulation.AirResistanceConstraint.prototype.propertyTypes = {scale: 'Number', velocity: 'Vector'}
 
@@ -336,22 +377,23 @@ function installSimulationConstraints(Sketchpad) {
 
     //  Bounce Constraint
 
-    Sketchpad.simulation.BounceConstraint = function Sketchpad__simulation__BounceConstraint(length, position, velocity, surfaceP1, surfaceP2) {
-	this.halfLength = length / 2
-	this.position = position
-	this.velocity = velocity
+    Sketchpad.simulation.BounceConstraint = function Sketchpad__simulation__BounceConstraint(body, surfaceP1, surfaceP2) {
+	this.body = body
+	this.halfLength = body.radius
+	this.position = body.position
+	this.velocity = body.velocity
 	this.surfaceP1 = surfaceP1
 	this.surfaceP2 = surfaceP2
     }
 
     sketchpad.addClass(Sketchpad.simulation.BounceConstraint, true)
 
-    Sketchpad.simulation.BounceConstraint.prototype.description = function() { return  "Sketchpad.simulation.BounceConstraint(Number L, Point Pos, Vector Vel, Point End1, Point End2) states that the body with diameter L and position Pos and velocity vector Vel is going to bounce off the line with two end points End1 & End2." }
+    Sketchpad.simulation.BounceConstraint.prototype.description = function() { return  "Sketchpad.simulation.BounceConstraint(FreeBody Body, Point End1, Point End2) states that the Body with diameter L and position Pos and velocity vector Vel is going to bounce off the line with two end points End1 & End2." }
 
-    Sketchpad.simulation.BounceConstraint.prototype.propertyTypes = {halfLength: 'Number', position: 'Point', velocity: 'Vector', surfaceP1: 'Point', surfaceP2: 'Point'}
+    Sketchpad.simulation.BounceConstraint.prototype.propertyTypes = {body: 'FreeBody', surfaceP1: 'Point', surfaceP2: 'Point'}
 
     Sketchpad.simulation.BounceConstraint.dummy = function(x, y) {
-	return new Sketchpad.simulation.BounceConstraint(10, Point.dummy(x, y), Sketchpad.geom.Vector.dummy(x, y), Point.dummy(x, y), Point.dummy(x, y))
+	return new Sketchpad.simulation.BounceConstraint(FreeBody.dummy(x, y), Point.dummy(x, y), Point.dummy(x, y))
     }
 
     Sketchpad.simulation.BounceConstraint.prototype.proposeNextPseudoTime = function(pseudoTime) {
@@ -423,22 +465,23 @@ function installSimulationConstraints(Sketchpad) {
 
     //  HitSurface Constraint
 
-    Sketchpad.simulation.HitSurfaceConstraint = function Sketchpad__simulation__HitSurfaceConstraint(length, position, velocity, surfaceP1, surfaceP2) {
-	this.halfLength = length / 2
-	this.position = position
-	this.velocity = velocity
+    Sketchpad.simulation.HitSurfaceConstraint = function Sketchpad__simulation__HitSurfaceConstraint(body, surfaceP1, surfaceP2) {
+	this.body = body
+	this.halfLength = body.radius / 2
+	this.position = body.position
+	this.velocity = body.velocity
 	this.surfaceP1 = surfaceP1
 	this.surfaceP2 = surfaceP2
     }
 
     sketchpad.addClass(Sketchpad.simulation.HitSurfaceConstraint, true)
 
-    Sketchpad.simulation.HitSurfaceConstraint.prototype.description = function() { return  "Sketchpad.simulation.HitSurfaceConstraint(Number L, Point Pos, Vector Vel, Point End1, Point End2) states that the body with diameter L and position Pos and velocity vector Vel is going to land and stay on the line with two end points End1 & End2." }
+    Sketchpad.simulation.HitSurfaceConstraint.prototype.description = function() { return  "Sketchpad.simulation.HitSurfaceConstraint(FreeBody Body, Point End1, Point End2) states that the Body with diameter L and position Pos and velocity vector Vel is going to land and stay on the line with two end points End1 & End2." }
 
-    Sketchpad.simulation.HitSurfaceConstraint.prototype.propertyTypes = {halfLength: 'Number', position: 'Point', velocity: 'Vector', surfaceP1: 'Point', surfaceP2: 'Point'}
+    Sketchpad.simulation.HitSurfaceConstraint.prototype.propertyTypes = {body: 'FreeBody', surfaceP1: 'Point', surfaceP2: 'Point'}
 
     Sketchpad.simulation.HitSurfaceConstraint.dummy = function(x, y) {
-	return new Sketchpad.simulation.HitSurfaceConstraint(10, Point.dummy(x, y), Sketchpad.geom.Vector.dummy(x, y), Point.dummy(x, y), Point.dummy(x, y))
+	return new Sketchpad.simulation.HitSurfaceConstraint(FreeBody.dummy(x, y), Point.dummy(x, y), Point.dummy(x, y))
     }
 
     Sketchpad.simulation.HitSurfaceConstraint.prototype.onEachTimeStep = function(pseudoTime, prevPseudoTime) {
@@ -453,7 +496,7 @@ function installSimulationConstraints(Sketchpad) {
 	    this.hitVelocity = scaledBy({x: 0, y: -Sketchpad.simulation.g}, dt)
 	    var velocityMagnitude = Math.sqrt((velocity.x * velocity.x) + (velocity.y * velocity.y))
 	    deltaPosX = slopeV.x * velocityMagnitude * dt
-	    deltaPosY = slopeV.y * -velocityMagnitude * dt
+	    deltaPosY = slopeV.y * velocityMagnitude * dt
 	    this.hitPosition = {x: position.x + deltaPosX, y: position.y + deltaPosY}
 	} else
 	    this.contact = false
@@ -472,21 +515,22 @@ function installSimulationConstraints(Sketchpad) {
 
     // Conveyor Belt Constraint
 
-    Sketchpad.simulation.ConveyorBeltConstraint = function Sketchpad__simulation__ConveyorBeltConstraint(length, position, velocity, belt) {
-	this.halfLength = length / 2
-	this.position = position
-	this.velocity = velocity
+    Sketchpad.simulation.ConveyorBeltConstraint = function Sketchpad__simulation__ConveyorBeltConstraint(body, belt) {
+	this.body = body
+	this.halfLength = body.radius
+	this.position = body.position
+	this.velocity = body.velocity
 	this.belt = belt
     }
 
     sketchpad.addClass(Sketchpad.simulation.ConveyorBeltConstraint, true)
 
-    Sketchpad.simulation.ConveyorBeltConstraint.prototype.description = function() { return  "Sketchpad.simulation.ConveyorBeltConstraint(Number L, Point Pos, Vector Vel, ConveyorBelt Belt) states that the body with diameter L and position Pos and velocity vector Vel is going to land and move based on the conveyor belt Belt's velocity." }
+    Sketchpad.simulation.ConveyorBeltConstraint.prototype.description = function() { return  "Sketchpad.simulation.ConveyorBeltConstraint(Number L, FreeBody Body, ConveyorBelt Belt) states that the body with diameter L and position Pos and velocity vector Vel is going to land and move based on the conveyor belt Belt's velocity." }
 
-    Sketchpad.simulation.ConveyorBeltConstraint.prototype.propertyTypes = {halfLength: 'Number', position: 'Point', velocity: 'Vector', belt: 'Belt'}
+    Sketchpad.simulation.ConveyorBeltConstraint.prototype.propertyTypes = {body: 'FreeBody', belt: 'Belt'}
 
     Sketchpad.simulation.ConveyorBeltConstraint.dummy = function(x, y) {
-	return new Sketchpad.simulation.ConveyorBeltConstraint(10, Point.dummy(x, y), Sketchpad.geom.Vector.dummy(x, y), Belt.dummy(x, y))
+	return new Sketchpad.simulation.ConveyorBeltConstraint(FreeBody.dummy(x, y), Belt.dummy(x, y))
     }
 
     Sketchpad.simulation.ConveyorBeltConstraint.prototype.onEachTimeStep = function(pseudoTime, prevPseudoTime) {
@@ -498,7 +542,7 @@ function installSimulationConstraints(Sketchpad) {
 	if (Sketchpad.simulation.detectContact(this.halfLength, this.position, velocity, beltP1, beltP2)) {
 	    this.contact = true
 	    var slopeV = Sketchpad.simulation.slopeVector(beltP1, beltP2)
-	    this.targetVelocity = {x: velocity.x + (-slopeV.y * beltSpeed), y: velocity.y + (slopeV.x * beltSpeed)}
+	    this.targetVelocity = {x: velocity.x + (slopeV.y * beltSpeed), y: velocity.y + (slopeV.x * beltSpeed)}
 	} else
 	    this.contact = false
     }
@@ -520,23 +564,25 @@ function installSimulationConstraints(Sketchpad) {
 
     // NoOverlap Constraint
 
-    Sketchpad.simulation.NoOverlapConstraint = function Sketchpad__simulation__NoOverlapConstraint(length1, position1, velocity1, length2, position2, velocity2) {
-	this.length1 = length1
-	this.position1 = position1
-	this.velocity1 = velocity1
-	this.length2 = length2
-	this.position2 = position2
-	this.velocity2 = velocity2
+    Sketchpad.simulation.NoOverlapConstraint = function Sketchpad__simulation__NoOverlapConstraint(body1, body2) {
+	this.body1 = body1
+	this.length1 = body1.radius / 2
+	this.position1 = body1.position
+	this.velocity1 = body1.velocity
+	this.body2 = body2
+	this.length2 = body2.radius / 2
+	this.position2 = body2.position
+	this.velocity2 = body2.velocity
     }
 
     sketchpad.addClass(Sketchpad.simulation.NoOverlapConstraint, true)
 
-    Sketchpad.simulation.NoOverlapConstraint.prototype.description = function() { return  "Sketchpad.simulation.NoOverlapConstraint(Number L1, Point Pos1, Vector Vel1, Number L2, Point Pos2, Vector Vel2) states that the body with diameter L1 and position Pos1 and velocity vector Vel1 and the body with diameter L2 and position Pos2 and velocity vector Vel2 will push each other if touching." }
+    Sketchpad.simulation.NoOverlapConstraint.prototype.description = function() { return  "Sketchpad.simulation.NoOverlapConstraint(FreeBody Body1, FreeBody Body1) states that the Body1 with diameter L1 and position Pos1 and velocity vector Vel1 and the Body2 with diameter L2 and position Pos2 and velocity vector Vel2 will push each other if touching." }
 
-    Sketchpad.simulation.NoOverlapConstraint.prototype.propertyTypes = {length1: 'Number', position1: 'Point', velocity1: 'Vector', length2: 'Number', position2: 'Point', velocity2: 'Vector'}
+    Sketchpad.simulation.NoOverlapConstraint.prototype.propertyTypes = {body1: 'FreeBody', body2: 'FreeBody'}
 
     Sketchpad.simulation.NoOverlapConstraint.dummy = function(x, y) {
-	return new Sketchpad.simulation.NoOverlapConstraint(10, Point.dummy(x, y), Sketchpad.geom.Vector.dummy(x, y), 10, Point.dummy(x, y), Sketchpad.geom.Vector.dummy(x, y))
+	return new Sketchpad.simulation.NoOverlapConstraint(FreeBody.dummy(x, y), FreeBody.dummy(x +100, y + 100))
     }
 
     Sketchpad.simulation.NoOverlapConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
@@ -565,27 +611,29 @@ function installSimulationConstraints(Sketchpad) {
 
     //  Spring Constraint
 
-    Sketchpad.simulation.SpringConstraint = function Sketchpad__simulation__SpringConstraint(position1, velocity1, acceleration1, mass1, position2, velocity2, acceleration2, mass2, spring) {
-	this.position1 = position1
-	this.velocity1 = velocity1
-	this.acceleration1 = acceleration1
-	this.mass1 = mass1
-	this.position2 = position2
-	this.velocity2 = velocity2
-	this.acceleration2 = acceleration2
-	this.mass2 = mass2
+    Sketchpad.simulation.SpringConstraint = function Sketchpad__simulation__SpringConstraint(body1, body2, spring) {
+	this.body1 = body1
+	this.body2 = body2
+	this.position1 = body1.position
+	this.velocity1 = body1.velocity
+	this.acceleration1 = body1.acceleration
+	this.mass1 = body1.mass
+	this.position2 = body2.position
+	this.velocity2 = body2.velocity
+	this.acceleration2 = body2.acceleration
+	this.mass2 = body2.mass
 	this.spring = spring
 	this._lastVelocities = [undefined, undefined]
     }
 
     sketchpad.addClass(Sketchpad.simulation.SpringConstraint, true)
 
-    Sketchpad.simulation.SpringConstraint.prototype.description = function() { return  "Sketchpad.simulation.SpringConstraint(Point Pos1, Vector Vel1, Vector Acc1, Number Mass1, Point Pos2, Vector Vel2, Vector Acc2, Number Mass2, Spring S) states that spring S has been attached to two bodies with positions, velocities, accelerations, and masses of respectively Pos1, Pos2, Vel1, Vel2, Acc1, Acc2, Mass1, Mass2. " }
+    Sketchpad.simulation.SpringConstraint.prototype.description = function() { return  "Sketchpad.simulation.SpringConstraint(FreeBody Body1, FreeBody Body2, Spring S) states that spring S has been attached to two bodies Body1 and Body2." }
 
-    Sketchpad.simulation.SpringConstraint.prototype.propertyTypes = {position1: 'Point', velocity1: 'Vector', acceleration1: 'Vector', mass1: 'Number', position2: 'Point', velocity2: 'Vector', acceleration2: 'Vector', mass2: 'Number', spring: 'Spring'}
+    Sketchpad.simulation.SpringConstraint.prototype.propertyTypes = {body1: 'FreeBody', body2: 'FreeBody', spring: 'Spring'}
 
     Sketchpad.simulation.SpringConstraint.dummy = function(x, y) {
-	return new Sketchpad.simulation.SpringConstraint(Point.dummy(x, y), Sketchpad.geom.Vector.dummy(x, y), Sketchpad.geom.Vector.dummy(x, y), 0, Point.dummy(x, y), Sketchpad.geom.Vector.dummy(x, y), Sketchpad.geom.Vector.dummy(x, y), 10, Sketchpad.simulation.Spring.dummy(x, y))
+	return new Sketchpad.simulation.SpringConstraint(FreeBody.dummy(x, y), FreeBody.dummy(x+100, y+100), Sketchpad.simulation.Spring.dummy(x, y))
     }
 
     Sketchpad.simulation.SpringConstraint.prototype.onEachTimeStep = function(pseudoTime, prevPseudoTime) {	
@@ -657,6 +705,54 @@ function installSimulationConstraints(Sketchpad) {
 	return soln
     }
 
+    //  OrbitalMotion Constraint
+
+    Sketchpad.simulation.OrbitalMotionConstraint = function Sketchpad__simulation__OrbitalMotionConstraint(sun, moon, distanceDownscale) {
+	this.sun = sun
+	this.moon = moon
+	this.position = moon.position
+	this._lastPosition = undefined
+	this._lastSunPosition = undefined
+	this.distanceDownscale = (distanceDownscale || (1e9 / 2))
+    }
+
+    sketchpad.addClass(Sketchpad.simulation.OrbitalMotionConstraint, true)
+
+    Sketchpad.simulation.OrbitalMotionConstraint.prototype.description = function() { return  "Sketchpad.simulation.OrbitalMotionConstraint(FreeBody Sun, FreeBody Moon) states that Moon body is orbiting around Sun body according to simple orbital motion formula." }
+
+    Sketchpad.simulation.OrbitalMotionConstraint.prototype.propertyTypes = {sun: 'FreeBody', moon: 'FreeBody'}
+
+    Sketchpad.simulation.OrbitalMotionConstraint.dummy = function(x, y) {
+	return new Sketchpad.simulation.OrbitalMotionConstraint(FreeBody.dummy(x, y), FreeBody.dummy(x + 200, y))
+    }
+
+    Sketchpad.simulation.OrbitalMotionConstraint.prototype.onEachTimeStep = function(pseudoTime, prevPseudoTime) {	
+	//if (this._lastSunPosition)
+	    //this.position.set(plus(this.position, minus(this.sun.position, this._lastSunPosition)))
+	this._lastPosition = scaledBy(this.position, 1)
+	//this._lastSunPosition = scaledBy(this.sun.position, 1)
+    }
+
+    Sketchpad.simulation.OrbitalMotionConstraint.prototype.currentEscapeVelocity = function() {
+	var p1 = this.position, p2 = this.sun.position
+	var dist0 = distance(p1, p2)
+	var dist = dist0 * this.distanceDownscale	
+	var vMag0 = Math.sqrt((2 * Sketchpad.simulation.G * this.sun.mass) / dist)
+	var vMag = vMag0 / this.distanceDownscale 
+	var slopeV = Sketchpad.simulation.slopeVector(p1, p2)
+	return {x: slopeV.x * vMag, y: slopeV.y * vMag}
+    }
+    
+    Sketchpad.simulation.OrbitalMotionConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
+	var dt = pseudoTime - prevPseudoTime
+	this._targetVelocity = this.currentEscapeVelocity()
+	return magnitude(minus(plus(this._lastPosition, scaledBy(this._targetVelocity, dt)), this.position))	
+    }
+
+    Sketchpad.simulation.OrbitalMotionConstraint.prototype.solve = function(pseudoTime, prevPseudoTime) {
+	var dt = pseudoTime - prevPseudoTime
+	return {position: plus(this._lastPosition, scaledBy(this._targetVelocity, dt))}
+    }
 }
 
 module.exports.install = installSimulationConstraints

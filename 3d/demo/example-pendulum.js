@@ -3,23 +3,19 @@ examples['pendulum']= function() {
     rc.setOption('renderMode', 1)
 
     // --- Data ----------------------------------------------------------------
-
     
     var p1 = new Point3D(0, 0, 0) 
-    var b1 = rc.add(new Sphere(p1))
+    var b1 = rc.add(new Sketchpad.simulation3d.FreeBody(p1, undefined, undefined, 0))
     var p2 = new Point3D(100, -100, 100)
-    var b2 = rc.add(new Sphere(p2))
-    var spring = rc.add(new Sketchpad.simulation3d.Spring(new Cylinder(p1, p2), 10, 100, 300))
-    var zero = new Vector3D(0, 0, 0)
-    var velocity2 = new Vector3D(0, 0, 0)
-    var acceleration2 = new Vector3D(0, 0, 0)
+    var b2 = rc.add(new Sketchpad.simulation3d.FreeBody(p2, undefined, undefined, 30))
+    var spring = rc.add(new Sketchpad.simulation3d.Spring(b1, b2, 10, 100, 300))
     
     // --- Constraints ---------------------------------------------------------
 
-    rc.addConstraint(Sketchpad.simulation3d.VelocityConstraint, p2, velocity2)
-    rc.addConstraint(Sketchpad.simulation3d.AccelerationConstraint, velocity2, acceleration2)
-    rc.addConstraint(Sketchpad.simulation3d.AccelerationConstraint, velocity2, new Vector3D(0, -Sketchpad.simulation.g,0))
-    rc.addConstraint(Sketchpad.simulation3d.SpringConstraint, p1, zero, zero, 0, p2, velocity2, acceleration2, 30, spring)
+    rc.addConstraint(Sketchpad.simulation3d.VelocityConstraint, b2)
+    rc.addConstraint(Sketchpad.simulation3d.AccelerationConstraint, b2, b2.acceleration)
+    rc.addConstraint(Sketchpad.simulation3d.AccelerationConstraint, b2, new Vector3D(0, -Sketchpad.simulation.g,0))
+    rc.addConstraint(Sketchpad.simulation3d.SpringConstraint, b1, b2, spring)
      rc.addConstraint(Sketchpad.simulation.TimerConstraint, rc.add(new Timer(0.5)))
 
    
