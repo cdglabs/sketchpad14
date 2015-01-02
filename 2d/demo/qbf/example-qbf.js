@@ -334,11 +334,11 @@ examples['quick brown fox'] = function() {
 
     rc.addConstraint(Sketchpad.simulation.TimerConstraint, rc.add(new Timer(.5)))
 
-    rc.add(new TextBox(new Point(550, 50), "-- ( 'backspace' to delete, 'enter' to submit ) --", 22))
+    rc.add(new TextBox(new Point(550, 50), "-- ( 'backspace' to delete, 'enter' to submit ) --", false, 22))
 
     // score boards
-    var goodWords = rc.add(new TextBox(new Point(150, 100), undefined, 22, 150, 500, undefined, undefined, 'green'))
-    var badWords = rc.add(new TextBox(new Point(350, 100), undefined, 22, 150, 500, undefined, undefined, 'red'))
+    var goodWords = rc.add(new TextBox(new Point(150, 100), undefined, false, 22, 150, 500, undefined, undefined, 'green'))
+    var badWords = rc.add(new TextBox(new Point(350, 100), undefined, false, 22, 150, 500, undefined, undefined, 'red'))
 
     // feeder
     var feederPos = new Point(1182 - tileHLength , 50 - tileHLength, 'gray', 5)

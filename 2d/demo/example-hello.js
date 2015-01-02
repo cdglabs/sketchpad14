@@ -147,7 +147,7 @@ examples['hello world'] = function() {
     
 // --- Data ----------------------------------------------------------------
     
-    rc.add(new TextBox(new Point(550, 50), "-- ( press 'space' to take snapshot ) --", 20))
+    rc.add(new TextBox(new Point(550, 50), "-- ( press 'space' to take snapshot ) --", false, 20))
     var b1 = rc.add(new Examples.hello.Box(new Point(500, 200), 100, 200))
     var b2 = rc.add(new Examples.hello.Box(new Point(800, 500), 300, 200))
 

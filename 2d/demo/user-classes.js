@@ -78,6 +78,10 @@ Point.prototype.plus = function(p) {
     return new Point(this.x + p.x, this.y + p.y)
 }
 
+Point.prototype.minus = function(p) {
+    return new Point(this.x - p.x, this.y - p.y)
+}
+
 Point.prototype.scale = function(s) {
     return new Point(this.x * s, this.y * s)
 }
@@ -149,7 +153,7 @@ Line.prototype.border = function() {
     return this
 }
 
-function Box(position, width, height, resizable, optColor, optBgColor, optNoBorder, optLineDash) {
+function Box(position, width, height, resizable, optMaintainBottomCorner, optColor, optBgColor, optNoBorder, optLineDash) {
     this.__origin = position
     this.position = position    
     this.width = width
@@ -158,27 +162,23 @@ function Box(position, width, height, resizable, optColor, optBgColor, optNoBord
     this.bgColor = optBgColor
     this.hasBorder = !optNoBorder
     this.lineDash = optLineDash
+    if (optMaintainBottomCorner || resizable) {
+	this.bottomCorner = new Point(position.x + width, position.y + height, 'gray', 6)
+	this.bottomCornerConstraint1 = rc.addConstraint(Sketchpad.arith.SumConstraint, {obj: position, prop: 'x'}, {obj: this, prop: 'width'}, {obj: this.bottomCorner, prop: 'x'}, [3])
+	this.bottomCornerConstraint2 = rc.addConstraint(Sketchpad.arith.SumConstraint, {obj: position, prop: 'y'}, {obj: this, prop: 'height'}, {obj: this.bottomCorner, prop: 'y'}, [3])
+	this.addMaintainSizeConstraints()
+    }
     if (resizable) {
-	this.bottomCorner = rc.add(new Point(position.x + width, position.y + height, 'gray', 6))
-	self = this
+	rc.add(this.bottomCorner)
+	self = this	
 	rc.sketchpad.registerEvent('pointerdown', function(e) { 
-	    if (rc.selection === position && !self.constraintsAdded) {
-		self.maintainWidthConstraint = new Sketchpad.arith.ValueConstraint({obj: self, prop: 'width'}, self.width) 
-		self.maintainHeightConstraint = new Sketchpad.arith.ValueConstraint({obj: self, prop: 'height'}, self.height) 
-		rc.addNewConstraint(self.maintainWidthConstraint)
-		rc.addNewConstraint(self.maintainHeightConstraint)
-		self.constraintsAdded = true
-	    }
+	    if (rc.selection === self.bottomCorner && !self.constraintsRemoved)
+		self.removeMaintainSizeConstraints()
 	})
 	rc.sketchpad.registerEvent('pointerup', function(e) { 
-	    if (rc.selection === position && self.constraintsAdded) {
-		rc.removeConstraint(self.maintainWidthConstraint)
-		rc.removeConstraint(self.maintainHeightConstraint)
-		self.constraintsAdded = false
-	    }
+	    if (rc.selection === self.bottomCorner && self.constraintsRemoved) 
+		self.addMaintainSizeConstraints()
 	})
-	rc.addConstraint(Sketchpad.arith.SumConstraint, {obj: position, prop: 'x'}, {obj: this, prop: 'width'}, {obj: this.bottomCorner, prop: 'x'}, [2, 3])
-	rc.addConstraint(Sketchpad.arith.SumConstraint, {obj: position, prop: 'y'}, {obj: this, prop: 'height'}, {obj: this.bottomCorner, prop: 'y'}, [2, 3])
     }
 }
 
@@ -186,6 +186,24 @@ sketchpad.addClass(Box)
 
 Box.dummy = function(x, y) {
     return new Box(new Point(x, y), 200, 200)
+}
+
+Box.prototype.addMaintainSizeConstraints = function() {
+    this.maintainWidthConstraint = new Sketchpad.arith.ValueConstraint({obj: this, prop: 'width'}, this.width) 
+    this.maintainHeightConstraint = new Sketchpad.arith.ValueConstraint({obj: this, prop: 'height'}, this.height) 
+    rc.addNewConstraint(this.maintainWidthConstraint)
+    rc.addNewConstraint(this.maintainHeightConstraint)
+    this.bottomCornerConstraint1.onlyWriteTo = [3]
+    this.bottomCornerConstraint2.onlyWriteTo = [3]
+    this.constraintsRemoved = false
+}
+
+Box.prototype.removeMaintainSizeConstraints = function() {
+    rc.removeConstraint(self.maintainWidthConstraint)
+    rc.removeConstraint(self.maintainHeightConstraint)
+    this.bottomCornerConstraint1.onlyWriteTo = [2]
+    this.bottomCornerConstraint2.onlyWriteTo = [2]
+    self.constraintsRemoved = true
 }
 
 Box.prototype.grabPoint = function() {
@@ -229,19 +247,22 @@ Box.prototype.center = function() {
     return this.position.midPoint(new Point(this.position.x + this.width, this.position.y + this.height))
 }
 
-function TextBox(position, optText, optFontSize, optWidth, optHeight, optBgColor, optFont, optFontColor, optHasNoBorder) {
+function TextBox(position, optText, optMultiLine, optFontSize, optWidth, optHeight, optBgColor, optFont, optFontColor, optHasNoBorder) {
     this.position = position
     this.text = optText || ''
+    this.multiLine = optMultiLine
     this.bgColor = optBgColor// || 'white'
     this.fontSize = optFontSize || '12'
     this.width = optWidth || ((1+this.text.length) * this.fontSize * .5)
     this.height = optHeight || (this.fontSize * 3)
     this.font = optFont || 'Georgia'
     this.fontColor = optFontColor || 'black'
-    this.box = new Box(position, this.width, this.height, false, optBgColor, optBgColor, optHasNoBorder)
-    this.lines = []
-    if (optText)
-	this.lines.push(optText)
+    this.box = new Box(position, this.width, this.height, false, false, optBgColor, optBgColor, optHasNoBorder)
+    if (this.multiLine) {
+	this.lines = []
+	if (optText)
+	    this.lines.push(optText)
+    } 
 }
 
 TextBox.prototype.propertyTypes = {position: 'Point', text: 'String'}
@@ -252,13 +273,17 @@ TextBox.dummy = function(x, y) {
     return new TextBox(new Point(x, y))
 }
 
+TextBox.prototype.solutionJoins = function() { 
+    return {text: sketchpad.lastOneWinsJoinSolutions}
+}
+
 TextBox.prototype.draw = function(canvas, origin) {
     var ctxt = canvas.ctxt
     var x = this.position.x + origin.x, y = this.position.y + origin.y
     this.box.draw(canvas, origin)
     ctxt.font = this.fontSize + 'px ' + this.font
-    ctxt.fillStyle = this.fontColor
-    var lines = this.lines
+    ctxt.fillStyle = this.fontColor    
+    var lines = this.multiLine ? this.lines : [this.text]
     var margin = this.fontSize / 3
     for (var i = 0; i < lines.length; i++)
 	ctxt.fillText(lines[i], x +  margin, y + margin + i * this.fontSize + 20)
@@ -279,7 +304,10 @@ TextBox.prototype.grabPoint = function() {
 }
 
 TextBox.prototype.add = function(text) {
-    this.lines.push(text)
+    if (this.multiLine)
+	this.lines.push(text)
+    else
+	this.text += text
 }
 
 
