@@ -98,7 +98,7 @@ Examples.pentominoes.Piece = function Examples__pentominoes__Piece(kind, possibl
     this.color = color
     this.squareLength = squareLength
     this.possibleSquarePositions = possibleSquarePositions
-    this.squares = [1,2,3,4,5].map(function(x) { return new Box(new Point(0, 0),  this.squareLength, this.squareLength, false, 'gray', color) }.bind(this))
+    this.squares = [1,2,3,4,5].map(function(x) { return new Box(new Point(0, 0),  this.squareLength, this.squareLength, false, false, 'gray', color) }.bind(this))
 }
 
 sketchpad.addClass(Examples.pentominoes.Piece)
@@ -329,7 +329,7 @@ examples['pentominoes'] = function() {
 					}, "Once solved place pieces in solved positions")					
 				    }
 				    scratch.solveMode = !scratch.solveMode
-				    scratch.modeLabel.lines[0] = '"' + (scratch.solveMode ? 'on' : 'off') + '"'
+				    scratch.modeLabel.text = '"' + (scratch.solveMode ? 'on' : 'off') + '"'
 				    rc.redraw()
 				}
 			    },
@@ -380,12 +380,12 @@ examples['pentominoes'] = function() {
     scratch.drawnSolution = false
     scratch.solveMode = false
     for (o in orients) {
-	var piece = rc.add(new Examples.pentominoes.Piece(o, orients[o], 0, 0, colors[o], rc.getRandomPoint(200, 150, 400, 400), squareLength))
+	var piece = rc.add(new Examples.pentominoes.Piece(o, orients[o], 0, 0, colors[o], rc.getRandomPoint(200, 150, 400, 400), squareLength), undefined, true)
 	pieces[o] = piece
 	rc.addConstraint(Examples.pentominoes.PiecePlacementConstraint, piece, board)
     }
-    rc.add(new TextBox(new Point(350, 50), "Select piece by clicking on its shape. Press 'space' to rotate & 'shift' to flip.", 20, 670, 40, '#81f781'))
-    rc.add(new TextBox(new Point(420, 100), "Press 'enter' to toggle solve mode (wait a while...):", 20, 450, 40, '#81f781'))
-    scratch.modeLabel = rc.add(new TextBox(new Point(880, 100), ('"off"'), 20, 50, 40, '#f6ceec'))
+    rc.add(new TextBox(new Point(350, 50), "Select piece by clicking on its shape. Press 'space' to rotate & 'shift' to flip.", false, 20, 670, 40, '#81f781'))
+    rc.add(new TextBox(new Point(420, 100), "Press 'enter' to toggle solve mode (wait a while...):", false, 20, 450, 40, '#81f781'))
+    scratch.modeLabel = rc.add(new TextBox(new Point(880, 100), ('"off"'), false, 20, 50, 40, '#f6ceec'))
     scratch.pentominoesConstraint = new Examples.pentominoes.PentominoesConstraint(board)
 }

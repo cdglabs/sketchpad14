@@ -46,7 +46,7 @@ examples['bounce'] = function() {
 
 // --- Data ----------------------------------------------------------------
 
-    rc.add(new TextBox(new Point(600, 50), "-- ( hold 'space' to accelerate up ) --", 20))
+    rc.add(new TextBox(new Point(600, 50), "-- ( hold 'space' to accelerate up ) --", false, 20))
     var rocket = rc.add(new Sketchpad.simulation.FreeBody(new Point(800, 100, 'brown')))
     rocket.velocity = new Vector(-1, -5)
     var jetAcceleration = new Vector(0,-2.0)

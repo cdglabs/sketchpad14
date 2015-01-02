@@ -306,7 +306,7 @@ SketchpadCanvas.prototype.computeAllSelectableThings = function() {
 }
 
 SketchpadCanvas.prototype.findThingPointedTo = function(e) {
-    var thing, point, pointIdx, count = 0, indexWanted = this.selectionChoiceIdx
+    var thing, point, pointIdx, grabOffset, count = 0, indexWanted = this.selectionChoiceIdx
     var all = this.computeAllSelectableThings()
     var found = false
     for (var idx = 0; idx < all.length; idx++) {
@@ -324,6 +324,9 @@ SketchpadCanvas.prototype.findThingPointedTo = function(e) {
 		}
 		if (count == indexWanted) {
 		    found = true
+		    if (!point && thing.grabPoint)
+			point = thing.grabPoint()
+		    grabOffset = point ? {x: x - point.x, y: y - point.y} : {x: 0, y: 0}
 		    break
 		} else
 		    count++
@@ -332,9 +335,11 @@ SketchpadCanvas.prototype.findThingPointedTo = function(e) {
     }
     if (found)
 	this.selectionChoiceIdx++
-    if (!found || this.selectionChoiceIdx == all.length)
+    if (!found || this.selectionChoiceIdx == all.length) {
 	this.selectionChoiceIdx = 0
-    return {thing: thing, point: point, pointIdx: pointIdx}
+	grabOffset = {x: 0, y: 0}
+    }
+    return {thing: thing, point: point, pointIdx: pointIdx, offset: grabOffset}
 }
 
 SketchpadCanvas.prototype.pointerdown = function(e) {
@@ -381,16 +386,18 @@ SketchpadCanvas.prototype.pointerdown = function(e) {
 	this.clearSelections()
 	if (!this.pointMode) { 
 	    if (!this.inDragSelectMode) {
-		this.selectionBox = new Box(new Point(e.clientX, e.clientY), 0, 0, false, undefined, undefined, undefined, 10)
+		this.selectionBox = new Box(new Point(e.clientX, e.clientY), 0, 0, false, false, undefined, undefined, undefined, 10)
 	    }
 	}
     }
     if (setDragSelectMode)
 	this.inDragSelectMode = true
     if (point) {
+	var offset = pointedToThing.offset	
 	var x = e.clientX
 	var y = e.clientY
 	var constraint = this.addConstraint(Sketchpad.geom.CoordinateConstraint, point, x, y)
+	constraint._offset = offset
 	constraint.__priority = 10
 	this.points.splice(pointIdx, 1)
 	this.points.push(point)
@@ -460,9 +467,10 @@ SketchpadCanvas.prototype.updateCoordinateConstraints = function() {
 	if (constraint instanceof Sketchpad.geom.CoordinateConstraint) {
 	    self.forEachFinger(function(finger) {
 		if (finger.point === constraint.p) {
+		    var offset = constraint._offset
 		    var origin = finger.point.__container.__origin
-		    constraint.c.x = finger.x - origin.x
-		    constraint.c.y = finger.y - origin.y
+		    constraint.c.x = finger.x - origin.x - offset.x
+		    constraint.c.y = finger.y - origin.y - offset.y
 		}
 	    })
 	}
@@ -601,7 +609,7 @@ SketchpadCanvas.prototype.markIfNew = function(t) {
     return this.sketchpad.markObjectWithIdIfNew(t)
 }
 
-SketchpadCanvas.prototype.add = function(t, container, toEnd) {
+SketchpadCanvas.prototype.add = function(t, container, addGrabPoint, toEnd) {
     var isTopLevel = container === undefined
     var set = isTopLevel ? this.things : this.nonTopLevelThings
     if (set.indexOf(t) > 0)
@@ -614,7 +622,7 @@ SketchpadCanvas.prototype.add = function(t, container, toEnd) {
     } else {
 	var addFn1 = toEnd ? 'push' : 'unshift' 
 	set[addFn1](t)
-	if (t.grabPoint)
+	if (addGrabPoint && t.grabPoint)
 	    this.addGrabPointFor(t, false, isTopLevel, container, toEnd)
     }
     if (t.onEachTimeStep)
@@ -677,7 +685,7 @@ SketchpadCanvas.prototype.doOneTimeThingsForNewThing = function(c) {
 
 SketchpadCanvas.prototype.defineDrawMethodForThing = function(c) {
     if (!c.draw) {
-	var label = new TextBox(this.getRandomPoint(), c.__toString, undefined, undefined, undefined, '#c0c0c0')
+	var label = new TextBox(this.getRandomPoint(), c.__toString, false, undefined, undefined, undefined, '#c0c0c0')
 	c.__labelBox = label
 	c.grabPoint = label.grabPoint.bind(label)
 	c.containsPoint = label.containsPoint.bind(label)
@@ -901,7 +909,7 @@ SketchpadCanvas.prototype.inspectState = function(thing) {
     if (posY > 500)
 	posY -= 100
     var pos = new Point(posX, posY, 'gray')
-    this.addTemp(new SketchpadTile('View ' + thing.__toString, props, undefined, undefined, thing, true, undefined, pos, new Box(new Point(0, 0), 350, 250, false, 'gray', '#ffffcc')))
+    this.addTemp(new SketchpadTile('View ' + thing.__toString, props, undefined, undefined, thing, true, undefined, pos, new Box(new Point(0, 0), 350, 250, false, false, 'gray', '#ffffcc')))
     rc.redraw()
 }
 
@@ -1033,20 +1041,20 @@ function SketchpadTile(name, inputs, ownRun, buttonsInfo, inspectorOfObj, fixedI
     this.__origin = this.position
     this.parts = []
     var o = new Point(0, 0)
-    this.box = optBox || new Box(o, 350, 50, false, 'gray', '#ccccff')
+    this.box = optBox || new Box(o, 350, 50, false, false, 'gray', '#ccccff')
     this.box.___container = this
     this.parts.push(this.box)
     var box = this.box
     var pos = box.position, width = box.width, height = 50, left = pos.x, top = pos.y
     this.isOwnerOf = [this.position]    
     rc.addTemp(this.position)
-    this.tileLabel = new TextBox(new Point(15, top + 5), this.name, 16, undefined, undefined, undefined, undefined, 'gray', true)    
+    this.tileLabel = new TextBox(new Point(15, top + 5), this.name, false, 16, undefined, undefined, undefined, undefined, 'gray', true)    
     this.tileLabel.___container = this
     this.parts.push(this.tileLabel)
     var y = top + 40
-    this.inputsLabel = new TextBox(new Point(10, y), 'Inputs', 14, undefined, undefined, undefined, undefined, 'gray', true)
+    this.inputsLabel = new TextBox(new Point(10, y), 'Inputs', false, 14, undefined, undefined, undefined, undefined, 'gray', true)
     this.inputsLabel.___container = this
-    this.tilesLabel = new TextBox(new Point((width / 2) + 10, y), 'Tiles', 14, undefined, undefined, undefined, undefined, 'gray', true)
+    this.tilesLabel = new TextBox(new Point((width / 2) + 10, y), 'Tiles', false, 14, undefined, undefined, undefined, undefined, 'gray', true)
     this.tilesLabel.___container = this
     var inputElements = {}
     this.inputLabels = []
@@ -1096,7 +1104,7 @@ function SketchpadTile(name, inputs, ownRun, buttonsInfo, inspectorOfObj, fixedI
 	self.parts.push(input)
 	inputElements[inputName] = input
 	var labelPoint = new Point(15, y)
-	var label = new TextBox(labelPoint, inputLabel + ':', 14, undefined, undefined, undefined, undefined, 'gray', true)
+	var label = new TextBox(labelPoint, inputLabel + ':', false, 14, undefined, undefined, undefined, undefined, 'gray', true)
 	label.___container = self
 	self.parts.push(label)
 	self.inputLabels.push(label)
@@ -1162,7 +1170,7 @@ SketchpadTile.prototype.addChildTileInput = function(input) {
     var tileCount = this.childTileInputs.length
     var labelName = 'tile' + tileCount
     var h = 50 + (tileCount * 35)
-    var label = new TextBox(new Point(this.box.width / 2 + 40, h + 5), labelName + ':', 14)
+    var label = new TextBox(new Point(this.box.width / 2 + 40, h + 5), labelName + ':', false, 14)
     label.___container = this
     this.parts.push(label)
     h += 30

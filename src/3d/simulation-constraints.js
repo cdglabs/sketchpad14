@@ -271,7 +271,6 @@ function install3DSimulationConstraints(Sketchpad) {
 	this.moon = moon
 	this.position = moon.position
 	this._lastPosition = undefined
-	this._lastSunPosition = undefined
 	this.distanceDownscale = (distanceDownscale || (1e9 / 2))
     }
 
@@ -282,10 +281,7 @@ function install3DSimulationConstraints(Sketchpad) {
     Sketchpad.simulation3d.OrbitalMotionConstraint.prototype.propertyTypes = {sun: 'FreeBody', moon: 'FreeBody'}
 
     Sketchpad.simulation3d.OrbitalMotionConstraint.prototype.onEachTimeStep = function(pseudoTime, prevPseudoTime) {	
-	//if (this._lastSunPosition)
-	    //this.position.set(plus(this.position, minus(this.sun.position, this._lastSunPosition)))
 	this._lastPosition = scaledBy(this.position, 1)
-	//this._lastSunPosition = scaledBy(this.sun.position, 1)
     }
 
     Sketchpad.simulation3d.OrbitalMotionConstraint.prototype.currentEscapeVelocity = function() {

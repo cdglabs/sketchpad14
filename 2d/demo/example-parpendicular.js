@@ -59,7 +59,7 @@ examples['parpendicular'] = function() {
 
 // --- Data ----------------------------------------------------------------
 
-    rc.add(new TextBox(new Point(550, 50), "-- ( press 'space' to manually flip ) --", 20))
+    rc.add(new TextBox(new Point(550, 50), "-- ( press 'space' to manually flip ) --", false, 20))
     var p1 = rc.add(new Point(500, 200))
     var p2 = rc.add(new Point(1000, 700))
     var l1 = rc.add(new Line(p1, p2))

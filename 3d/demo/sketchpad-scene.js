@@ -633,7 +633,7 @@ SketchpadScene.prototype.doOneTimeThingsForNewThing = function(c) {
 
 SketchpadScene.prototype.defineDrawMethodForThing = function(c) {
     if (!c.draw) {
-	var label = new TextBox(this.getRandomPoint(), c.__toString, undefined, undefined, undefined, '#c0c0c0')
+	var label = new TextBox(this.getRandomPoint(), c.__toString, false, undefined, undefined, undefined, '#c0c0c0')
 	c.__labelBox = label
 	c.grabPoint = label.grabPoint.bind(label)
 	c.containsPoint = label.containsPoint.bind(label)
@@ -876,7 +876,7 @@ SketchpadScene.prototype.inspectState = function(thing) {
     if (posY > 500)
 	posY -= 100
     var pos = new Point(posX, posY, 'gray')
-    this.addTemp(new SketchpadTile('View ' + thing.__toString, props, undefined, undefined, thing, true, undefined, pos, new Box(new Point(0, 0), 350, 250, false, 'gray', '#ffffcc')))
+    this.addTemp(new SketchpadTile('View ' + thing.__toString, props, undefined, undefined, thing, true, undefined, pos, new Box(new Point(0, 0), 350, 250, false, false, 'gray', '#ffffcc')))
     rc.redraw()
 }
 
@@ -1008,20 +1008,20 @@ function SketchpadTile(name, inputs, ownRun, buttonsInfo, inspectorOfObj, fixedI
     this.__origin = this.position
     this.parts = []
     var o = new Point(0, 0)
-    this.box = optBox || new Box(o, 350, 50, false, 'gray', '#ccccff')
+    this.box = optBox || new Box(o, 350, 50, false, false, 'gray', '#ccccff')
     this.box.___container = this
     this.parts.push(this.box)
     var box = this.box
     var pos = box.position, width = box.width, height = 50, left = pos.x, top = pos.y
     this.isOwnerOf = [this.position]    
     rc.addTemp(this.position)
-    this.tileLabel = new TextBox(new Point(15, top + 5), this.name, 16, undefined, undefined, undefined, undefined, 'gray', true)    
+    this.tileLabel = new TextBox(new Point(15, top + 5), this.name, false, 16, undefined, undefined, undefined, undefined, 'gray', true)    
     this.tileLabel.___container = this
     this.parts.push(this.tileLabel)
     var y = top + 40
-    this.inputsLabel = new TextBox(new Point(10, y), 'Inputs', 14, undefined, undefined, undefined, undefined, 'gray', true)
+    this.inputsLabel = new TextBox(new Point(10, y), 'Inputs', false, 14, undefined, undefined, undefined, undefined, 'gray', true)
     this.inputsLabel.___container = this
-    this.tilesLabel = new TextBox(new Point((width / 2) + 10, y), 'Tiles', 14, undefined, undefined, undefined, undefined, 'gray', true)
+    this.tilesLabel = new TextBox(new Point((width / 2) + 10, y), 'Tiles', false, 14, undefined, undefined, undefined, undefined, 'gray', true)
     this.tilesLabel.___container = this
     var inputElements = {}
     this.inputLabels = []
@@ -1071,7 +1071,7 @@ function SketchpadTile(name, inputs, ownRun, buttonsInfo, inspectorOfObj, fixedI
 	self.parts.push(input)
 	inputElements[inputName] = input
 	var labelPoint = new Point(15, y)
-	var label = new TextBox(labelPoint, inputLabel + ':', 14, undefined, undefined, undefined, undefined, 'gray', true)
+	var label = new TextBox(labelPoint, inputLabel + ':', false, 14, undefined, undefined, undefined, undefined, 'gray', true)
 	label.___container = self
 	self.parts.push(label)
 	self.inputLabels.push(label)
@@ -1137,7 +1137,7 @@ SketchpadTile.prototype.addChildTileInput = function(input) {
     var tileCount = this.childTileInputs.length
     var labelName = 'tile' + tileCount
     var h = 50 + (tileCount * 35)
-    var label = new TextBox(new Point(this.box.width / 2 + 40, h + 5), labelName + ':', 14)
+    var label = new TextBox(new Point(this.box.width / 2 + 40, h + 5), labelName + ':', false, 14)
     label.___container = this
     this.parts.push(label)
     h += 30
