@@ -53,7 +53,7 @@ function SketchpadCanvas(sketchpad, canvas) {
     }
 
     this.fingers = {}
-
+    this.dragFingersCount = 0
     this.pointMode = false
     this.clickSelectMode = false
     this.inDragSelectMode = false
@@ -306,16 +306,18 @@ SketchpadCanvas.prototype.computeAllSelectableThings = function() {
 }
 
 SketchpadCanvas.prototype.findThingPointedTo = function(e) {
-    var thing, point, pointIdx, grabOffset, count = 0, indexWanted = this.selectionChoiceIdx
+    var thing, point, pointIdx, grabOffset, count = 0
     var all = this.computeAllSelectableThings()
-    var found = false
+    var indexWanted = this.selectionChoiceIdx
+    var found = false, foundRightIndex = false
     for (var idx = 0; idx < all.length; idx++) {
 	var t = all[idx]
-	if (t.containsPoint) {
+	if (t.containsPoint && !t._selectable) {
 	    var origin = t.__container.__origin
 	    var x = e.clientX - origin.x
 	    var y = e.clientY - origin.y
-	    if (t.containsPoint(x, y)) {		
+	    if (t.containsPoint(x, y)) {
+		found = true
 		thing = t
 		if (t instanceof Point) { 
 		    var p = t
@@ -323,22 +325,27 @@ SketchpadCanvas.prototype.findThingPointedTo = function(e) {
 		    pointIdx = idx
 		}
 		if (count == indexWanted) {
-		    found = true
-		    if (!point && thing.grabPoint)
-			point = thing.grabPoint()
-		    grabOffset = point ? {x: x - point.x, y: y - point.y} : {x: 0, y: 0}
+		    foundRightIndex = true
 		    break
 		} else
 		    count++
 	    }
 	}
     }
-    if (found)
-	this.selectionChoiceIdx++
-    if (!found || this.selectionChoiceIdx == all.length) {
+    if (found) {
+	if (foundRightIndex)
+	    this.selectionChoiceIdx++
+	else {
+	    this.selectionChoiceIdx = 0
+	    return this.findThingPointedTo(e)
+	}
+	if (thing) {
+	    if (!point && thing.grabPoint)
+		point = thing.grabPoint()
+	    grabOffset = point ? {x: x - point.x, y: y - point.y} : {x: 0, y: 0}    
+	}
+    } else
 	this.selectionChoiceIdx = 0
-	grabOffset = {x: 0, y: 0}
-    }
     return {thing: thing, point: point, pointIdx: pointIdx, offset: grabOffset}
 }
 
@@ -393,16 +400,19 @@ SketchpadCanvas.prototype.pointerdown = function(e) {
     if (setDragSelectMode)
 	this.inDragSelectMode = true
     if (point) {
-	var offset = pointedToThing.offset	
-	var x = e.clientX
-	var y = e.clientY
-	var constraint = this.addConstraint(Sketchpad.geom.CoordinateConstraint, point, x, y)
-	constraint._offset = offset
-	constraint.__priority = 10
-	this.points.splice(pointIdx, 1)
-	this.points.push(point)
-	this.fingers[e.pointerId] =
-	    { x: x, y: y, point: point, thing: thing, constraint: constraint }
+	if (!thing._unmovable) {
+	    var offset = pointedToThing.offset	
+	    var x = e.clientX
+	    var y = e.clientY
+	    var constraint = this.addConstraint(Sketchpad.geom.CoordinateConstraint, point, x, y)
+	    constraint._offset = offset
+	    constraint.__priority = 10
+	    this.points.splice(pointIdx, 1)
+	    this.points.push(point)
+	    this.fingers[e.pointerId] =
+		{ x: x, y: y, point: point, thing: thing, constraint: constraint }
+	    this.dragFingersCount++
+	}
 	if (this.pointMode) {
 	    var oldLastPoint = this.lastPoint
 	    this.lastPoint = point
@@ -439,6 +449,7 @@ SketchpadCanvas.prototype.pointerup = function(e) {
 	finger.point._isSelected = false	
 	this.removeConstraint(finger.constraint)
 	delete this.fingers[e.pointerId]
+	this.dragFingersCount--
     }
 }
 
@@ -480,7 +491,8 @@ SketchpadCanvas.prototype.updateCoordinateConstraints = function() {
 SketchpadCanvas.prototype.step = function() {
     if (!this.paused) {
 	var totalError = 0, didSomething = false
-	this.updateCoordinateConstraints()
+	if (this.dragFingersCount > 0)
+	    this.updateCoordinateConstraints()
 	if (this.showEachIteration) {
 	    var t0 = this.sketchpad.currentTime()
 	    this.sketchpad.doTasksOnEachTimeStep(t0)
@@ -609,21 +621,23 @@ SketchpadCanvas.prototype.markIfNew = function(t) {
     return this.sketchpad.markObjectWithIdIfNew(t)
 }
 
-SketchpadCanvas.prototype.add = function(t, container, addGrabPoint, toEnd) {
+SketchpadCanvas.prototype.add = function(t, container, addGrabPoint, params) {
     var isTopLevel = container === undefined
     var set = isTopLevel ? this.things : this.nonTopLevelThings
     if (set.indexOf(t) > 0)
-	return t
+	return t    
     this.markIfNew(t)
+    if (params)
+	for (var o in params)
+	    t['_' + o] = params[o]
     if (t instanceof Point) {
 	if (isTopLevel)
 	    this.points.push(t)
 	set.push(t)
     } else {
-	var addFn1 = toEnd ? 'push' : 'unshift' 
-	set[addFn1](t)
+	set.unshift(t)
 	if (addGrabPoint && t.grabPoint)
-	    this.addGrabPointFor(t, false, isTopLevel, container, toEnd)
+	    this.addGrabPointFor(t, false, isTopLevel, container)
     }
     if (t.onEachTimeStep)
 	this.sketchpad.thingsWithOnEachTimeStepFn.push(t)
@@ -663,7 +677,7 @@ SketchpadCanvas.prototype.addNewConstraint = function(c) {
     return c
 }
 
-SketchpadCanvas.prototype.addGrabPointFor = function(thing, isConstraint, isTopLevel, container, toEnd) {
+SketchpadCanvas.prototype.addGrabPointFor = function(thing, isConstraint, isTopLevel, container) {
     var grabP = thing.grabPoint()
     if (grabP && this.points.indexOf(grabP) < 0) {
 	grabP.__owner = thing
@@ -673,9 +687,8 @@ SketchpadCanvas.prototype.addGrabPointFor = function(thing, isConstraint, isTopL
 	    this.points.push(grabP)
 	else
 	    grabP.___container = container
-        var addFn2 = toEnd ? 'unshift' : 'push'
 	var gPointSet = isConstraint ? this.constraintGrabPoints : this.thingGrabPoints
-	gPointSet[addFn2](grabP)
+	gPointSet.push(grabP)
     }
 }
 
@@ -847,6 +860,7 @@ SketchpadCanvas.prototype.clear = function() {
     this.codeEditMode = false
     this.grabPointOpacity = 0.5
     this.fingers = {} // because fingers can refer to points
+    this.dragFingersCount = 0
     this.disableDefaultKeyEvents = false
     this.clearTemps()
 }

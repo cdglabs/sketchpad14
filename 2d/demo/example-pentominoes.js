@@ -375,7 +375,7 @@ examples['pentominoes'] = function() {
 	L: 'yellow',
     }
     var pieces = {}
-    var board = rc.add(new Examples.pentominoes.Board(new Point(700, 300), 3, 5, squareLength, pieces))
+    var board = rc.add(new Examples.pentominoes.Board(new Point(700, 300), 3, 5, squareLength, pieces), undefined, undefined, {selectable: true, unmovable: true})
     scratch.board = board
     scratch.drawnSolution = false
     scratch.solveMode = false
