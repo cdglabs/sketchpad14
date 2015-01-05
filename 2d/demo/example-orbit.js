@@ -12,17 +12,19 @@ examples['orbit'] = function() {
     var center = {x: 700, y: 400}
     
     // --- Data ----------------------------------------------------------------
-
     var sun = rc.add(new Sketchpad.simulation.FreeBody(new Point(center.x, center.y, 'orange', radiuses.sun / sunRadiusDownscale), radiuses.sun, masses.sun))
     var earth = rc.add(new Sketchpad.simulation.FreeBody(new Point(center.x - (distances.sunEarth /  distanceDownscale), center.y, 'blue', radiuses.earth / radiusDownscale), radiuses.earth, masses.earth))
     var venus = rc.add(new Sketchpad.simulation.FreeBody(new Point(center.x - (distances.sunVenus /  distanceDownscale), center.y, 'green', radiuses.venus / radiusDownscale), radiuses.venus, masses.venus))
     var moon = rc.add(new Sketchpad.simulation.FreeBody(new Point(earth.position.x - (distances.earthMoon / (distanceDownscale * distancesCheat.earthMoon)), earth.position.y, 'purple', radiuses.moon / radiusDownscale), radiuses.moon, masses.moon))
-
+    var bodies = [sun, earth, moon, venus]
+    
     // --- Constraints ---------------------------------------------------------
 
-    rc.addConstraint(Sketchpad.simulation.OrbitalMotionConstraint, sun, earth, distanceDownscale / distanceDownscaleCheat)
-    rc.addConstraint(Sketchpad.simulation.OrbitalMotionConstraint, earth, moon, distanceDownscale / distanceDownscaleCheat)
-    rc.addConstraint(Sketchpad.simulation.OrbitalMotionConstraint, sun, moon, distanceDownscale / distanceDownscaleCheat)
-    rc.addConstraint(Sketchpad.simulation.OrbitalMotionConstraint, sun, venus, distanceDownscale / distanceDownscaleCheat)
-    rc.addConstraint(Sketchpad.simulation.TimerConstraint, rc.add(new Timer(.25)))
+    bodies.forEach(function (aSun) {
+	bodies.forEach(function (aMoon) {
+	    if (aSun !== aMoon)
+		rc.addConstraint(Sketchpad.simulation.OrbitalMotionConstraint, aSun, aMoon, distanceDownscale / distanceDownscaleCheat)
+	})
+    })
+    rc.addConstraint(Sketchpad.simulation.TimerConstraint, rc.add(new Timer(.5)))
 }
