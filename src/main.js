@@ -187,17 +187,6 @@ Sketchpad.prototype.collectPerConstraintSolutions = function(timeMillis, inFixPo
 	    || this.solveEvenWithoutError || (this.solveEvenWithoutErrorOnPriorityDifferences && this.constraintIsCompetingWithALowerPriorityOne(c))
 	   ) {
 	    var solutions = c.solve(pseudoTime, prevPseudoTime)
-	    /*
-	    if (solutions instanceof Array) {
-		if (inFixPointProcess) {
-		    var count = solutions.length
-		    var choice =  Math.floor(Math.random() * count)
-		    solutions = solutions[choice]
-		}
-	    } else if (!inFixPointProcess) {
-		solutions = [solutions]
-	    }
-	    */
 	    if (!(inFixPointProcess || searchable))
 		solutions = [solutions]
 	    localDidSomething = true
@@ -421,36 +410,29 @@ Sketchpad.prototype.solveForUpToMillis = function(tMillis) {
 
 Sketchpad.prototype.iterateForUpToMillis = function(tMillis) {
     var count = 0, totalError = 0, epsilon = this.epsilon
-    //var didSomething
     var currError, lastError
     var t0, t
     t0 = this.currentTime()
     do {
 	lastError = currError
-	/*didSomething*/ currError = this.doOneIteration(t0)
+	currError = this.doOneIteration(t0)
 	t =  this.currentTime() - t0
-	//count += didSomething ? 1 : 0
 	if (currError > 0) {
 	    count++
 	    totalError += currError
 	}
-	//log(currError, lastError)
     } while (
 	currError > epsilon
 	    && !(currError >= lastError)
-	//currError > 0//didSomething 
 	    && t < tMillis)
-    //log({error: totalError, count: count})
     return {error: totalError, count: count}
 }
 
 // various ways we can join solutions from all solvers
 // damped average join fn:
 Sketchpad.prototype.sumJoinSolutions = function(curr, solutions) {
-    //var res = curr
     var rho = this.rho
     var sum = 0
-    //solutions.forEach(function(v) { res += (v - curr) * rho })
     solutions.forEach(function(v) { sum += v })
     var res = curr + (rho * ((sum / solutions.length) - curr))
     return res
