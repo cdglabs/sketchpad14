@@ -7,11 +7,12 @@ log2 = function() { var args = []; for (var i = 0; i < arguments.length; i++) ar
 
 function SketchpadCanvas(sketchpad, canvas) {
     this.sketchpad = sketchpad
-    this.optionsRequiringSIILableUpdate = ['renderMode', 'millisecondsPerFrame',  'onlyRenderOnConvergence', 'showEachIteration']
+    this.optionsRequiringSIILableUpdate = ['renderMode', 'millisecondsPerFrame',  'onlyRenderOnConvergence', 'onlyRenderOnNoError', 'showEachIteration']
     this.renderMode = 0
     this.millisecondsPerFrame = 1000 / 65
     this.onlyRenderOnConvergence = false
     this.renderEvenOnConvergence = false
+    this.onlyRenderOnNoError = false
     this.showConstraints = false
     this.showEachIteration = false
     this.showGrabPoints = true
@@ -97,7 +98,7 @@ SketchpadCanvas.prototype.initCanvas = function(canvas) {
 
     var sii = document.getElementById('sii')
 
-    sii.onclick = function() { this.setRenderMode((this.renderMode + 1) % 4) }.bind(this)
+    sii.onclick = function() { this.setRenderMode((this.renderMode + 1) % 5) }.bind(this)
 }
  
 SketchpadCanvas.prototype.setRenderMode = function(mode) {
@@ -106,18 +107,27 @@ SketchpadCanvas.prototype.setRenderMode = function(mode) {
 	this.showEachIteration = false
 	this.onlyRenderOnConvergence = false
 	this.renderEvenOnConvergence = false
+	this.onlyRenderOnNoError = false
     } else if (this.renderMode == 1) {
 	this.showEachIteration = false
 	this.onlyRenderOnConvergence = false
 	this.renderEvenOnConvergence = true
+	this.onlyRenderOnNoError = false
     } else if (this.renderMode == 2) {
 	this.showEachIteration = true	
 	this.onlyRenderOnConvergence = false
 	this.renderEvenOnConvergence = false
+	this.onlyRenderOnNoError = false
+    } else if (this.renderMode == 3) {
+	this.showEachIteration = false
+	this.onlyRenderOnConvergence = true
+	this.renderEvenOnConvergence = false
+	this.onlyRenderOnNoError = false
     } else {
 	this.showEachIteration = false
 	this.onlyRenderOnConvergence = true
 	this.renderEvenOnConvergence = false
+	this.onlyRenderOnNoError = true
     }
     this.updateSIILabel()
 }
@@ -510,15 +520,14 @@ SketchpadCanvas.prototype.step = function() {
 	    this.iterationsPerFrame = iterations.count
 	    totalError = iterations.error
 	}
-	if (//this.iterationsPerFrame > 0 &&
-	    this.renderEvenOnConvergence || 
+	if (this.renderEvenOnConvergence || 
 	    !(this.lastIterationError == totalError)) {
 	    didSomething = true
 	    this.alreadyRenderedConvergence = false
 	}
 	var redraw = false
 	if (this.onlyRenderOnConvergence) {
-	    if (!didSomething &&  !this.alreadyRenderedConvergence) {
+	    if (!didSomething && (!this.onlyRenderOnNoError || totalError <= this.sketchpad.epsilon) && !this.alreadyRenderedConvergence) {
 		this.alreadyRenderedConvergence = true
 		redraw = true
 	    }
@@ -839,8 +848,9 @@ SketchpadCanvas.prototype.clear = function() {
     if (this.codeEditMode) this.toggleCodeEditMode()
     this.sketchpad.clear()
     this.millisecondsPerFrame = 1000 / 65
-    this.onlyRenderOnConvergence = false
-    this.renderEvenOnConvergence = false
+    this.onlyRenderOnConvergence = false   
+    this.renderEvenOnConvergence = false    
+    this.onlyRenderOnNoError = false
     this.threeD = false
     this.points = []
     this.things = []
@@ -1292,7 +1302,7 @@ SketchpadCanvas.prototype.updateSIILabel = function() {
     var sii = document.getElementById('sii')
     sii.innerHTML = this.paused ? 'paused' : 
 	(this.showEachIteration ? ' rendering each iteration'
-	 : (this.onlyRenderOnConvergence ? ' rendering only on convergence' :
+	 : (this.onlyRenderOnConvergence ? (' rendering only on convergence' + (this.onlyRenderOnNoError ? ' and no error' : '')) :	    
 	    ' rendering every ' + Math.floor(this.millisecondsPerFrame) + ' ms.' + (this.renderEvenOnConvergence ? '' : ' until convergence')))
 }
 

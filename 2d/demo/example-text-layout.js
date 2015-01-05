@@ -466,9 +466,9 @@ examples['text layout'] = function() {
 
     rc.showGrabPoints = true
     rc.grabPointOpacity = 0
-    sketchpad.rho = 1//.25
+    sketchpad.rho = 1
     sketchpad.solveEvenWithoutErrorOnPriorityDifferences = true
-    rc.setOption('renderMode', 3)
+    rc.setOption('renderMode', 4)
     sketchpad.scratch.wordWrapModes = ['greedy', 'optimal', 'justify']
     sketchpad.scratch.wordWrapMode = 0
 
@@ -498,7 +498,7 @@ examples['text layout'] = function() {
     var toggleWordWrapMode = function() {	
 	sketchpad.scratch.wordWrapMode = (sketchpad.scratch.wordWrapMode + 1) % 3
 	var mode = sketchpad.scratch.wordWrapModes[sketchpad.scratch.wordWrapMode]
-	modeLabel.lines[0] = '"' + mode + '"'
+	modeLabel.text = '"' + mode + '"'
 	if (mode === 'optimal' || mode === 'justify') {
 	    for (var i = 0; i < textArea.chars.length; i++) {	    
 		var c = textArea.chars[i]
