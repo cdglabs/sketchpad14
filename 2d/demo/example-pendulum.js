@@ -44,7 +44,7 @@ examples['pendulum'] = function() {
 	var mass = masses[i]
 	if (mass > 0) {
 	    var body = bodies[i]
-	    rc.addConstraint(Sketchpad.simulation.VelocityConstraint, body)//position, velocity)
+	    rc.addConstraint(Sketchpad.simulation.VelocityConstraint, body)
 	    rc.addConstraint(Sketchpad.simulation.AccelerationConstraint, body, new Vector(0, 0.8)) //gravity
 	    rc.addConstraint(Sketchpad.simulation.AccelerationConstraint, body, body.acceleration) //spring force
 	}

@@ -50,7 +50,8 @@ function SketchpadCanvas(sketchpad, canvas) {
 	"Opt/Alt + P (or Z) + click + release: Point": {},
 	"Opt/Alt + P (or Z) + click + hold + repeat: Line": {},
 	"Opt/Alt + C: Show constraints": {},
-	"Opt/Alt + G: Show grab points": {}
+	"Opt/Alt + G: Show grab points": {},
+	"Opt/Alt + T: Show trace": {}
     }
 
     this.fingers = {}
@@ -172,6 +173,7 @@ SketchpadCanvas.prototype.keydown = function(e) {
     case 'D': this.removeAll(this.selection ? [this.selection] : this.secondarySelections); break
     case 'C': this.showConstraints = !this.showConstraints; break
     case 'G': this.showGrabPoints = !this.showGrabPoints; break
+    case 'T': this.renderStateTrace = !this.renderStateTrace; break
     case 'I': this.inspectState(this.selection); break
     case 'X': this.toggleProgramExplainMode(); break
     case 'E': this.toggleCodeEditMode(); break
@@ -440,7 +442,7 @@ SketchpadCanvas.prototype.pointerdown = function(e) {
     this.redraw()
 }
 
-SketchpadCanvas.prototype.pointermove = function(e) {
+SketchpadCanvas.prototype.pointermove = function(e) {    
     var finger = this.fingers[e.pointerId]
     if (finger) {
 	finger.x = e.clientX
@@ -520,8 +522,7 @@ SketchpadCanvas.prototype.step = function() {
 	    this.iterationsPerFrame = iterations.count
 	    totalError = iterations.error
 	}
-	if (this.renderEvenOnConvergence || 
-	    !(this.lastIterationError == totalError)) {
+	if (this.renderEvenOnConvergence || this.lastIterationError != totalError) {
 	    didSomething = true
 	    this.alreadyRenderedConvergence = false
 	}
@@ -562,8 +563,8 @@ SketchpadCanvas.prototype.resume = function() {
 
 SketchpadCanvas.prototype.redraw = function() {
     var self = this
-    this.ctxt.fillStyle = 'white'
-    this.ctxt.fillRect(0, 0, this.canvas.width, this.canvas.height)
+    if (!this.renderStateTrace)
+	this.clearCanvas()
     this.ctxt.save()
     this.things.forEach(function(t) { draw(t, this) }.bind(this))    
     this.temps.forEach(function(t) { draw(t, this) }.bind(this))    
@@ -630,7 +631,7 @@ SketchpadCanvas.prototype.markIfNew = function(t) {
     return this.sketchpad.markObjectWithIdIfNew(t)
 }
 
-SketchpadCanvas.prototype.add = function(t, container, addGrabPoint, params) {
+SketchpadCanvas.prototype.add = function(t, container, addGrabPoint, toEnd, params) {
     var isTopLevel = container === undefined
     var set = isTopLevel ? this.things : this.nonTopLevelThings
     if (set.indexOf(t) > 0)
@@ -644,7 +645,8 @@ SketchpadCanvas.prototype.add = function(t, container, addGrabPoint, params) {
 	    this.points.push(t)
 	set.push(t)
     } else {
-	set.unshift(t)
+	var addFn = toEnd ? 'push' : 'unshift'
+	set[addFn](t)
 	if (addGrabPoint && t.grabPoint)
 	    this.addGrabPointFor(t, false, isTopLevel, container)
     }
@@ -844,9 +846,15 @@ SketchpadCanvas.prototype.removeConstraint = function(unwanted) {
     this.sketchpad.removeConstraint(unwanted)
 }
 
+SketchpadCanvas.prototype.clearCanvas = function() {
+    this.ctxt.fillStyle = 'white'
+    this.ctxt.fillRect(0, 0, this.canvas.width, this.canvas.height)
+}
+
 SketchpadCanvas.prototype.clear = function() {
     if (this.codeEditMode) this.toggleCodeEditMode()
     this.sketchpad.clear()
+    this.clearCanvas()
     this.millisecondsPerFrame = 1000 / 65
     this.onlyRenderOnConvergence = false   
     this.renderEvenOnConvergence = false    
@@ -863,7 +871,8 @@ SketchpadCanvas.prototype.clear = function() {
     this.secondarySelections = []
     this.selectionChoiceIdx = 0
     this.showGrabPoints = true
-    this.selectionPoints = []
+    this.renderStateTrace = false
+    this.selectionPoints = []    
     this.clickSelectMode = false
     this.inDragSelectMode = false
     this.startDragSelectMode = false
