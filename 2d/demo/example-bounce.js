@@ -36,6 +36,8 @@ Sketchpad.simulation.JetEngineConstraint.prototype.solve = function(pseudoTime, 
 
 examples['bounce'] = function() {
 
+    rc.setOption('renderStateTrace', true)
+
 // --- Time / Event Handling ---------------------------------------------
 
     rc.sketchpad.registerEvent('keydown', function(e) { if (32 == e.which)  scratch.spaceStillDown = true }, "When spacebar is pressed set flag scratch.spaceStillDown to true.") 

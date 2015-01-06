@@ -35,7 +35,7 @@ examples['bridge'] = function() {
     // wind
     var windOrigin = new Point(700, 100)
     var windEnd = rc.add(new Point(650, 100, 'green'))
-    var wind = rc.add(new PointVector(windOrigin, windEnd, 0.1, 'wind'))
+    var wind = rc.add(new PointVector(windOrigin, windEnd, 0.05, 'wind'))
 
     // nodes
     for (var i = 0; i < massCount; i++) {

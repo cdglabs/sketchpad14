@@ -47,7 +47,7 @@ button {
 demo, constraint, class, tile, shortcut, action, bin, iterationsPerFrame, showEachIterationButton {
     display: block;
     margin: 10pt;
-    padding: 4pt 4pt;
+    padding: 1pt 4pt;
     background: #eee;
     border: 1px solid #ddd;
     border-radius: 4pt;

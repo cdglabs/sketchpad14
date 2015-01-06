@@ -161,17 +161,24 @@ function installSimulationConstraints(Sketchpad) {
     }
 
     Sketchpad.simulation.slope = function(p1, p2) {
-	return (p1.y - p2.y) / (p2.x - p1.x)
+	return (p1.y - p2.y) / (p1.x - p2.x)
     }
 
     Sketchpad.simulation.angle = function(p1, p2) {
 	return Math.atan2(p1.y - p2.y, p2.x - p1.x)
     }
 
-    Sketchpad.simulation.slopeVector = function(p1, p2) {
+    Sketchpad.simulation.slopeVectorWrong = function(p1, p2) {
 	var slope = this.slope(p1, p2), atn = Math.atan(slope)
 	var sign = p1.x < p2.x ? -1 : 1
 	return {x: sign * Math.sin(atn), y: sign * Math.cos(atn)}
+    }
+    
+    Sketchpad.simulation.slopeVector = function(p1, p2) {
+	var slope = this.slope(p1, p2), atn = Math.atan(slope)
+	var signX = p1.x < p2.x ? 1 : -1
+	var signY = p1.y < p2.y ? 1 : -1
+	return {x: signX * Math.cos(atn), y: signX * Math.sin(atn)}
     }
 
     // Timer Constraint
@@ -423,7 +430,7 @@ function installSimulationConstraints(Sketchpad) {
 	    var x = angleC * velocityMagnitude * 1
 	    var y = angleS * velocityMagnitude * -1
 	    this.bounceVelocity = scaledBy({x: x, y: y}, 1)
-	    var slopeV = Sketchpad.simulation.slopeVector(surfaceP1, surfaceP2)
+	    var slopeV = Sketchpad.simulation.slopeVectorWrong(surfaceP1, surfaceP2)
 	    var deltaPosX = slopeV.x * velocityMagnitude * dt
 	    var deltaPosY = slopeV.y * -velocityMagnitude * dt
 	    this.bouncePosition = {x: position.x + deltaPosX, y: position.y + deltaPosY}
@@ -492,7 +499,7 @@ function installSimulationConstraints(Sketchpad) {
 	if (Sketchpad.simulation.detectContact(this.halfLength, position, velocity, surfaceP1, surfaceP2)) {
 	    this.contact = true
 	    var dt = pseudoTime - prevPseudoTime
-	    var slopeV = Sketchpad.simulation.slopeVector(surfaceP1, surfaceP2)
+	    var slopeV = Sketchpad.simulation.slopeVectorWrong(surfaceP1, surfaceP2)
 	    this.hitVelocity = scaledBy({x: 0, y: -Sketchpad.simulation.g}, dt)
 	    var velocityMagnitude = Math.sqrt((velocity.x * velocity.x) + (velocity.y * velocity.y))
 	    deltaPosX = slopeV.x * velocityMagnitude * dt
@@ -541,7 +548,7 @@ function installSimulationConstraints(Sketchpad) {
 	var beltSpeed = belt.speed
 	if (Sketchpad.simulation.detectContact(this.halfLength, this.position, velocity, beltP1, beltP2)) {
 	    this.contact = true
-	    var slopeV = Sketchpad.simulation.slopeVector(beltP1, beltP2)
+	    var slopeV = Sketchpad.simulation.slopeVectorWrong(beltP1, beltP2)
 	    this.targetVelocity = {x: velocity.x + (slopeV.y * beltSpeed), y: velocity.y + (slopeV.x * beltSpeed)}
 	} else
 	    this.contact = false
@@ -636,11 +643,6 @@ function installSimulationConstraints(Sketchpad) {
 	return new Sketchpad.simulation.SpringConstraint(FreeBody.dummy(x, y), FreeBody.dummy(x+100, y+100), Sketchpad.simulation.Spring.dummy(x, y))
     }
 
-    Sketchpad.simulation.SpringConstraint.prototype.onEachTimeStep = function(pseudoTime, prevPseudoTime) {	
-	this._lastVelocities[0] = scaledBy(this.velocity1, 1)
-	this._lastVelocities[1] = scaledBy(this.velocity2, 1)
-    }
-
     Sketchpad.simulation.SpringConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
 	var spring = this.spring
 	if (spring.torn) {
@@ -655,9 +657,8 @@ function installSimulationConstraints(Sketchpad) {
 	for (var i = 0; i <= 1; i++) {
 	    var j = (i + 1) % 2
 	    var mass = masses[j]
-	    var d = {x: 0, y: 0}
 	    if (mass > 0) { // if not anchored
-		var acceleration = accelerations[j]
+		var currAcceleration = accelerations[j]
 		var position1 = positions[i]
 		var position2 = positions[j]
 		var vector = minus(position2, position1)
@@ -665,7 +666,7 @@ function installSimulationConstraints(Sketchpad) {
 		var stretchLen =  springCurrLen - spring.length
 		var newAccelerationMag = spring.k * stretchLen / mass
 		var acc = scaledBy(normalized(vector), -newAccelerationMag)
-		err += magnitude(minus(plus(this._lastVelocities[j], scaledBy(acc, dt)), velocities[j]))
+		err += magnitude(minus(acc, currAcceleration))
 	    }
 	}
 	return err
@@ -678,13 +679,11 @@ function installSimulationConstraints(Sketchpad) {
 	var masses = [this.mass1, this.mass2]
 	var velocities = [this.velocity1, this.velocity2]
 	var accelerations = [this.acceleration1, this.acceleration2]
-	var dt = pseudoTime - prevPseudoTime
 	for (var i = 0; i <= 1; i++) {
 	    var j = (i + 1) % 2
 	    var mass = masses[j]
-	    var d = {x: 0, y: 0}, torn = false
+	    var acc, torn = false
 	    if (mass > 0) { // if not anchored
-				var acceleration = accelerations[j]
 		var position1 = positions[i]
 		var position2 = positions[j]
 		var vector = minus(position2, position1)
@@ -694,13 +693,13 @@ function installSimulationConstraints(Sketchpad) {
 		torn = stretchLen > spring.tearPointAmount
 		if (!torn) {
 		    var newAccelerationMag = spring.k * stretchLen / mass
-		    var acc = scaledBy(normalized(vector), -newAccelerationMag)
-		    d = plus(this._lastVelocities[j], scaledBy(acc, dt))
+		    acc = scaledBy(normalized(vector), -newAccelerationMag)
 		} 
 	    }
 	    if (torn)
 		soln['spring'] = {torn: true}
-	    soln['velocity' + (j+1)] = d
+	    if (acc)
+		soln['acceleration' + (j+1)] = acc
 	}	
 	return soln
     }
@@ -710,8 +709,7 @@ function installSimulationConstraints(Sketchpad) {
     Sketchpad.simulation.OrbitalMotionConstraint = function Sketchpad__simulation__OrbitalMotionConstraint(sun, moon, distanceDownscale) {
 	this.sun = sun
 	this.moon = moon
-	this.position = moon.position
-	this._lastPosition = undefined
+	this.acceleration = moon.acceleration
 	this.distanceDownscale = (distanceDownscale || (1e9 / 2))
     }
 
@@ -724,30 +722,24 @@ function installSimulationConstraints(Sketchpad) {
     Sketchpad.simulation.OrbitalMotionConstraint.dummy = function(x, y) {
 	return new Sketchpad.simulation.OrbitalMotionConstraint(FreeBody.dummy(x, y), FreeBody.dummy(x + 200, y))
     }
-
-    Sketchpad.simulation.OrbitalMotionConstraint.prototype.onEachTimeStep = function(pseudoTime, prevPseudoTime) {	
-	this._lastPosition = scaledBy(this.position, 1)
-    }
-
-    Sketchpad.simulation.OrbitalMotionConstraint.prototype.currentEscapeVelocity = function() {
-	var p1 = this.position, p2 = this.sun.position
+    
+    Sketchpad.simulation.OrbitalMotionConstraint.prototype.currentGravityAcceleration = function() {
+	var p1 = this.moon.position, p2 = this.sun.position
 	var dist0 = distance(p1, p2)
 	var dist = dist0 * this.distanceDownscale	
-	var vMag0 = Math.sqrt((2 * Sketchpad.simulation.G * this.sun.mass) / dist)
-	var vMag = vMag0 / this.distanceDownscale 
+	var aMag0 = (Sketchpad.simulation.G * this.sun.mass) / (dist * dist)
+	var aMag = aMag0 / this.distanceDownscale
 	var slopeV = Sketchpad.simulation.slopeVector(p1, p2)
-	return {x: slopeV.x * vMag, y: slopeV.y * vMag}
+	return {x: slopeV.x * aMag, y: slopeV.y * aMag}
     }
     
     Sketchpad.simulation.OrbitalMotionConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
-	var dt = pseudoTime - prevPseudoTime
-	this._targetVelocity = this.currentEscapeVelocity()
-	return magnitude(minus(plus(this._lastPosition, scaledBy(this._targetVelocity, dt)), this.position))	
+	this._targetAcceleration = this.currentGravityAcceleration()
+	return magnitude(minus(this._targetAcceleration, this.acceleration))	
     }
 
     Sketchpad.simulation.OrbitalMotionConstraint.prototype.solve = function(pseudoTime, prevPseudoTime) {
-	var dt = pseudoTime - prevPseudoTime
-	return {position: plus(this._lastPosition, scaledBy(this._targetVelocity, dt))}
+	return {acceleration: this._targetAcceleration}
     }
 }
 
