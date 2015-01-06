@@ -171,14 +171,14 @@ function installSimulationConstraints(Sketchpad) {
     Sketchpad.simulation.slopeVectorWrong = function(p1, p2) {
 	var slope = this.slope(p1, p2), atn = Math.atan(slope)
 	var sign = p1.x < p2.x ? -1 : 1
-	return {x: sign * Math.sin(atn), y: sign * Math.cos(atn)}
+	return normalized({x: sign * Math.sin(atn), y: sign * Math.cos(atn)})
     }
     
     Sketchpad.simulation.slopeVector = function(p1, p2) {
 	var slope = this.slope(p1, p2), atn = Math.atan(slope)
 	var signX = p1.x < p2.x ? 1 : -1
 	var signY = p1.y < p2.y ? 1 : -1
-	return {x: signX * Math.cos(atn), y: signX * Math.sin(atn)}
+	return normalized({x: signX * Math.cos(atn), y: signX * Math.sin(atn)})
     }
 
     // Timer Constraint
