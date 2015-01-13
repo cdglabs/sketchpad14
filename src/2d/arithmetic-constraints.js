@@ -59,9 +59,10 @@ function installArithmeticConstraints(Sketchpad) {
 	return patch(this, 'v', this.value)
     }
 
-    // Equality Constraint, i.e., o1.p1 = o2.p2
+    // Equality Constraint, i.e., k1 * o1.p1 = k2 * o2.p2
 
-    Sketchpad.arith.EqualityConstraint = function Sketchpad__arith__EqualityConstraint(ref1, ref2, optOnlyWriteTo) {
+    Sketchpad.arith.EqualityConstraint = function Sketchpad__arith__EqualityConstraint(ref1, ref2, optOnlyWriteTo, k1, k2) {
+	this.k1 = k1 || 1, this.k2 = k2 || 1
 	installRef(this, ref1, 'v1')
 	installRef(this, ref2, 'v2')
 	this.onlyWriteTo = optOnlyWriteTo || [1, 2]
@@ -69,25 +70,26 @@ function installArithmeticConstraints(Sketchpad) {
 
     sketchpad.addClass(Sketchpad.arith.EqualityConstraint, true)
 
-    Sketchpad.arith.EqualityConstraint.prototype.description = function() { return  "Sketchpad.arith.EqualityConstraint({obj: O1, prop: p1}, {obj: O2, prop: p2}) states that O1.p1 = O2.p2 ." }
+    Sketchpad.arith.EqualityConstraint.prototype.description = function() { return  "Sketchpad.arith.EqualityConstraint({obj: O1, prop: p1}, {obj: O2, prop: p2}, WritableIdxs, Number K1, Number K2) states that K1 * O1.p1 = K2 * O2.p2 . Constants K1-2 default to 1. Optional WritableIdxs gives a list of indices (elements 1,and/or 2) the constraint is allowed to change," }
 
     Sketchpad.arith.EqualityConstraint.dummy = function(x, y) {
 	return new Sketchpad.arith.EqualityConstraint({obj: new Point(1,1), prop: 'x'}, {obj: new Point(1,1), prop: 'x'}) 
     }
 
     Sketchpad.arith.EqualityConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
-	var diff = ref(this, 'v1') - ref(this, 'v2')
+	var diff = (this.k1 * ref(this, 'v1')) - (this.k2 * ref(this, 'v2'))
 	return diff
     }
 
     Sketchpad.arith.EqualityConstraint.prototype.solve = function(pseudoTime, prevPseudoTime) {
-	var v1 = ref(this, 'v1'), v2 = ref(this, 'v2')
+	var v1 = this.k1 * ref(this, 'v1'), v2 = this.k2 * ref(this, 'v2')
+	ks = [this.k1, this.k2]
 	var vs = [v1, v2]
 	var onlyWriteTo = this.onlyWriteTo
 	var diff = v1 - v2
 	var div = onlyWriteTo.length
 	var args = [this]
-	onlyWriteTo.forEach(function(i) { var sign = i > 1 ? 1 : -1; args.push('v' + i); args.push(vs[i - 1] + sign * diff / div) })
+	onlyWriteTo.forEach(function(i) { var sign = i > 1 ? 1 : -1; args.push('v' + i); args.push((vs[i - 1] + sign * diff / div) / ks[i - 1]) })
 	res = patch.apply(this, args)
 	return res //patch(this, 'v1', v1 - (diff / 2), 'v2', v2 + diff / 2)
     }
@@ -119,37 +121,38 @@ function installArithmeticConstraints(Sketchpad) {
 	return patch(this, 'v1', v2)
     }
 
-    // Inequality Constraint, i.e., o1.p1 + K >= o2.p2 or o1.p1 + K <= o2.p2
+    // Inequality Constraint, i.e., k1 * o1.p1 >= k2 * o2.p2 + k3 or k1 * o1.p1 <= k2 * o2.p2 + k3
 
-    Sketchpad.arith.InequalityConstraint = function Sketchpad__arith__InequalityConstraint(ref1, constantK, ref2, isGeq) {
+    Sketchpad.arith.InequalityConstraint = function Sketchpad__arith__InequalityConstraint(ref1, ref2, isGeq, k1, k2, k3) {
+	this.k1 = k1 || 1, this.k2 = k2 || 1, this.k3 = k3 || 0
 	installRef(this, ref1, 'v1')
 	installRef(this, ref2, 'v2')
-	this.constantK = constantK
 	this.isGeq = isGeq
     }
 
     sketchpad.addClass(Sketchpad.arith.InequalityConstraint, true)
 
-    Sketchpad.arith.InequalityConstraint.prototype.description = function() { return  "Sketchpad.arith.InequalityConstraint({obj: O1, prop: p1}, Number K, {obj: O2, prop: p2}, isGeq) states that O1.p1 + K >= O2.p2 (when isGeq=true) or O1.p1 + K <= O2.p2 (when isGeq=false)." }
+    Sketchpad.arith.InequalityConstraint.prototype.description = function() { return  "Sketchpad.arith.InequalityConstraint({obj: O1, prop: p1}, {obj: O2, prop: p2}, isGeq, Number K1, Number K2, Number K3) states that K1 * O1.p1 >= K2 * O2.p2 + K3 (when isGeq=true) or K1 * O1.p1 <= K2 * O2.p2 + K3 (when isGeq=false). Constants K1-2 default to 1 and K3 to 0" }
 
     Sketchpad.arith.InequalityConstraint.dummy = function(x, y) {
-	return new Sketchpad.arith.InequalityConstraint({obj: new Point(1,1), prop: 'x'}, 0, {obj: new Point(1,1), prop: 'x'}, true) 
+	return new Sketchpad.arith.InequalityConstraint({obj: new Point(1,1), prop: 'x'}, {obj: new Point(1,1), prop: 'x'}, true) 
     }
 
     Sketchpad.arith.InequalityConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
-	var v1 = ref(this, 'v1') + this.constantK, v2 = ref(this, 'v2'), cond = this.isGeq ? v1 >= v2 : v2 <= v1, e = cond ? 0 : v2 - v1
+	var v1 = this.k1 * ref(this, 'v1') , v2 = (this.k2 * ref(this, 'v2')) + this.k3, cond = this.isGeq ? v1 >= v2 : v2 <= v1, e = cond ? 0 : v2 - v1
 	return e
     }
 
     Sketchpad.arith.InequalityConstraint.prototype.solve = function(pseudoTime, prevPseudoTime) {
-	var v2 = ref(this, 'v2')
-	res = patch(this, 'v1', v2 - this.constantK)
+	var v2 = (this.k2 * ref(this, 'v2')) + this.k3
+	res = patch(this, 'v1', v2 / this.k1)
 	return res
     }
 
-    // Sum Constraint, i.e., o1.p1 + o2.p2 = o3.p3
+    // Sum Constraint, i.e., k1 * o1.p1 + k2 * o2.p2 = k3 * o3.p3 + k4
 
-    Sketchpad.arith.SumConstraint = function Sketchpad__arith__SumConstraint(ref1, ref2, ref3, optOnlyWriteTo) {
+    Sketchpad.arith.SumConstraint = function Sketchpad__arith__SumConstraint(ref1, ref2, ref3, optOnlyWriteTo, k1, k2, k3, k4) {
+	this.k1 = k1 || 1, this.k2 = k2 || 1, this.k3 = k3 || 1, this.k4 = k4 || 0
 	installRef(this, ref1, 'v1')
 	installRef(this, ref2, 'v2')
 	installRef(this, ref3, 'v3')
@@ -158,57 +161,57 @@ function installArithmeticConstraints(Sketchpad) {
 
     sketchpad.addClass(Sketchpad.arith.SumConstraint, true)
 
-    Sketchpad.arith.SumConstraint.prototype.description = function() { return  "Sketchpad.arith.SumConstraint({obj: O1, prop: p1}, {obj: O2, prop: p2}, {obj: O3, prop: p3}, WritableIdxs) states that O1.p1 + O2.p2 = O3.p3 . Optional WritableIdxs gives a list of indices (1, 2, or, 3) the constraint is allowed to change." } 
+    Sketchpad.arith.SumConstraint.prototype.description = function() { return  "Sketchpad.arith.SumConstraint({obj: O1, prop: p1}, {obj: O2, prop: p2}, {obj: O3, prop: p3}, WritableIdxs, Number K1, Number K2, Number K3, Number K4) states that K1 * O1.p1 + K2 * O2.p2 = K3 * O3.p3 + K4 . Constants K1-3 default to 1 and K4 to 0. Optional WritableIdxs gives a list of indices (1, 2, or, 3) the constraint is allowed to change." } 
 
     Sketchpad.arith.SumConstraint.dummy = function(x, y) {
 	return new Sketchpad.arith.SumConstraint({obj: new Point(1,1), prop: 'x'}, {obj: new Point(1,1), prop: 'x'}, {obj: new Point(1,1), prop: 'x'}) 
     }
 
     Sketchpad.arith.SumConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
-	var diff = ref(this, 'v3') - (ref(this, 'v1') + ref(this, 'v2'))
+	var diff = this.k3 * ref(this, 'v3') + this.k4 - ((this.k1 * ref(this, 'v1')) + (this.k2 * ref(this, 'v2')))
 	return diff
     }
 
     Sketchpad.arith.SumConstraint.prototype.solve = function(pseudoTime, prevPseudoTime) {
-	var v1 = ref(this, 'v1')
-	var v2 = ref(this, 'v2')
-	var v3 = ref(this, 'v3')
-	var vs = [v1, v2, v3]
-	var diff = v3 - (v1 + v2)
+	var v1 = this.k1 * ref(this, 'v1')
+	var v2 = this.k2 * ref(this, 'v2')
+	var v3 = this.k3 * ref(this, 'v3')
+	var vs = [v1, v2, v3], ks = [this.k1, this.k2, this.k3]
+	var diff = v3 + this.k4 - (v1 + v2)
 	var onlyWriteTo = this.onlyWriteTo
 	var div = onlyWriteTo.length
 	var args = [this]
-	onlyWriteTo.forEach(function(i) { var sign = i > 2 ? -1 : 1; args.push('v' + i); args.push(vs[i - 1] + sign * diff / div) })
+	onlyWriteTo.forEach(function(i) { var sign = i > 2 ? -1 : 1; args.push('v' + i); args.push((vs[i - 1] + sign * diff / div) / ks[i - 1]) })
 	res = patch.apply(this, args)
 	return res
     }
 
-    // SumInequality Constraint, i.e., o1.p1 + K >= o2.p2 + o3.p3 or o1.p1 + K <= o2.p2 + o3.p3 
+    // SumInequality Constraint, i.e., k1 * o1.p1 >= k2 * o2.p2 + k3 * o3.p3 + k4 or k1 * o1.p1 >= k2 * o2.p2 + k3 * o3.p3 + k4
 
-    Sketchpad.arith.SumInequalityConstraint = function Sketchpad__arith__SumInequalityConstraint(ref1, constantK, ref2, ref3, isGeq) {
+    Sketchpad.arith.SumInequalityConstraint = function Sketchpad__arith__SumInequalityConstraint(ref1, ref2, ref3, isGeq, k1, k2, k3, k4) {
+	this.k1 = k1 || 1, this.k2 = k2 || 1, this.k3 = k3 || 1, this.k4 = k4 || 0
 	installRef(this, ref1, 'v1')
 	installRef(this, ref2, 'v2')
 	installRef(this, ref3, 'v3')
-	this.constantK = constantK
 	this.isGeq = isGeq
     }
 
     sketchpad.addClass(Sketchpad.arith.SumInequalityConstraint, true)
 
-    Sketchpad.arith.SumInequalityConstraint.prototype.description = function() { return  "Sketchpad.arith.SumInequalityConstraint({obj: O1, prop: p1}, Number K, {obj: O2, prop: p2}, {obj: O3, prop: p3}, isGeq) states that O1.p1 + K >=  O2.p2  + O3.p3 or O1.p1 + K <=  O2.p2 + O3.p3 (>= when isGeq=true)" } 
+    Sketchpad.arith.SumInequalityConstraint.prototype.description = function() { return  "Sketchpad.arith.SumInequalityConstraint({obj: O1, prop: p1}, {obj: O2, prop: p2}, {obj: O3, prop: p3}, isGeq, Number K1, Number K2, Number K3, Number K4) states that K1 * O1.p1 >=  k2 * O2.p2  + k3 * O3.p3 + K4  or  K1 * O1.p1 <=  K2 * O2.p2 + K3 * O3.p3 + K4 (>= when isGeq=true)" } 
 
     Sketchpad.arith.SumInequalityConstraint.dummy = function(x, y) {
-	return new Sketchpad.arith.SumInequalityConstraint({obj: new Point(1,1), prop: 'x'}, 0, {obj: new Point(1,1), prop: 'x'}, {obj: new Point(1,1), prop: 'x'}, true) 
+	return new Sketchpad.arith.SumInequalityConstraint({obj: new Point(1,1), prop: 'x'}, {obj: new Point(1,1), prop: 'x'}, {obj: new Point(1,1), prop: 'x'}, true) 
     }
 
     Sketchpad.arith.SumInequalityConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
-	var v1 = ref(this, 'v1') + this.constantK, v2 = ref(this, 'v2'), v3 = ref(this, 'v3'), sum = v2 + v3, cond = this.isGeq ? v1 >= sum : v1 <= sum, e = cond ? 0 : sum - v1
+	var v1 = this.k1 * ref(this, 'v1'), v2 = this.k2 * ref(this, 'v2'), v3 = this.k3 * ref(this, 'v3'), sum = v2 + v3 + this.k4, cond = this.isGeq ? v1 >= sum : v1 <= sum, e = cond ? 0 : sum - v1
 	return e
     }
 
     Sketchpad.arith.SumInequalityConstraint.prototype.solve = function(pseudoTime, prevPseudoTime) {
-	v2 = ref(this, 'v2'), v3 = ref(this, 'v3'), sum = v2 + v3
-	res = patch(this, 'v1', sum - this.constantK)
+	v2 = this.k2 * ref(this, 'v2'), v3 = this.k3 * ref(this, 'v3'), sum = v2 + v3 + this.k4
+	res = patch(this, 'v1', sum / this.k1)
 	return res
     }
 

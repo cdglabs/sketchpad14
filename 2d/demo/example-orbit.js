@@ -1,5 +1,5 @@
 examples['orbit'] = function() {
-
+    //sketchpad.rho = 1
     rc.setOption('renderMode', 1)
     //rc.setOption('renderStateTrace', true)
  

@@ -27,7 +27,9 @@ Examples.midpoint.Midpoint.dummy = function(x, y, noAdd) {
 }
 
 Examples.midpoint.Midpoint.prototype.init = function() { 
-    rc.addConstraint(Sketchpad.geom.EquivalenceConstraint, this.p1, this.p2, this.p2, this.p3)
+    //rc.addConstraint(Sketchpad.geom.EquivalenceConstraint, this.p1, this.p2, this.p2, this.p3)
+    rc.addConstraint(Sketchpad.arith.SumConstraint, {obj: this.p1, prop: 'x'}, {obj: this.p3, prop: 'x'}, {obj: this.p2, prop: 'x'}, undefined, 1, 1, 2, 0)
+    rc.addConstraint(Sketchpad.arith.SumConstraint, {obj: this.p1, prop: 'y'}, {obj: this.p3, prop: 'y'}, {obj: this.p2, prop: 'y'}, undefined, 1, 1, 2, 0)
     return this
 }
 
