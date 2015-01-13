@@ -781,6 +781,7 @@ SketchpadCanvas.prototype.mergeInputElementValueWithSelection = function(inputEl
 }
 
 SketchpadCanvas.prototype.removeAll = function(unwanteds, notInvolvingConstraintsOrOwnedThings) {
+    this.haveDragSelectionsMode = false
     unwanteds.forEach(function(unwanted) { this.remove(unwanted, notInvolvingConstraintsOrOwnedThings) }.bind(this))
 }
 

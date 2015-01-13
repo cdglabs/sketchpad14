@@ -133,6 +133,7 @@ for (var idx = 0; idx < bins.length; idx++) {
     }})(itemDOMNodes, itemNames, binKind)
 }
     </script>
+    <script src="example-sliders.js"></script>
     <script src="example-slider.js"></script>
     <script src="example-orbit.js"></script>
     <script src="example-cdg.js"></script>
