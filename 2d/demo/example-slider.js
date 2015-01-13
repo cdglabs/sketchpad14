@@ -60,12 +60,11 @@ Examples.slider.SliderValueConstraint.prototype.solve = function(pseudoTime, pre
 }
 
 examples.slider = function() {
-    rc.setOption('renderMode', 1)
-
+    rc.setOption('dragConstraintPriority', 0)
     // --- Data ----------------------------------------------------------------
     var center = {x: 700, y: 350}
     rc.add(new TextBox(new Point(center.x - 300, center.y - 100), "Edit the value by clicking and typing in or moving the slider.", false, 20, 540, 40, '#81f781'))
-    var sliderValueView = rc.add(new TextBox(new Point(center.x - 100, center.y), '0', false, 40, 80, 50))
+    var sliderValueView = rc.add(new TextBox(new Point(center.x - 85, center.y), '0', false, 40, 80, 50))
     var slider = rc.add(new Examples.slider.Slider(new Point(center.x - 250, center.y + 100)))
     				
     // --- Constraints ---------------------------------------------------------

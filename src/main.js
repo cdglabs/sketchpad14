@@ -101,9 +101,8 @@ Sketchpad.prototype.getObject = function(id) {
 }
 
 Sketchpad.prototype.addConstraint = function(constraint) {
-    if (!constraint.__priority)
-	constraint.__priority = 0
-    //this.constraints.push(constraint)
+    if (constraint.__priority === undefined)
+	constraint.__priority = 1
     var prio = constraint.__priority
     var addIdx = 0
     while (addIdx < this.constraints.length && this.constraints[addIdx].__priority < prio)
