@@ -1,7 +1,7 @@
 Examples.sliders = {}
 
 examples.sliders = function() {
-    rc.setOption('renderMode', 1)
+    rc.setOption('dragConstraintPriority', 0)
 
     var sliders = [], sliderValueViews = [], sliderConstraints = []
     var center = {x: 700, y: 350}
@@ -11,8 +11,8 @@ examples.sliders = function() {
     rc.add(new TextBox(new Point(center.x - 300, center.y - 200), "Edit the value by clicking and typing in or moving the slider.", false, 20, 540, 40, '#81f781'))
     for (var i = 0; i < 2; i++) {
 	var offset = i * 200
-	rc.add(new TextBox(new Point(center.x, center.y + offset - 100), (i == 0 ? '~feet' : '~meter'), false, 25, 100, 50, '#f6ceec'))
-	var sliderValueView = rc.add(new TextBox(new Point(center.x - 100, center.y + offset - 100), '0', false, 40, 80, 50))
+	rc.add(new TextBox(new Point(center.x - 50, center.y + offset - 100), (i == 1 ? '~feet' : '~meter'), false, 25, 100, 50, '#f6ceec'))
+	var sliderValueView = rc.add(new TextBox(new Point(center.x - 150, center.y + offset - 100), '0', false, 40, 80, 50))
 	sliderValueViews.push(sliderValueView)
 	var slider = rc.add(new Examples.slider.Slider(new Point(center.x - 250, center.y + offset)))
 	sliders.push(slider)
@@ -23,7 +23,7 @@ examples.sliders = function() {
 	rc.addConstraint(Sketchpad.arith.SumInequalityConstraint, {obj: slider.position, prop: 'x'}, {obj: slider.frame.position, prop: 'x'}, {obj: slider.frame, prop: 'width'}, false, 1, 1, 1, -slider.button.width)
 	sliderConstraints.push(rc.addConstraint(Examples.slider.SliderValueConstraint, slider, sliderValueView))
     }
-    var meterFeetC = rc.addConstraint(Sketchpad.arith.EqualityConstraint,  {obj: sliderValueViews[0], prop: 'text'}, {obj: sliderValueViews[1], prop: 'text'}, [1, 2], 1, 3.28084)
+    var meterFeetC = rc.addConstraint(Sketchpad.arith.EqualityConstraint,  {obj: sliderValueViews[0], prop: 'text'}, {obj: sliderValueViews[1], prop: 'text'}, [1, 2], 3.28084, 1)
     
     // --- Time / Event Handling ---------------------------------------------
 

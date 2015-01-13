@@ -418,7 +418,7 @@ SketchpadCanvas.prototype.pointerdown = function(e) {
 	    var y = e.clientY
 	    var constraint = this.addConstraint(Sketchpad.geom.CoordinateConstraint, point, x, y)
 	    constraint._offset = offset
-	    constraint.__priority = 10
+	    constraint.__priority = this.dragConstraintPriority
 	    this.points.splice(pointIdx, 1)
 	    this.points.push(point)
 	    this.fingers[e.pointerId] =
@@ -878,7 +878,8 @@ SketchpadCanvas.prototype.clear = function() {
     this.inDragSelectMode = false
     this.startDragSelectMode = false
     this.codeEditMode = false
-    this.grabPointOpacity = 0.5
+    this.dragConstraintPriority = 10
+    this.grabPointOpacity = 0.5    
     this.fingers = {} // because fingers can refer to points
     this.dragFingersCount = 0
     this.disableDefaultKeyEvents = false
@@ -1146,7 +1147,6 @@ function SketchpadTile(name, inputs, ownRun, buttonsInfo, inspectorOfObj, fixedI
 	if (inspectorOfObj) {
 	    input.representsProperty = inputName
 	    if (isThing) {
-		//inputCoord.x += inputCoord.w / 2 + 7
 		inputCoord.y += inputCoord.h / 2 + 7
 		var pointerLinePt = new Point(inputCoord.x, inputCoord.y)
 		var pointerLine = new Line(pointerLinePt, inputValue.center(), 'orange', 2, 4)

@@ -385,7 +385,7 @@ SketchpadScene.prototype.pointerdown = function(e) {
 	var y = point.y
 	var z = point.z
 	this.mouseDragCoordConstraint = this.addConstraint(Sketchpad.geom3d.CoordinateConstraint, point, x, y, z)
-	this.mouseDragCoordConstraint.__priority = 10
+	this.mouseDragCoordConstraint.__priority = this.dragConstraintPriority
     } 
     this.redraw()
 }
@@ -807,6 +807,7 @@ SketchpadScene.prototype.clear = function() {
     this.inDragSelectMode = false
     this.startDragSelectMode = false
     this.codeEditMode = false
+    this.dragConstraintPriority = 10
     this.grabPointOpacity = 0.5
     this.fingers = {} // because fingers can refer to points
     this.disableDefaultKeyEvents = false
