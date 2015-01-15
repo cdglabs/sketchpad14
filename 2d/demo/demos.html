@@ -55,11 +55,12 @@ canvas.width = window.innerWidth
 canvas.height = window.innerHeight
 
 var rc = new SketchpadCanvas(sketchpad, canvas)
+var clearRButtons = function() { lists.forEach(function(i) { while (i.firstChild) { i.removeChild(i.firstChild) } }) }
 
 var showFns = {
   demo: 
-    function(name) { 
-      rc.clear(); rc.pause(); examples[name](); rc.redraw(); rc.unpause();
+function(name) {
+      clearRButtons(); rc.clear(); rc.pause(); examples[name](); rc.redraw(); rc.unpause();
     },
   constraint: 
     function(name) { 
@@ -117,11 +118,7 @@ for (var idx = 0; idx < bins.length; idx++) {
   }
   (function(itemDOMNodesArg, itemNamesArg, binKindArg) {  
     bin.onclick = function() {
-      lists.forEach(function(i) {
-         while (i.firstChild) {
-           i.removeChild(i.firstChild)
-         }
-      })  
+      clearRButtons()
       Object.keys(itemNamesArg).forEach(function(e) {
         var thing = document.createElement(binKindArg)
         thing.appendChild(document.createTextNode(e))
@@ -156,8 +153,13 @@ for (var idx = 0; idx < bins.length; idx++) {
 var ipf = document.getElementById('ipf')
 setInterval(function() { ipf.innerHTML = rc.iterationsPerFrame }, 100)
 rc.updateSIILabel()
+var requestExample = decodeURIComponent(document.location.search)
+if (requestExample) {
+    var requestExampleName = requestExample.substr(1 + requestExample.lastIndexOf('='))
+    requestExample = examples[requestExampleName]
+    if (requestExample) showFns.demo(requestExampleName)
+}
     </script>
-    <?php if ($_GET['example']) echo "<script>showFns.demo('" . $_GET['example'] . "')</script>\n"; ?>
   </body>
 </html>
 
