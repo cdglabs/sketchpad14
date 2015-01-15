@@ -4,17 +4,17 @@ examples.sliders = function() {
     rc.setOption('dragConstraintPriority', 0)
 
     var sliders = [], sliderValueViews = []
-    var center = {x: 700, y: 350}
+    var center = {x: 800, y: 350}
 
     // --- Data ----------------------------------------------------------------
 
-    rc.add(new TextBox(new Point(center.x - 350, center.y - 200), "Edit the value by clicking and typing in or moving the slider.", false, 20, undefined, 40, '#81f781'))
+    rc.add(new TextBox(new Point(center.x - 400, center.y - 200), "Edit the value by clicking and typing in or moving the slider.", false, 20, undefined, 40, '#81f781'))
     for (var i = 0; i < 2; i++) {
 	var offset = i * 200
-	rc.add(new TextBox(new Point(center.x - 50, center.y + offset - 100), (i == 1 ? '~feet' : '~meter'), false, 25, 100, 50, '#f6ceec'))
-	var sliderValueView = rc.add(new TextBox(new Point(center.x - 150, center.y + offset - 100), '0', false, 40, 80, 50))
+	rc.add(new TextBox(new Point(center.x - 100, center.y + offset - 100), (i == 1 ? '~feet' : '~meter'), false, 25, 120, 50, '#f6ceec'))
+	var sliderValueView = rc.add(new TextBox(new Point(center.x - 200, center.y + offset - 100), '0', false, 40, 80, 50))
 	sliderValueViews.push(sliderValueView)
-	var slider = rc.add(new Examples.slider.Slider({obj: sliderValueView, prop: 'text'}, true, new Point(center.x - 250, center.y + offset), 400, 40, {start: -100, end: 100}, true))
+	var slider = rc.add(new Examples.slider.Slider({obj: sliderValueView, prop: 'text'}, true, new Point(center.x - (250 + (i * 300)), center.y + offset), 300 * (i > 0 ? 3 : 1), 40, {start: -(100 + offset) , end: 100 + offset}, true))
 	slider.init()
 	sliders.push(slider)
     }
@@ -34,8 +34,8 @@ examples.sliders = function() {
 			    function(e) {
 				var anyButtonClick = false
 				for (var i = 0; i < 2; i++) {
-				    var  buttonClick = rc.selection == sliders[i].button
-				    sliders[i].valueConstraint.valueToSliderPositionMode = !buttonClick
+				    var  buttonClick = rc.selection == sliders[i]
+				    sliders[i].valueToSliderPositionMode = !buttonClick
 				    if (buttonClick)
 					anyButtonClick = true
 				}
