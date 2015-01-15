@@ -633,6 +633,8 @@ SketchpadCanvas.prototype.markIfNew = function(t) {
 
 SketchpadCanvas.prototype.add = function(t, container, addGrabPoint, toEnd, params) {
     var isTopLevel = container === undefined
+    if (!isTopLevel)
+	    t.___container = container
     var set = isTopLevel ? this.things : this.nonTopLevelThings
     if (set.indexOf(t) > 0)
 	return t    

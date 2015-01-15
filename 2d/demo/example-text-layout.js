@@ -12,8 +12,10 @@ Examples.textlayout.TextArea = function Examples__textlayout__TextArea(lineHeigh
     this.lineHeight = lineHeight
     this.columnMargin = columnMargin
     this.box = box
-    this.chars = []
+    this.chars = []    
     this.__origin = this.box.__origin
+    this.viewOffset = 0
+    this.maxLineCount = Math.floor(box.height / lineHeight)
 }
 
 sketchpad.addClass(Examples.textlayout.TextArea)
@@ -22,9 +24,14 @@ Examples.textlayout.TextArea.prototype.init = function() {
     rc.add(this.box)
     this.cursor = new Examples.textlayout.Char(new Point(0, 0, 'gray', 2), '|', undefined, undefined, undefined, 'green')
     rc.add(this.cursor, this)
+    this.slider = rc.add(new Examples.slider.Slider({obj: this, prop: 'viewOffset'}, false, new Point(this.box.width, 0), 20, this.box.height, {start: 0, end: 1}, true), this.box)
+    this.slider.init()
+    //rc.addConstraint(Sketchpad.arith.EqualityConstraint, {obj: this.box.bottomCorner, prop: 'x'}, {obj: this.slider.frame.position, prop: 'x'}, [2])
+    //rc.addConstraint(Sketchpad.arith.EqualityConstraint, {obj: this.box.position, prop: 'y'}, {obj: this.slider.frame.position, prop: 'y'}, [2])
+    //rc.addConstraint(Sketchpad.arith.EqualityConstraint, {obj: this.box, prop: 'height'}, {obj: this.slider.frame, prop: 'height'}, [2])
     this.cursorConstraint = rc.addConstraint(Examples.textlayout.CharFollowAdjacentsConstraint, this.cursor, this)
     this.optimalBreaksConstraint = new Examples.textlayout.WordWrapOptimalBreaks(this)
-    this.optimalBreaksConstraint.__priority = 1
+    this.optimalBreaksConstraint.__priority = 2
     this.justifyConstraint = new Examples.textlayout.WordWrapJustify(this)
     var mode = sketchpad.scratch.wordWrapModes[sketchpad.scratch.wordWrapMode]
     if (mode === 'optimal' || mode === 'justify') {
@@ -36,8 +43,15 @@ Examples.textlayout.TextArea.prototype.init = function() {
 }
 
 Examples.textlayout.TextArea.prototype.draw = function(canvas, origin) {
-    var pos = this.box.position
-    this.chars.forEach(function(c) { c.draw(canvas, pos) })
+    this.viewOffset = this.cursorLineOffset()
+    var pos = this.box.position.minus({x: 0, y: this.viewOffset * this.lineHeight})
+    var box = this.box
+    var posX = pos.x, posY = pos.y
+    this.chars.forEach(function(c) {
+	p = c.position
+	if (box.containsPoint(p.x + posX, p.y + posY - 2))
+	    c.draw(canvas, pos)
+    })
     this.cursor.draw(canvas, pos)
 }
 
@@ -47,6 +61,12 @@ Examples.textlayout.TextArea.prototype.lineCharLimit = function() { return Math.
 Examples.textlayout.TextArea.prototype.position = function() { return this.box.position }
 Examples.textlayout.TextArea.prototype.topLeft = function() { return {x: this.columnMargin, y: this.lineHeight} }
 Examples.textlayout.TextArea.prototype.text = function() {return this.chars.map(function(c) { return c.chr }).join('') }
+Examples.textlayout.TextArea.prototype.topLeft = function() { return {x: this.columnMargin, y: this.lineHeight} }
+Examples.textlayout.TextArea.prototype.cursorLineOffset = function() {
+    var o = Math.ceil((this.cursor.position.y - this.box.height) / this.lineHeight)
+    return Math.max(0, o)
+}
+
 Examples.textlayout.TextArea.prototype.addText = function(text) { 
     rc.pause()
     text.split('').forEach(function(c) { this.addChar(c) }.bind(this)) 
@@ -280,6 +300,7 @@ Examples.textlayout.Char.prototype.wordWidth = function() {  return this.isSpace
 Examples.textlayout.Char.prototype.pastMarginX = function(marginX) { return this.position.x + this.width > marginX }
 Examples.textlayout.Char.prototype.revertWidth = function() { this.width = this.origWidth }
 
+
 // --- Constraint Defs -------------------------------------------------------
 
 //  CharFollowAdjacentsConstraint
@@ -459,6 +480,7 @@ Examples.textlayout.WordWrapJustify.prototype.solve = function(pseudoTime, prevP
     return this.soln
 }
 
+
 examples['text layout'] = function() {
 
 // --- Time / Event Handling ---------------------------------------------
@@ -468,7 +490,7 @@ examples['text layout'] = function() {
     rc.grabPointOpacity = 0
     sketchpad.rho = 1
     sketchpad.solveEvenWithoutErrorOnPriorityDifferences = true
-    rc.setOption('renderMode', 4)
+    rc.setOption('renderMode', 3)
     sketchpad.scratch.wordWrapModes = ['greedy', 'optimal', 'justify']
     sketchpad.scratch.wordWrapMode = 0
 
@@ -523,8 +545,10 @@ examples['text layout'] = function() {
     }
 
 // --- Data ----------------------------------------------------------------
-    rc.add(new TextBox(new Point(400, 50), 'Press "Option/Alt" to toggle word-wrap mode:', false, 20, 420, 40, '#81f781'))
-    modeLabel = rc.add(new TextBox(new Point(830, 50), ('"' + sketchpad.scratch.wordWrapModes[sketchpad.scratch.wordWrapMode] + '"'), false, 20, 90, 40, '#f6ceec'))
-    textArea = rc.add(new Examples.textlayout.TextArea(22, 10, new Box(rc.add(new Point(200, 200, 'gray', 6)), 850, 400, true, true, undefined, '#f0ee9e'))).init()
-    textArea.addText("Call me Ishmael. Some years ago, never mind how long precisely, having little or no money in my purse, and nothing particular to interest me on shore, I thought I would sail about a little and see the watery part of the world. It is a way I have of driving off the spleen, and regulating the circulation. Whenever I find myself growing grim about the mouth; whenever it is a damp, drizzly November in my soul; whenever I find myself involuntarily pausing before coffin warehouses, and bringing up the rear of every funeral I meet; and especially whenever my hypos get such an upper hand of me, that it requires a strong moral principle to prevent me from deliberately stepping into the street, and methodically knocking people's hats off, then, I account it high time to get to sea as soon as I can. This is my substitute for pistol and ball. With a philosophical flourish Cato throws himself upon his sword; I quietly take to the ship")//"if c2 is after none:\n  c2's position = upper left corner\n\nif c2 is after c1:\n  if (c1 is whitespace and c1's position's x + c1's width + c2's word width is past the right margin) or c1 is a new line character:\n    c2's position = start of 1 line(s) below c1\n  otherwise:\n    c2 is to the right of c1")
+    modeText = rc.add(new TextBox(new Point(400, 50), 'Press "Option/Alt" to toggle word-wrap mode:', false, 20, 500, 40, '#81f781'))
+    modeLabel = rc.add(new TextBox(modeText.position.plus({x: modeText.width + 10, y: 0}), ('"' + sketchpad.scratch.wordWrapModes[sketchpad.scratch.wordWrapMode] + '"'), false, 20, 90, 40, '#f6ceec'))
+    textArea = rc.add(new Examples.textlayout.TextArea(22, 10, new Box(rc.add(new Point(200, 200, 'gray', 6)), 200, 100, true, true, undefined, '#f0ee9e'))).init()
+    textArea.addText("Call me Ishmael. Some years ago, never mind how long precisey.")
+    //textArea.box.width = 850
+    //textArea.addText("Call me Ishmael. Some years ago, never mind how long precisely, having little or no money in my purse, and nothing particular to interest me on shore, I thought I would sail about a little and see the watery part of the world. It is a way I have of driving off the spleen, and regulating the circulation. Whenever I find myself growing grim about the mouth; whenever it is a damp, drizzly November in my soul; whenever I find myself involuntarily pausing before coffin warehouses, and bringing up the rear of every funeral I meet; and especially whenever my hypos get such an upper hand of me, that it requires a strong moral principle to prevent me from deliberately stepping into the street, and methodically knocking people's hats off, then, I account it high time to get to sea as soon as I can. This is my substitute for pistol and ball. With a philosophical flourish Cato throws himself upon his sword; I quietly take to the ship")//"if c2 is after none:\n  c2's position = upper left corner\n\nif c2 is after c1:\n  if (c1 is whitespace and c1's position's x + c1's width + c2's word width is past the right margin) or c1 is a new line character:\n    c2's position = start of 1 line(s) below c1\n  otherwise:\n    c2 is to the right of c1")    
 }

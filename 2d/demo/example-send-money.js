@@ -99,21 +99,28 @@ Examples.sendmoney.ChooseLetterConstraint.prototype.solve = function(pseudoTime,
     return [0, 1, 2, 5, 6, 7].map(function(v) { var sol = {}; sol[letter] = v; return {values: sol} })
 }
 
+function resetValues(vs) {
+    var def = {s: 9, e: 5,  n: 6, d: -1, m: -1, o: -1, r: 8, e: -1, y: -1}
+    for (var i in def)
+	vs[i] = def[i]
+}
+
 examples['send money'] = function() {
     rc.setOption('millisecondsPerFrame', 10000)
-    //sketchpad.debug = true
+    sketchpad.debug = false
     sketchpad.searchOn = true
     sketchpad.rho = 1
-    // --- Time / Event Handling ---------------------------------------------
     // --- Constraints ---------------------------------------------------------
     // --- Data ----------------------------------------------------------------
+    solveButton = rc.add(new TextBox(new Point(800, 300), ('click to solve (wait a while)'), false, 20, 250, 40, '#f6ceec'))
 
     for (var i = 0; i < 10; i++) {	
 	var o1 = rc.add(new Point(400 + i * 75, 600, 'gray', 12))
 	o1._selectionIndices.push(i)
     }
     //var values = {s: 9, e: 5, n: 6, d: 7, m: 1, o: 0, r: 8, y: 2} <-- solution
-    var values =  {s: 9, e: 5,  n: 6, d: -1, m: -1, o: -1, r: 8, e: -1, y: -1}
+    var values =  {s: -1, e: -1,  n: -1, d: -1, m: -1, o: -1, r: -1, e: -1, y: -1}
+    resetValues(values)
     var rows = []
     var words = ["money", "more", "send"]
     var x = 300, y = 400
@@ -138,6 +145,23 @@ examples['send money'] = function() {
 	rc.addConstraint(Sketchpad.arith.EqualityConstraint, {obj: letterVec, prop: 'x'}, {obj: values, prop: letter}, [1])
 	rc.addConstraint(Sketchpad.geom.CartesianPointConstraint, letterPos, letterVec, origin, unit)
     }
-    rc.addConstraint(Examples.sendmoney.SendMoreMoneyConstraint, rows, values) 
+    var problemConstraint = new Examples.sendmoney.SendMoreMoneyConstraint(rows, values)
+    var solveOn = false
+    
+    // --- Time / Event Handling ---------------------------------------------
+    sketchpad.registerEvent('pointerup', function(e) {
+	solveOn = !solveOn
+	if (rc.selection == solveButton) {
+	    if (solveOn) {
+		solveButton.text = 'solved'
+		rc.redraw()
+		rc.addNewConstraint(problemConstraint)
+		resetValues(values)
+	    } else {
+		solveButton.text = 'click to solve (wait a while)'
+		rc.removeConstraint(problemConstraint)	
+	    }
+	}})
+    
 }
 

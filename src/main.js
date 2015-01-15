@@ -334,7 +334,7 @@ Sketchpad.prototype.iterateSearchChoicesForUpToMillis = function(timeMillis) {
     if (didSomething) {
 	var allSolutionChoices = sols.solutions
 	//find all solution combinations between constraints
-	//log(allSolutionChoices)
+	//if (this.debug) log(allSolutionChoices)
 	var choicesCs = allSolutionChoices.map(function(c) { return c.constraint })
 	var cCount = choicesCs.length
 	var choicesSs = allSolutionChoices.map(function(c) { return c.solutions })
@@ -362,7 +362,7 @@ Sketchpad.prototype.iterateSearchChoicesForUpToMillis = function(timeMillis) {
 	    applySolutions(this, collectedSolutions)
 	    res = this.iterateForUpToMillis(choiceTO)	    
 	    var choiceErr = this.computeCurrentError()
-	    //log(choiceErr)
+	    //if (this.debug) log('choice resulted in error: ', choiceErr)
 	    if (choiceErr < epsilon || last)
 		break
 	    //revert here

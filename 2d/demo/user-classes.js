@@ -253,7 +253,7 @@ function TextBox(position, optText, optMultiLine, optFontSize, optWidth, optHeig
     this.multiLine = optMultiLine
     this.bgColor = optBgColor// || 'white'
     this.fontSize = optFontSize || '12'
-    this.width = optWidth || ((1+this.text.length) * this.fontSize * .5)
+    this.width = optWidth || ((1+('' + this.text).length) * this.fontSize * .5)
     this.height = optHeight || (this.fontSize * 3)
     this.font = optFont || 'Georgia'
     this.fontColor = optFontColor || 'black'
@@ -284,9 +284,13 @@ TextBox.prototype.draw = function(canvas, origin) {
     ctxt.font = this.fontSize + 'px ' + this.font
     ctxt.fillStyle = this.fontColor    
     var lines = this.multiLine ? this.lines : [this.text]
+    var width = this.width
     var margin = this.fontSize / 3
-    for (var i = 0; i < lines.length; i++)
-	ctxt.fillText(lines[i], x +  margin, y + margin + i * this.fontSize + 20)
+    for (var i = 0; i < lines.length; i++) {
+	var txt = lines[i]
+	var offset = (width - (('' + txt).length * this.fontSize / 2.5)) / 2
+	ctxt.fillText(txt, x + offset, y + margin + i * this.fontSize + 20)
+    }
 }
 
 TextBox.prototype.border = function() {
