@@ -9,11 +9,11 @@ Examples.slider.Slider = function Examples__slider__Slider(valueView, isHoriz, f
     this._prop2 = isHoriz ? 'y' : 'x'
     this._prop3 = isHoriz ? 'width' : 'height'
     this.range = range || {start: 0, end: 100}
-    this.frame = rc.add(new Box(framePosition, width, height, undefined, undefined, 'black', 'gray'), undefined, undefined, undefined, {selectable: true, unmovable: true})
-    var m = Math.min(20, (2 * (this.range.end - this.range.start)))
+    this.frame = new Box(framePosition, width, height, undefined, undefined, 'black', 'gray')    
+    var m = Math.max(2, (this.range.end - this.range.start) / 10)
     var w = this.frame.width / (isHoriz ? m : 1)
     var h = this.frame.height / (isHoriz ? 1 : m)
-    this.button = rc.add(new Box(new Point(this.frame.position.x, this.frame.position.y), w, h, undefined, undefined, undefined, 'black'), undefined, undefined,  true)
+    this.button = new Box(new Point(this.frame.position.x, this.frame.position.y), w, h, undefined, undefined, undefined, 'black')
     this.position = this.button.position
     this.valueToSliderPositionMode = valueToSliderPositionMode
 }
@@ -39,14 +39,33 @@ Examples.slider.Slider.prototype.valueFromPosition = function() {
 }
 
 Examples.slider.Slider.prototype.positionFromValue = function(val) {
+    var p1 = this._prop1
     var p3 = this._prop3
     var range = this.range
     var rangeLength = range.end - range.start
-    return this.frame.position.x + Math.ceil((val - range.start) / rangeLength * (this.frame[p3] - this.button[p3]))
+    return this.frame.position[p1] + Math.ceil((val - range.start) / rangeLength * (this.frame[p3] - this.button[p3]))
 }
 
 Examples.slider.Slider.prototype.draw = function(canvas, origin, options) {
     var ctxt = canvas.ctxt
+    this.frame.draw(canvas, origin)
+    this.button.draw(canvas, origin)
+}
+
+Examples.slider.Slider.prototype.grabPoint = function() {
+    return this.position
+}
+
+Examples.slider.Slider.prototype.containsPoint = function(x, y) {
+    return this.button.containsPoint(x, y)
+}
+
+Examples.slider.Slider.prototype.center = function() {
+    return this.button.center(x, y)
+}
+
+Examples.slider.Slider.prototype.border = function() {
+    return this.button
 }
 
 // --- Constraint Defs -------------------------------------------------------
@@ -55,7 +74,6 @@ Examples.slider.SliderValueConstraint = function Examples__slider__SliderValueCo
     this.slider = slider
     this.sliderValueViewObj = sliderValueView.obj
     this.sliderValueViewProp = sliderValueView.prop
-    this.valueToSliderPositionMode = slider.valueToSliderPositionMode
     this.sliderPos = slider.button.position    
 }
 
@@ -78,7 +96,7 @@ Examples.slider.SliderValueConstraint.prototype.solve = function(pseudoTime, pre
     var sliderValueViewObj = this.sliderValueViewObj
     var sliderValueViewProp = this.sliderValueViewProp
     var sol, val = {}
-    if (this.valueToSliderPositionMode) {
+    if (slider.valueToSliderPositionMode) {
 	val[p1] = slider.positionFromValue(sliderValueViewObj[sliderValueViewProp] || 0)
 	sol = {sliderPos: val}
     } else {
@@ -91,21 +109,20 @@ Examples.slider.SliderValueConstraint.prototype.solve = function(pseudoTime, pre
 examples.slider = function() {
     rc.setOption('dragConstraintPriority', 0)
     // --- Data ----------------------------------------------------------------
+    // --- Constraints ---------------------------------------------------------
+
     var center = {x: 700, y: 350}
     rc.add(new TextBox(new Point(center.x - 350, center.y - 100), "Edit the value by clicking and typing in or moving the slider.", false, 20, undefined, 40, '#81f781'))
     var sliderValueView = rc.add(new TextBox(new Point(center.x - 85, center.y), '0', false, 40, 80, 50))
     var slider = rc.add(new Examples.slider.Slider({obj: sliderValueView, prop: 'text'}, true, new Point(center.x - 250, center.y + 100), 400, 40, {start: 0, end: 100}))
     slider.init()
     
-    // --- Constraints ---------------------------------------------------------
-
-
     // --- Time / Event Handling ---------------------------------------------
 
     // toggling slider constraint's flow direction
     sketchpad.registerEvent('pointerdown',
 			    function(e) {
-				slider.valueConstraint.valueToSliderPositionMode = rc.selection != slider.button
+				slider.valueToSliderPositionMode = rc.selection != slider
 			    })
 
     // adding a digit to value view
