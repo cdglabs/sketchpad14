@@ -1,19 +1,19 @@
 examples['bridge']= function() {
 
-    rc.setOption('renderMode', 2)
+    rc.setOption('renderMode', 1)
     
     // --- Data ----------------------------------------------------------------
 
     var massCount = 26, springCount = 52, center = [0, 0, 0]
     var masses = [], bodies = [], springKs = [], springs = []
     for (var i = 0; i < massCount; i++)
-	masses.push(30)
+	masses.push(10)
     for (var i = 9; i <= 12; i++)
 	masses[i] = 0
     for (var i = 22; i <= 25; i++)
 	masses[i] = 0
     for (var i = 0; i < springCount; i++)
-	springKs.push(30)
+	springKs.push(3)
     var centerX = center[0], centerY = center[1], centerZ = center[2]    
     var positionsRaw = [
 	[centerX - 80, centerY - 60, centerZ], //0
@@ -55,7 +55,7 @@ examples['bridge']= function() {
     // wind
     var windOrigin = new Point3D(0, 0, -300)
     var windEnd = new Point3D(0, 0, -200)
-    var wind = rc.add(new PointVector3D(windOrigin, windEnd, 0.02, 'brown', 'wind'))
+    var wind = rc.add(new PointVector3D(windOrigin, windEnd, 0.1, 'brown', 'wind'))
     
     // nodes
     for (var i = 0; i < massCount; i++) {
@@ -83,8 +83,11 @@ examples['bridge']= function() {
 	if (mass > 0) {
 	    var body = bodies[i]
 	    rc.addConstraint(Sketchpad.simulation3d.VelocityConstraint, body)
-	    rc.addConstraint(Sketchpad.simulation3d.AccelerationConstraint, body, new Vector3D(0, -Sketchpad.simulation.g, 0)) //gravity
-	    rc.addConstraint(Sketchpad.simulation3d.AirResistanceConstraint, body, 0.05)
+	    rc.addConstraint(Sketchpad.simulation3d.AccelerationConstraint, body, new Vector3D(0,
+											       //-Sketchpad.simulation.g
+											       -1
+											       , 0)) //gravity
+	    //rc.addConstraint(Sketchpad.simulation3d.AirResistanceConstraint, body, 0.00001)
 	    rc.addConstraint(Sketchpad.simulation3d.AccelerationConstraint, body, body.acceleration) //spring force
 	    rc.addConstraint(Sketchpad.simulation3d.VelocityConstraint2, body, wind) //wind 
 	}

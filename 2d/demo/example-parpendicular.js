@@ -24,11 +24,11 @@ Sketchpad.geom.ParPendicularConstraint.dummy = function(x, y) {
     return new Sketchpad.geom.ParPendicularConstraint(Point.dummy(x, y), Point.dummy(x, y), Point.dummy(x, y), Point.dummy(x, y)) 
 }
 
-Sketchpad.geom.ParPendicularConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {	
+Sketchpad.geom.ParPendicularConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
     return (scratch.toggle ? this.parC : this.perC).computeError(pseudoTime, prevPseudoTime) 
 }
 
-Sketchpad.geom.ParPendicularConstraint.prototype.solve = function(pseudoTime, prevPseudoTime) {	
+Sketchpad.geom.ParPendicularConstraint.prototype.solve = function(pseudoTime, prevPseudoTime) {
     return (scratch.toggle ? this.parC : this.perC).solve(pseudoTime, prevPseudoTime) 
 }
 
@@ -39,7 +39,7 @@ Sketchpad.geom.ParPendicularConstraint.prototype.draw = function(canvas, origin)
 examples['parpendicular'] = function() {
 
 // --- Time / Event Handling ---------------------------------------------
-
+    sketchpad.rho = 0.5
     scratch = sketchpad.scratch
     scratch.auto = true
     scratch.toggle = false

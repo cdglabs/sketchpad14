@@ -16,7 +16,6 @@ function SketchpadScene(sketchpad, canvas) {
     this.onlyRenderOnNoError = false
     this.showConstraints = false
     this.showEachIteration = false
-    this.showGrabPoints = true
     this.iterationsPerFrame = 0    
     this.paused = false
     this.things = []
@@ -30,7 +29,6 @@ function SketchpadScene(sketchpad, canvas) {
     this.secondarySelections = []
     this.selectionChoiceIdx = 0
     this.selectionPoints = []
-    this.grabPointOpacity = 0.5
     this.__origin = new Point(0, 0)
     this.tileConstructors = {
 	//"Run": {}
@@ -187,7 +185,6 @@ SketchpadScene.prototype.keydown = function(e) {
     //case 'Z': this.enterPointMode();  break
     //case 'D': this.removeAll(this.selection ? [this.selection] : this.secondarySelections); break
     //case 'C': this.showConstraints = !this.showConstraints; break
-    //case 'G': this.showGrabPoints = !this.showGrabPoints; break
     //case 'I': this.inspectState(this.selection); break
     case 'X': this.toggleProgramExplainMode(); break
     //case 'E': this.toggleCodeEditMode(); break
@@ -333,11 +330,10 @@ SketchpadScene.prototype.describeProgram = function() {
 }
 
 SketchpadScene.prototype.computeAllSelectableThings = function() {
-    var all = (this.showGrabPoints ? this.thingGrabPoints : []).
-	concat(this.showConstraints ? ((this.showGrabPoints ? this.constraintGrabPoints : []).concat(this.sketchpad.constraints)) : []).
-	concat(this.nonTopLevelThings).
-	concat(this.things).
-	concat(this.temps)
+    var all = (this.showConstraints ? this.sketchpad.constraints : [])
+	.concat(this.nonTopLevelThings)
+	.concat(this.things)
+	.concat(this.temps)
     return all
 }
 
@@ -670,7 +666,7 @@ SketchpadScene.prototype.merge = function(src, dst, removes) {
 }
 
 SketchpadScene.prototype.mergeFromMergeList = function(srcs, dsts, removes) {
-    var all = (this.showGrabPoints ? this.thingGrabPoints : []).concat(this.things).concat(this.sketchpad.constraints)
+    var all = this.things.concat(this.sketchpad.constraints)
     var l = srcs.length
     for (var i = 0; i < l; i++) {
 	var src = srcs[i]
@@ -678,7 +674,7 @@ SketchpadScene.prototype.mergeFromMergeList = function(srcs, dsts, removes) {
 	if (all.indexOf(src) >= 0 && all.indexOf(dst) >= 0) {
 	    if (removes.indexOf(src) < 0)
 		removes.push(src)
-	    all = (this.showGrabPoints ? this.thingGrabPoints : []).concat(this.things).concat(this.sketchpad.constraints)
+	    all = this.things.concat(this.sketchpad.constraints)
 	    all.forEach(function(t) {
 		getProperties(t).forEach(function(p) { if (t[p] === src && !(removes.indexOf(t) >= 0)) t[p] = dst})})
 	}
@@ -801,14 +797,12 @@ SketchpadScene.prototype.clear = function() {
     this.selection = undefined
     this.secondarySelections = []
     this.selectionChoiceIdx = 0
-    this.showGrabPoints = true
     this.selectionPoints = []
     this.clickSelectMode = false
     this.inDragSelectMode = false
     this.startDragSelectMode = false
     this.codeEditMode = false
     this.dragConstraintPriority = 10
-    this.grabPointOpacity = 0.5
     this.fingers = {} // because fingers can refer to points
     this.disableDefaultKeyEvents = false
     this.renderSkipCount = 0

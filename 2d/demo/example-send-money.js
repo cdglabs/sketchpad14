@@ -109,7 +109,6 @@ examples['send money'] = function() {
     rc.setOption('millisecondsPerFrame', 10000)
     sketchpad.debug = false
     sketchpad.searchOn = true
-    sketchpad.rho = 1
     // --- Constraints ---------------------------------------------------------
     // --- Data ----------------------------------------------------------------
     solveButton = rc.add(new TextBox(new Point(800, 300), ('click to solve (wait a while)'), false, 20, 250, 40, '#f6ceec'))
@@ -150,8 +149,8 @@ examples['send money'] = function() {
     
     // --- Time / Event Handling ---------------------------------------------
     sketchpad.registerEvent('pointerup', function(e) {
-	solveOn = !solveOn
 	if (rc.selection == solveButton) {
+	    solveOn = !solveOn
 	    if (solveOn) {
 		solveButton.text = 'solved'
 		rc.redraw()

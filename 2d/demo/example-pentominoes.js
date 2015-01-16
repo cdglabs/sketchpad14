@@ -289,51 +289,7 @@ examples['pentominoes'] = function() {
     rc.setOption('millisecondsPerFrame', 10000)
     sketchpad.debug = false
     sketchpad.searchOn = false
-    sketchpad.rho = 1
     scratch = sketchpad.scratch
-    // --- Time / Event Handling ---------------------------------------------
-    sketchpad.registerEvent('pointermove',
-			    function(e) {
-				var finger = rc.fingers[e.pointerId]
-				if (finger) {
-				    var p = finger.point
-				    var t = p.__owner
-				    if (t instanceof Examples.pentominoes.Piece) {
-					if (scratch.board.piecesOn[t.kind])
-					    delete(scratch.board.piecesOn[t.kind])
-				    }
-				}
-			    }, "If piece is picked up it's no longer on the board")
-    sketchpad.registerEvent('keyup',
-			    function(e) {
-				var k = e.which
-				var rotate = k == 32, flip = k == 16, enter = k == 13
-				if (rotate || flip) {
-				    if (rc.selection instanceof Examples.pentominoes.Piece) {
-					rc.selection[rotate ? 'rotate' : 'flip'](); rc.redraw()
-				    }
-				} else if (enter) {
-				    sketchpad.searchOn = !sketchpad.searchOn
-				    if (scratch.solveMode) {					
-					rc.removeConstraint(scratch.pentominoesConstraint)
-					sketchpad.unsetOnEachTimeStep()
-					scratch.board.piecesOn = {}
-					scratch.drawnSolution = false
-				    } else {
-					rc.addNewConstraint(scratch.pentominoesConstraint)
-					sketchpad.setOnEachTimeStep(function(pseudoTime, prevPseudoTime) {
-					    if (sketchpad.searchOn && !scratch.drawnSolution && scratch.pentominoesConstraint.computeError(pseudoTime, prevPseudoTime) == 0) {
-						scratch.drawnSolution = true
-						scratch.board.placeSolvedPieces()
-					    }
-					}, "Once solved place pieces in solved positions")					
-				    }
-				    scratch.solveMode = !scratch.solveMode
-				    scratch.modeLabel.text = '"' + (scratch.solveMode ? 'on' : 'off') + '"'
-				    rc.redraw()
-				}
-			    },
-			    "When 'space' bar is pressed current piece is rotated 90 deg, when 'shift' is pressed it is flipped, and on 'enter' we toggle the solve mode (which when true adds the main Pentominoes constraint forcing the problem to be solved automatically).")	
     
     // --- Constraints ---------------------------------------------------------
     // --- Data ----------------------------------------------------------------
@@ -375,7 +331,7 @@ examples['pentominoes'] = function() {
 	L: 'yellow',
     }
     var pieces = {}
-    var board = rc.add(new Examples.pentominoes.Board(new Point(700, 300), 3, 5, squareLength, pieces), undefined, undefined, {selectable: true, unmovable: true})
+    var board = rc.add(new Examples.pentominoes.Board(new Point(700, 300), 3, 5, squareLength, pieces), undefined, undefined, undefined, {unselectable: true, unmovable: true})
     scratch.board = board
     scratch.drawnSolution = false
     scratch.solveMode = false
@@ -385,7 +341,58 @@ examples['pentominoes'] = function() {
 	rc.addConstraint(Examples.pentominoes.PiecePlacementConstraint, piece, board)
     }
     rc.add(new TextBox(new Point(350, 50), "Select piece by clicking on its shape. Press 'space' to rotate & 'shift' to flip.", false, 20, 670, 40, '#81f781'))
-    rc.add(new TextBox(new Point(420, 100), "Press 'enter' to toggle solve mode (wait a while...):", false, 20, 450, 40, '#81f781'))
+    scratch.solveButton = rc.add(new TextBox(new Point(420, 100), "Click to toggle solve mode (wait a while...):", false, 20, 450, 40, '#81f781'))
     scratch.modeLabel = rc.add(new TextBox(new Point(880, 100), ('"off"'), false, 20, 50, 40, '#f6ceec'))
     scratch.pentominoesConstraint = new Examples.pentominoes.PentominoesConstraint(board)
+
+        // --- Time / Event Handling ---------------------------------------------
+    sketchpad.registerEvent('pointermove',
+			    function(e) {
+				var finger = rc.fingers[e.pointerId]
+				if (finger) {
+				    var p = finger.point
+				    var t = p.__owner
+				    if (t instanceof Examples.pentominoes.Piece) {
+					if (scratch.board.piecesOn[t.kind])
+					    delete(scratch.board.piecesOn[t.kind])
+				    }
+				}
+			    }, "If piece is picked up it's no longer on the board")
+    sketchpad.registerEvent('keyup',
+			    function(e) {
+				var k = e.which
+				var rotate = k == 32, flip = k == 16
+				if (rotate || flip) {
+				    if (rc.selection instanceof Examples.pentominoes.Piece) {
+					rc.selection[rotate ? 'rotate' : 'flip'](); rc.redraw()
+				    }
+				} 
+			    },
+			    "When 'space' bar is pressed current piece is rotated 90 deg, when 'shift' is pressed it is flipped.")
+
+    sketchpad.registerEvent('pointerup', function(e) {
+	{
+	    if (rc.selection == scratch.modeLabel) {
+		sketchpad.searchOn = !sketchpad.searchOn
+		if (scratch.solveMode) {
+		    rc.removeConstraint(scratch.pentominoesConstraint)
+		    sketchpad.unsetOnEachTimeStep()
+		    scratch.board.piecesOn = {}
+		    scratch.drawnSolution = false
+		} else {
+		    rc.addNewConstraint(scratch.pentominoesConstraint)
+		    sketchpad.setOnEachTimeStep(function(pseudoTime, prevPseudoTime) {
+			if (sketchpad.searchOn && !scratch.drawnSolution && scratch.pentominoesConstraint.computeError(pseudoTime, prevPseudoTime) == 0) {
+			    scratch.drawnSolution = true
+			    scratch.board.placeSolvedPieces()
+			}
+		    }, "Once solved place pieces in solved positions")					
+		}
+		scratch.solveMode = !scratch.solveMode
+		scratch.modeLabel.text = '"' + (scratch.solveMode ? 'on' : 'off') + '"'
+		rc.redraw()
+	    }
+	}}, "on button click we toggle the solve mode (which when true adds the main Pentominoes constraint forcing the problem to be solved automatically).")
+
+
 }

@@ -43,8 +43,10 @@ Examples.textlayout.TextArea.prototype.init = function() {
 }
 
 Examples.textlayout.TextArea.prototype.draw = function(canvas, origin) {
-    if (this.slider.valueToSliderPositionMode)
+    if (this.slider.valueToSliderPositionMode) {
 	this.viewOffset = this.cursorLineOffset()
+	this.setSliderRange()
+    }
     var bPos = this.box.position
     var pos = bPos.minus({x: 0, y: this.viewOffset * this.lineHeight})
     var box = this.box
@@ -68,7 +70,7 @@ Examples.textlayout.TextArea.prototype.draw = function(canvas, origin) {
 	chars[i].draw(canvas, pos)
     c = this.cursor
     p = c.position
-    if (box.containsPoint(p.x + posX, p.y + posY))
+    if (box.containsPoint(p.x + posX, p.y + posY - 2))
 	c.draw(canvas, pos)
 }
 
@@ -80,10 +82,10 @@ Examples.textlayout.TextArea.prototype.topLeft = function() { return {x: this.co
 Examples.textlayout.TextArea.prototype.text = function() {return this.chars.map(function(c) { return c.chr }).join('') }
 Examples.textlayout.TextArea.prototype.topLeft = function() { return {x: this.columnMargin, y: this.lineHeight} }
 Examples.textlayout.TextArea.prototype.cursorLineOffset = function() {
-    var o = Math.ceil((this.cursor.position.y - this.box.height) / this.lineHeight)
-    var res = Math.max(0, o)
-    this.slider.range.end = res
-    return res
+    return Math.max(0, Math.ceil((this.cursor.position.y - this.box.height) / this.lineHeight))
+}
+Examples.textlayout.TextArea.prototype.setSliderRange = function() {
+    this.slider.range.end = Math.max(0, Math.ceil((this.chars[this.chars.length - 1].position.y - this.box.height) / this.lineHeight))
 }
 
 Examples.textlayout.TextArea.prototype.addText = function(text) { 
@@ -106,6 +108,7 @@ Examples.textlayout.TextArea.prototype.addChar = function(chr) {
 	cursor.next.prev = newChar
     }
     cursor.prev = newChar
+
     var constraint = rc.addConstraint(Examples.textlayout.CharFollowAdjacentsConstraint, newChar, this)
     constraint.___container = this.box
     var mode = sketchpad.scratch.wordWrapModes[sketchpad.scratch.wordWrapMode]
@@ -506,7 +509,6 @@ examples['text layout'] = function() {
 
     rc.showGrabPoints = true
     rc.grabPointOpacity = 0
-    sketchpad.rho = 1
     sketchpad.solveEvenWithoutErrorOnPriorityDifferences = true
     rc.setOption('renderMode', 3)
     sketchpad.scratch.wordWrapModes = ['greedy', 'optimal', 'justify']
