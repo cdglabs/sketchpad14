@@ -15,7 +15,6 @@ function SketchpadCanvas(sketchpad, canvas) {
     this.onlyRenderOnNoError = false
     this.showConstraints = false
     this.showEachIteration = false
-    this.showGrabPoints = true
     this.iterationsPerFrame = 0
     this.paused = false
     this.threeD = false
@@ -29,7 +28,6 @@ function SketchpadCanvas(sketchpad, canvas) {
     this.secondarySelections = []
     this.selectionChoiceIdx = 0
     this.selectionPoints = []
-    this.grabPointOpacity = 0.5
     this.__origin = new Point(0, 0)
     this.tileConstructors = {
 	//"Run": {}
@@ -172,7 +170,6 @@ SketchpadCanvas.prototype.keydown = function(e) {
     case 'Z': this.enterPointMode();  break
     case 'D': this.removeAll(this.selection ? [this.selection] : this.secondarySelections); break
     case 'C': this.showConstraints = !this.showConstraints; break
-    case 'G': this.showGrabPoints = !this.showGrabPoints; break
     case 'T': this.renderStateTrace = !this.renderStateTrace; break
     case 'I': this.inspectState(this.selection); break
     case 'X': this.toggleProgramExplainMode(); break
@@ -309,11 +306,10 @@ SketchpadCanvas.prototype.describeProgram = function() {
 }
 
 SketchpadCanvas.prototype.computeAllSelectableThings = function() {
-    var all = (this.showGrabPoints ? this.thingGrabPoints : []).
-	concat(this.showConstraints ? ((this.showGrabPoints ? this.constraintGrabPoints : []).concat(this.sketchpad.constraints)) : []).
-	concat(this.nonTopLevelThings).
-	concat(this.things).
-	concat(this.temps)
+    var all = (this.showConstraints ? this.sketchpad.constraints : [])
+	.concat(this.nonTopLevelThings)
+	.concat(this.things)
+	.concat(this.temps)
     return all
 }
 
@@ -324,7 +320,7 @@ SketchpadCanvas.prototype.findThingPointedTo = function(e) {
     var found = false, foundRightIndex = false
     for (var idx = 0; idx < all.length; idx++) {
 	var t = all[idx]
-	if (t.containsPoint && !t._selectable) {
+	if (t.containsPoint && !t._unselectable) {
 	    var origin = t.__container.__origin
 	    var x = e.clientX - origin.x
 	    var y = e.clientY - origin.y
@@ -576,12 +572,6 @@ SketchpadCanvas.prototype.redraw = function() {
     this.secondarySelections.forEach(function(t) { if (t.border) drawBorderOf(t, 'green', self) })
     if (this.inDragSelectMode)
 	draw(this.selectionBox, self, {color: 'green'})
-    if (this.showGrabPoints) {
-	this.ctxt.globalAlpha = this.grabPointOpacity
-	this.thingGrabPoints.forEach(function(t) { draw(t, this) }.bind(this))    
-	if (this.showConstraints)
-	    this.constraintGrabPoints.forEach(function(t) { draw(t, this) }.bind(this))
-    }
     this.ctxt.restore()
 }
 
@@ -739,7 +729,7 @@ SketchpadCanvas.prototype.merge = function(src, dst, removes) {
 }
 
 SketchpadCanvas.prototype.mergeFromMergeList = function(srcs, dsts, removes) {
-    var all = (this.showGrabPoints ? this.thingGrabPoints : []).concat(this.things).concat(this.sketchpad.constraints)
+    var all = this.things.concat(this.sketchpad.constraints)
     var l = srcs.length
     for (var i = 0; i < l; i++) {
 	var src = srcs[i]
@@ -747,7 +737,7 @@ SketchpadCanvas.prototype.mergeFromMergeList = function(srcs, dsts, removes) {
 	if (all.indexOf(src) >= 0 && all.indexOf(dst) >= 0) {
 	    if (removes.indexOf(src) < 0)
 		removes.push(src)
-	    all = (this.showGrabPoints ? this.thingGrabPoints : []).concat(this.things).concat(this.sketchpad.constraints)
+	    all = this.things.concat(this.sketchpad.constraints)
 	    all.forEach(function(t) {
 		getProperties(t).forEach(function(p) { if (t[p] === src && !(removes.indexOf(t) >= 0)) t[p] = dst})})
 	}
@@ -873,7 +863,6 @@ SketchpadCanvas.prototype.clear = function() {
     this.selection = undefined
     this.secondarySelections = []
     this.selectionChoiceIdx = 0
-    this.showGrabPoints = true
     this.renderStateTrace = false
     this.selectionPoints = []    
     this.clickSelectMode = false
@@ -881,7 +870,6 @@ SketchpadCanvas.prototype.clear = function() {
     this.startDragSelectMode = false
     this.codeEditMode = false
     this.dragConstraintPriority = 10
-    this.grabPointOpacity = 0.5    
     this.fingers = {} // because fingers can refer to points
     this.dragFingersCount = 0
     this.disableDefaultKeyEvents = false

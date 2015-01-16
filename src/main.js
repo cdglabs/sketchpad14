@@ -57,7 +57,7 @@ Object.defineProperty(Object.prototype, '__scratch', {
 // --------------------------------------------------------------------
 
 function Sketchpad() {
-    this.rho = 0.25
+    this.rho = 1
     this.epsilon = 0.01
     this.debug = false
     this.solveEvenWithoutError = false
@@ -133,7 +133,7 @@ Sketchpad.prototype.removeConstraint = function(unwantedConstraint) {
 }
 
 Sketchpad.prototype.clear = function() {
-    this.rho = 0.25
+    this.rho = 1
     this.epsilon = 0.01
     this.searchOn = false
     this.solveEvenWithoutError = false

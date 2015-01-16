@@ -1,5 +1,4 @@
 examples['orbit'] = function() {
-    //sketchpad.rho = 1
     rc.setOption('renderMode', 1)
     //rc.setOption('renderStateTrace', true)
  
@@ -11,7 +10,7 @@ examples['orbit'] = function() {
     // fictions
     var distanceDownscale = 5e8, radiusDownscale = 5e5, sunRadiusDownscale = 2e7
     var distancesCheat = {earth_emoon: 20, sun_earth: .76, sun_emoon: 1, sun_venus: 1, venus_vmoon: 20} 
-    var initVelocityScale = {earth: 10, emoon: 10, venus: 10, vmoon: 10} //m
+    var initVelocityScale = {earth: 30, emoon: 30, venus: 30, vmoon: 30} //m
     var distanceDownscaleCheat = 1e3
     var center = {x: 700, y: 400}
     
