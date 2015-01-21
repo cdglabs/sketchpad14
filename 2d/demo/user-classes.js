@@ -249,7 +249,7 @@ Box.prototype.center = function() {
 
 function TextBox(position, optText, optMultiLine, optFontSize, optWidth, optHeight, optBgColor, optFont, optFontColor, optHasNoBorder) {
     this.position = position
-    this.text = optText || ''
+    this.text = optText === undefined ? '' : optText
     this.multiLine = optMultiLine
     this.bgColor = optBgColor// || 'white'
     this.fontSize = optFontSize || '12'
