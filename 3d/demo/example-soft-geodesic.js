@@ -125,6 +125,7 @@ examples['soft geodesic']= function() {
 	} else {
 	    b = rc.add(new Sketchpad.simulation3d.FreeBody(p, undefined, undefined, mass, 'yellow'))
 	    rc.addConstraint(Sketchpad.simulation3d.VelocityConstraint, b)
+	    rc.addConstraint(Sketchpad.simulation3d.AccelerationConstraint, b, b.acceleration)
 	    rc.addConstraint(Sketchpad.simulation3d.AirResistanceConstraint, b, 0.005)
 	    removeDuplicateCoords[key] = b
 	}
