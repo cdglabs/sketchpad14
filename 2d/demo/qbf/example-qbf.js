@@ -332,7 +332,7 @@ examples['quick brown fox'] = function() {
     var groundP6 = rc.add(new Point(900, 300))
     var platform = rc.add(new Line(groundP5, groundP6))
 
-    rc.addConstraint(Sketchpad.simulation.TimerConstraint, rc.add(new Timer(.5)))
+    rc.addConstraint(Sketchpad.simulation.TimerConstraint, undefined, rc.add(new Timer(.5)))
 
     rc.add(new TextBox(new Point(550, 50), "-- ( 'backspace' to delete, 'enter' to submit ) --", false, 22))
 
@@ -382,29 +382,29 @@ examples['quick brown fox'] = function() {
 	var tile = rc.add(new Examples.qbf.Tile(i, tilePos, getRandomLetter(), false))
 	tile.body = tileBody
 	tiles.push(tile)
-	rc.addConstraint(Sketchpad.simulation.HitSurfaceConstraint, tileBody, ground.p1, ground.p2)
-	rc.addConstraint(Sketchpad.simulation.HitSurfaceConstraint, tileBody, belt.position1, belt.position2)
-	rc.addConstraint(Sketchpad.simulation.HitSurfaceConstraint, tileBody, feederBelt.position1, feederBelt.position2)
-	rc.addConstraint(Sketchpad.simulation.HitSurfaceConstraint, tileBody, platform.p1, platform.p2)
-	rc.addConstraint(Sketchpad.simulation.ConveyorBeltConstraint, tileBody, belt)
-	rc.addConstraint(Sketchpad.simulation.ConveyorBeltConstraint, tileBody, feederBelt)
-	rc.addConstraint(Sketchpad.simulation.AccelerationConstraint, tileBody, {x: 0, y: Sketchpad.simulation.g})
-	rc.addConstraint(Sketchpad.simulation.VelocityConstraint, tileBody)
-	rc.addConstraint(Examples.qbf.TileActivationConstraint, tile, platform.p1, platform.p2)
-	rc.addConstraint(Examples.qbf.TileChoosingConstraint, tile, tiles, wordRack)
+	rc.addConstraint(Sketchpad.simulation.HitSurfaceConstraint, undefined, tileBody, ground.p1, ground.p2)
+	rc.addConstraint(Sketchpad.simulation.HitSurfaceConstraint, undefined, tileBody, belt.position1, belt.position2)
+	rc.addConstraint(Sketchpad.simulation.HitSurfaceConstraint, undefined, tileBody, feederBelt.position1, feederBelt.position2)
+	rc.addConstraint(Sketchpad.simulation.HitSurfaceConstraint, undefined, tileBody, platform.p1, platform.p2)
+	rc.addConstraint(Sketchpad.simulation.ConveyorBeltConstraint, undefined, tileBody, belt)
+	rc.addConstraint(Sketchpad.simulation.ConveyorBeltConstraint, undefined, tileBody, feederBelt)
+	rc.addConstraint(Sketchpad.simulation.AccelerationConstraint, undefined, tileBody, {x: 0, y: Sketchpad.simulation.g})
+	rc.addConstraint(Sketchpad.simulation.VelocityConstraint, undefined, tileBody)
+	rc.addConstraint(Examples.qbf.TileActivationConstraint, undefined, tile, platform.p1, platform.p2)
+	rc.addConstraint(Examples.qbf.TileChoosingConstraint, undefined, tile, tiles, wordRack)
     }
     var wrTiles = wordRack.tiles
     for (var i = 0; i < wordRack.count; i++) {
-	rc.addConstraint(Examples.qbf.TileUnchoosingConstraint, wrTiles[i], tiles, wordRack)
+	rc.addConstraint(Examples.qbf.TileUnchoosingConstraint, undefined, wrTiles[i], tiles, wordRack)
     }    
     for (var i = 0; i < qbf.tileCount; i++) {
 	var tile1 = tiles[i]
 	for (var j = i + 1; j < qbf.tileCount; j++) {
 	    var tile2 = tiles[j]
-	    rc.addConstraint(Sketchpad.simulation.NoOverlapConstraint, tile2.body, tile1.body)
+	    rc.addConstraint(Sketchpad.simulation.NoOverlapConstraint, undefined, tile2.body, tile1.body)
 	}
     }
-    rc.addConstraint(Examples.qbf.FeederTileCountConstraint, feeder, feederBelt, tiles)
+    rc.addConstraint(Examples.qbf.FeederTileCountConstraint, undefined, feeder, feederBelt, tiles)
  
 }
 

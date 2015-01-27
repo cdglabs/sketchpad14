@@ -412,9 +412,8 @@ SketchpadCanvas.prototype.pointerdown = function(e) {
 	    var offset = pointedToThing.offset	
 	    var x = e.clientX
 	    var y = e.clientY
-	    var constraint = this.addConstraint(Sketchpad.geom.CoordinateConstraint, point, x, y)
+	    var constraint = this.addConstraint(Sketchpad.geom.CoordinateConstraint, this.dragConstraintPriority, point, x, y)
 	    constraint._offset = offset
-	    constraint.__priority = this.dragConstraintPriority
 	    this.points.splice(pointIdx, 1)
 	    this.points.push(point)
 	    this.fingers[e.pointerId] =
@@ -658,11 +657,13 @@ SketchpadCanvas.prototype.addTemp = function(t) {
     return t
 }
 
-SketchpadCanvas.prototype.addConstraint = function(ctor /* , arguments, ... */) {
+SketchpadCanvas.prototype.addConstraint = function(ctor, priority /* , arguments, ... */) {
     if (ctor) {
-	var args = Array.prototype.slice.call(arguments)
+	var args = Array.prototype.slice.call(arguments, 2)
+	args.unshift(undefined)
 	ctor = ctor.bind.apply(ctor, args)
 	var c = new ctor()
+	if (priority !== undefined) c.__priority = priority
 	return this.addNewConstraint(c)
     } else
 	alert('No such class')
@@ -1142,8 +1143,8 @@ function SketchpadTile(name, inputs, ownRun, buttonsInfo, inspectorOfObj, fixedI
 		var pointerLine = new Line(pointerLinePt, inputValue.center(), 'orange', 2, 4)
 		input.pointerLine = pointerLine
 		self.parts.push(pointerLine)
-		self.isOwnerOf.push(rc.addConstraint(Sketchpad.arith.SumConstraint, {obj: self.position, prop: 'x'}, {obj: inputCoord, prop: 'x'}, {obj: pointerLinePt, prop: 'x'}, [3]))
-		self.isOwnerOf.push(rc.addConstraint(Sketchpad.arith.SumConstraint, {obj: self.position, prop: 'y'}, {obj: inputCoord, prop: 'y'}, {obj: pointerLinePt, prop: 'y'}, [3]))
+		self.isOwnerOf.push(rc.addConstraint(Sketchpad.arith.SumConstraint, undefined, {obj: self.position, prop: 'x'}, {obj: inputCoord, prop: 'x'}, {obj: pointerLinePt, prop: 'x'}, [3]))
+		self.isOwnerOf.push(rc.addConstraint(Sketchpad.arith.SumConstraint, undefined, {obj: self.position, prop: 'y'}, {obj: inputCoord, prop: 'y'}, {obj: pointerLinePt, prop: 'y'}, [3]))
 	    }
 	}
     })

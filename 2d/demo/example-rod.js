@@ -6,7 +6,7 @@ examples.rod = function() {
     rc.add(new Line(p1, p2))
     rc.add(new Line(p2, p3))
     
-    rc.addConstraint(Sketchpad.geom.EquivalenceConstraint, p1, p2, p2, p3)
-    rc.addConstraint(Sketchpad.geom.LengthConstraint, p1, p3, 200)
+    rc.addConstraint(Sketchpad.geom.EquivalenceConstraint, undefined, p1, p2, p2, p3)
+    rc.addConstraint(Sketchpad.geom.LengthConstraint, undefined, p1, p3, 200)
 };
 

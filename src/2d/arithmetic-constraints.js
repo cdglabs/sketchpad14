@@ -72,6 +72,10 @@ function installArithmeticConstraints(Sketchpad) {
 
     Sketchpad.arith.EqualityConstraint.prototype.description = function() { return  "Sketchpad.arith.EqualityConstraint({obj: O1, prop: p1}, {obj: O2, prop: p2}, WritableIdxs, Number K1, Number K2) states that K1 * O1.p1 = K2 * O2.p2 . Constants K1-2 default to 1. Optional WritableIdxs gives a list of indices (elements 1,and/or 2) the constraint is allowed to change," }
 
+    Sketchpad.arith.EqualityConstraint.prototype.effects = function() {
+	return [{obj: this.v1_obj, props: [this.v1_prop]}, {obj: this.v2_obj, props: [this.v2_prop]}]
+    }
+
     Sketchpad.arith.EqualityConstraint.dummy = function(x, y) {
 	return new Sketchpad.arith.EqualityConstraint({obj: new Point(1,1), prop: 'x'}, {obj: new Point(1,1), prop: 'x'}) 
     }
@@ -106,6 +110,10 @@ function installArithmeticConstraints(Sketchpad) {
 
     Sketchpad.arith.OneWayEqualityConstraint.prototype.description = function() { return  "Sketchpad.arith.OneWayEqualityConstraint({obj: O1, prop: p1}, {obj: O2, prop: p2}, Boolean secondPropIsFn) states that O1.p1 = O2.p2 (right hand-side is  read-only). If secondPropIsFn = true then O2.p2() is invoked instead." }
 
+    Sketchpad.arith.OneWayEqualityConstraint.prototype.effects = function() {
+	return [{obj: this.v1_obj, props: [this.v1_prop]}]
+    }
+
     Sketchpad.arith.OneWayEqualityConstraint.dummy = function(x, y) {
 	return new Sketchpad.arith.OneWayEqualityConstraint({obj: new Point(1,1), prop: 'x'}, {obj: new Point(1,1), prop: 'x'}) 
     }
@@ -133,6 +141,10 @@ function installArithmeticConstraints(Sketchpad) {
     sketchpad.addClass(Sketchpad.arith.InequalityConstraint, true)
 
     Sketchpad.arith.InequalityConstraint.prototype.description = function() { return  "Sketchpad.arith.InequalityConstraint({obj: O1, prop: p1}, {obj: O2, prop: p2}, isGeq, Number K1, Number K2, Number K3) states that K1 * O1.p1 >= K2 * O2.p2 + K3 (when isGeq=true) or K1 * O1.p1 <= K2 * O2.p2 + K3 (when isGeq=false). Constants K1-2 default to 1 and K3 to 0" }
+
+    Sketchpad.arith.InequalityConstraint.prototype.effects = function() {
+	return [{obj: this.v1_obj, props: [this.v1_prop]}, {obj: this.v2_obj, props: [this.v2_prop]}]
+    }
 
     Sketchpad.arith.InequalityConstraint.dummy = function(x, y) {
 	return new Sketchpad.arith.InequalityConstraint({obj: new Point(1,1), prop: 'x'}, {obj: new Point(1,1), prop: 'x'}, true) 
@@ -162,6 +174,10 @@ function installArithmeticConstraints(Sketchpad) {
     sketchpad.addClass(Sketchpad.arith.SumConstraint, true)
 
     Sketchpad.arith.SumConstraint.prototype.description = function() { return  "Sketchpad.arith.SumConstraint({obj: O1, prop: p1}, {obj: O2, prop: p2}, {obj: O3, prop: p3}, WritableIdxs, Number K1, Number K2, Number K3, Number K4) states that K1 * O1.p1 + K2 * O2.p2 = K3 * O3.p3 + K4 . Constants K1-3 default to 1 and K4 to 0. Optional WritableIdxs gives a list of indices (1, 2, or, 3) the constraint is allowed to change." } 
+
+    Sketchpad.arith.SumConstraint.prototype.effects = function() {
+	return [{obj: this.v1_obj, props: [this.v1_prop]}, {obj: this.v2_obj, props: [this.v2_prop]}, {obj: this.v3_obj, props: [this.v3_prop]}]
+    }
 
     Sketchpad.arith.SumConstraint.dummy = function(x, y) {
 	return new Sketchpad.arith.SumConstraint({obj: new Point(1,1), prop: 'x'}, {obj: new Point(1,1), prop: 'x'}, {obj: new Point(1,1), prop: 'x'}) 
@@ -197,6 +213,10 @@ function installArithmeticConstraints(Sketchpad) {
     }
 
     sketchpad.addClass(Sketchpad.arith.SumInequalityConstraint, true)
+
+    Sketchpad.arith.SumInequalityConstraint.prototype.effects = function() {
+	return [{obj: this.v1_obj, props: [this.v1_prop]}]
+    }
 
     Sketchpad.arith.SumInequalityConstraint.prototype.description = function() { return  "Sketchpad.arith.SumInequalityConstraint({obj: O1, prop: p1}, {obj: O2, prop: p2}, {obj: O3, prop: p3}, isGeq, Number K1, Number K2, Number K3, Number K4) states that K1 * O1.p1 >=  k2 * O2.p2  + k3 * O3.p3 + K4  or  K1 * O1.p1 <=  K2 * O2.p2 + K3 * O3.p3 + K4 (>= when isGeq=true)" } 
 

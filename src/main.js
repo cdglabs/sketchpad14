@@ -110,6 +110,7 @@ Sketchpad.prototype.addConstraint = function(constraint) {
     if (this.solveEvenWithoutErrorOnPriorityDifferences) {
 	this.addToPerThingPerPropertyEffectorsForConstraint(constraint, this.perThingPerPropEffectingConstraints)
 	this.computeConstraintsCompetingWithALowerPriorityOneForConstraint(constraint)
+	if (this.debug) log(this.perThingPerPropEffectingConstraints)
     }
     this.constraints.splice(addIdx, 0, constraint)
     for (var p in constraint) {
@@ -212,6 +213,7 @@ Sketchpad.prototype.doOneIteration = function(timeMillis) {
     if (this.beforeEachIteration)
 	(this.beforeEachIteration)()
     var res = this.collectPerConstraintSolutions(timeMillis, true)
+    if (this.debug) log(res)
     var didSomething = res.didSomething
     var totalError = res.error
     if (didSomething) {
@@ -268,8 +270,9 @@ Sketchpad.prototype.computeConstraintsCompetingWithALowerPriorityOneForConstrain
 	    if (cs.indexOf(constraint) >= 0) {
 		for (var i = 0; i < cs.length; i++) {
 		    var c = cs[i]
-		    if (c !== constraint && c.__priority < constraint.__priority) {
-			this.computeConstraintsCompetingWithALowerPriorityOne[constraint.__id] = true
+		    if (c !== constraint && c.__priority !== constraint.__priority) {			
+			var hC = constraint.__priority > c.__priority ? constraint : c
+			this.computeConstraintsCompetingWithALowerPriorityOne[hC.__id] = true
 			return
 		    }
 		}
@@ -500,6 +503,10 @@ Sketchpad.prototype.setOnEachTimeStep = function(onEachTimeFn, optDescription) {
 Sketchpad.prototype.unsetOnEachTimeStep = function() {
     this.onEachTimeStep = undefined
     delete(this.onEachTimeStepHandlerDescriptions['general'])
+}
+
+Sketchpad.prototype.setOption = function(opt, val) {
+    this[opt] = val
 }
 
 // --------------------------------------------------------------------

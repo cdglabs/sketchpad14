@@ -124,9 +124,9 @@ examples['soft geodesic']= function() {
 	    b = removeDuplicateCoords[key]
 	} else {
 	    b = rc.add(new Sketchpad.simulation3d.FreeBody(p, undefined, undefined, mass, 'yellow'))
-	    rc.addConstraint(Sketchpad.simulation3d.VelocityConstraint, b)
-	    rc.addConstraint(Sketchpad.simulation3d.AccelerationConstraint, b, b.acceleration)
-	    rc.addConstraint(Sketchpad.simulation3d.AirResistanceConstraint, b, 0.005)
+	    rc.addConstraint(Sketchpad.simulation3d.VelocityConstraint, undefined, b)
+	    rc.addConstraint(Sketchpad.simulation3d.AccelerationConstraint, undefined, b, b.acceleration)
+	    rc.addConstraint(Sketchpad.simulation3d.AirResistanceConstraint, undefined, b, 0.005)
 	    removeDuplicateCoords[key] = b
 	}
 	bodies.push(b)
@@ -135,8 +135,8 @@ examples['soft geodesic']= function() {
 	var b1 = bodies[e[0]], b2 = bodies[e[1]]
 	var d = Sketchpad.geom3d.distance(b1.position, b2.position)
 	var spring = rc.add(rc.add(new Sketchpad.simulation3d.Spring(b1, b2, springK, d, d * 2)))
-	rc.addConstraint(Sketchpad.simulation3d.SpringConstraint, b1, b2, spring)	
+	rc.addConstraint(Sketchpad.simulation3d.SpringConstraint, undefined, b1, b2, spring)	
     })
-    rc.addConstraint(Sketchpad.simulation.TimerConstraint, rc.add(new Timer(.1)))
+    rc.addConstraint(Sketchpad.simulation.TimerConstraint, undefined, rc.add(new Timer(.1)))
 
 };

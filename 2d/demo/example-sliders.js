@@ -1,6 +1,7 @@
 Examples.sliders = {}
 
 examples.sliders = function() {
+    sketchpad.setOption('solveEvenWithoutErrorOnPriorityDifferences', true)
     rc.setOption('dragConstraintPriority', 0)
 
     var sliders = [], sliderValueViews = []
@@ -18,7 +19,7 @@ examples.sliders = function() {
 	slider.init()
 	sliders.push(slider)
     }
-    var meterFeetC = rc.addConstraint(Sketchpad.arith.EqualityConstraint,  {obj: sliderValueViews[0], prop: 'text'}, {obj: sliderValueViews[1], prop: 'text'}, [1, 2], 3.28084, 1)
+    var meterFeetC = rc.addConstraint(Sketchpad.arith.EqualityConstraint, undefined,  {obj: sliderValueViews[0], prop: 'text'}, {obj: sliderValueViews[1], prop: 'text'}, [1, 2], 3.28084, 1)
     
     // --- Time / Event Handling ---------------------------------------------
 

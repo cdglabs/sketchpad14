@@ -82,14 +82,14 @@ examples['bridge']= function() {
 	var mass = masses[i]
 	if (mass > 0) {
 	    var body = bodies[i]
-	    rc.addConstraint(Sketchpad.simulation3d.VelocityConstraint, body)
-	    rc.addConstraint(Sketchpad.simulation3d.AccelerationConstraint, body, new Vector3D(0,
+	    rc.addConstraint(Sketchpad.simulation3d.VelocityConstraint, undefined, body)
+	    rc.addConstraint(Sketchpad.simulation3d.AccelerationConstraint, undefined, body, new Vector3D(0,
 											       //-Sketchpad.simulation.g
 											       -1
 											       , 0)) //gravity
-	    //rc.addConstraint(Sketchpad.simulation3d.AirResistanceConstraint, body, 0.00001)
-	    rc.addConstraint(Sketchpad.simulation3d.AccelerationConstraint, body, body.acceleration) //spring force
-	    rc.addConstraint(Sketchpad.simulation3d.VelocityConstraint2, body, wind) //wind 
+	    //rc.addConstraint(Sketchpad.simulation3d.AirResistanceConstraint, undefined, body, 0.00001)
+	    rc.addConstraint(Sketchpad.simulation3d.AccelerationConstraint, undefined, body, body.acceleration) //spring force
+	    rc.addConstraint(Sketchpad.simulation3d.VelocityConstraint2, undefined, body, wind) //wind 
 	}
     }
     
@@ -100,9 +100,9 @@ examples['bridge']= function() {
 	var end2 = ends[1]
 	var body1 = bodies[end1]
 	var body2 = bodies[end2]
-	rc.addConstraint(Sketchpad.simulation3d.SpringConstraint, body1, body2, spring)
+	rc.addConstraint(Sketchpad.simulation3d.SpringConstraint, undefined, body1, body2, spring)
     }
-    rc.addConstraint(Sketchpad.simulation.TimerConstraint, rc.add(new Timer(1)))
+    rc.addConstraint(Sketchpad.simulation.TimerConstraint, undefined, rc.add(new Timer(1)))
 
     // Events
     

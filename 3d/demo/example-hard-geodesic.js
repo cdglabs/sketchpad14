@@ -131,12 +131,12 @@ examples['hard geodesic']= function() {
 	var p1 = points[e[0]], p2 = points[e[1]]
 	rc.add(new Cylinder(p1, p2))
 	var d = Sketchpad.geom3d.distance(p1, p2)
-	rc.addConstraint(Sketchpad.geom3d.LengthConstraint, p1, p2, d)
+	rc.addConstraint(Sketchpad.geom3d.LengthConstraint, undefined, p1, p2, d)
 	edges.forEach(function(f) {
 	    var q1 = points[f[0]], q2 = points[f[1]]
 	    if (q1 == p2 && p1 != q2) {
 		d = Sketchpad.geom3d.distance(p1, q2)
-		rc.addConstraint(Sketchpad.geom3d.LengthConstraint, p1, q2, d)
+		rc.addConstraint(Sketchpad.geom3d.LengthConstraint, undefined, p1, q2, d)
 	    }
 	})
     })

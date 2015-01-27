@@ -56,6 +56,7 @@ function installSimulationConstraints(Sketchpad) {
 	this.length = length    
 	this.tearPointAmount = tearPointAmount
 	this.torn = false
+	this._normalColor = new Color(150, 150, 150)
     }
 
     sketchpad.addClass(Sketchpad.simulation.Spring)
@@ -94,9 +95,13 @@ function installSimulationConstraints(Sketchpad) {
 	var x1 = origin.x + p1.x
 	var x2 = origin.x + p2.x
 	if (!this.torn) {
+	    var stretch = Math.floor(Math.sqrt(Math.pow(y1 - y2, 2) + Math.pow(x1 - x2, 2)) - this.length)
+	    var stretchP = Math.abs(stretch)
+	    this._normalColor.red = Math.min(255, 150 + stretchP)
+	    line.color = this._normalColor.hexString()
 	    line.draw(canvas, origin)
 	    ctxt.fillStyle = 'black'
-	    ctxt.fillText(Math.floor(Math.sqrt(Math.pow(y1 - y2, 2) + Math.pow(x1 - x2, 2)) - this.length), (x1 + x2) / 2, (y1 + y2) / 2)
+	    ctxt.fillText(stretch, (x1 + x2) / 2, (y1 + y2) / 2)
 	}
     }
 

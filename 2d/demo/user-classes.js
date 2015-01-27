@@ -1,4 +1,22 @@
 // --- User Classes -------------------------------------------------------------
+function Color(r,g,b) {
+    this.red = r
+    this.green = g
+    this.blue = b
+}
+
+Color.prototype.hexString = function() {
+    var rStr = this.red.toString(16)
+    if (rStr.length == 1)
+	rStr = '0' + rStr
+    var gStr = this.green.toString(16)
+    if (gStr.length == 1)
+	gStr = '0' + gStr
+    var bStr = this.blue.toString(16)
+    if (bStr.length == 1)
+	bStr = '0' + bStr
+    return ('#' + rStr + gStr + bStr).toUpperCase()
+}
 
 function Point(x, y, optColor, optRadius, optUnfilled, optOpacity, optTextColor, optTextSize, optTextFont) {
     this.x = x
@@ -164,8 +182,8 @@ function Box(position, width, height, resizable, optMaintainBottomCorner, optCol
     this.lineDash = optLineDash
     if (optMaintainBottomCorner || resizable) {
 	this.bottomCorner = new Point(position.x + width, position.y + height, 'gray', 6)
-	this.bottomCornerConstraint1 = rc.addConstraint(Sketchpad.arith.SumConstraint, {obj: position, prop: 'x'}, {obj: this, prop: 'width'}, {obj: this.bottomCorner, prop: 'x'}, [3])
-	this.bottomCornerConstraint2 = rc.addConstraint(Sketchpad.arith.SumConstraint, {obj: position, prop: 'y'}, {obj: this, prop: 'height'}, {obj: this.bottomCorner, prop: 'y'}, [3])
+	this.bottomCornerConstraint1 = rc.addConstraint(Sketchpad.arith.SumConstraint, undefined, {obj: position, prop: 'x'}, {obj: this, prop: 'width'}, {obj: this.bottomCorner, prop: 'x'}, [3])
+	this.bottomCornerConstraint2 = rc.addConstraint(Sketchpad.arith.SumConstraint, undefined, {obj: position, prop: 'y'}, {obj: this, prop: 'height'}, {obj: this.bottomCorner, prop: 'y'}, [3])
 	this.addMaintainSizeConstraints()
     }
     if (resizable) {

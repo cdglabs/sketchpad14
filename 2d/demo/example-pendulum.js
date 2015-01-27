@@ -39,14 +39,14 @@ examples['pendulum'] = function() {
 
 // --- Constraints ---------------------------------------------------------
 
-    rc.addConstraint(Sketchpad.simulation.TimerConstraint, rc.add(new Timer(0.5)))
+    rc.addConstraint(Sketchpad.simulation.TimerConstraint, undefined, rc.add(new Timer(0.5)))
     for (var i = 0; i < massCount; i++) {
 	var mass = masses[i]
 	if (mass > 0) {
 	    var body = bodies[i]
-	    rc.addConstraint(Sketchpad.simulation.VelocityConstraint, body)
-	    rc.addConstraint(Sketchpad.simulation.AccelerationConstraint, body, new Vector(0, 0.8)) //gravity
-	    rc.addConstraint(Sketchpad.simulation.AccelerationConstraint, body, body.acceleration) //spring force
+	    rc.addConstraint(Sketchpad.simulation.VelocityConstraint, undefined, body)
+	    rc.addConstraint(Sketchpad.simulation.AccelerationConstraint, undefined, body, new Vector(0, 0.8)) //gravity
+	    rc.addConstraint(Sketchpad.simulation.AccelerationConstraint, undefined, body, body.acceleration) //spring force
 	}
     }
 
@@ -57,7 +57,7 @@ examples['pendulum'] = function() {
 	var end2 = ends[1]
 	var body1 = bodies[end1]
 	var body2 = bodies[end2]
-	rc.addConstraint(Sketchpad.simulation.SpringConstraint, body1, body2, spring)
+	rc.addConstraint(Sketchpad.simulation.SpringConstraint, undefined, body1, body2, spring)
     }
 
     var rocket = rc.add(new Sketchpad.simulation.FreeBody(new Point(300, 100, 'brown'), undefined, 10))
@@ -71,12 +71,12 @@ examples['pendulum'] = function() {
     var p1 = rc.add(new Point(200, 200))
     var p2 = rc.add(new Point(300, 200))    
     rc.add(new Line(p1, p2))
-    rc.addConstraint(Sketchpad.geom.LengthConstraint, p1, p2, 100)
-    rc.addConstraint(Sketchpad.geom.MotorConstraint, p1, p2, 1)
+    rc.addConstraint(Sketchpad.geom.LengthConstraint, undefined, p1, p2, 100)
+    rc.addConstraint(Sketchpad.geom.MotorConstraint, undefined, p1, p2, 1)
 
-    rc.addConstraint(Sketchpad.simulation.BounceConstraint, rocket, wall2.p1, wall2.p2)
-    rc.addConstraint(Sketchpad.simulation.BounceConstraint, bodies[1], wall2.p1, wall2.p2)
-    rc.addConstraint(Sketchpad.simulation.AccelerationConstraint, rocket, {x: 0, y: Sketchpad.simulation.g})
-    rc.addConstraint(Sketchpad.simulation.VelocityConstraint, rocket)
+    rc.addConstraint(Sketchpad.simulation.BounceConstraint, undefined, rocket, wall2.p1, wall2.p2)
+    rc.addConstraint(Sketchpad.simulation.BounceConstraint, undefined, bodies[1], wall2.p1, wall2.p2)
+    rc.addConstraint(Sketchpad.simulation.AccelerationConstraint, undefined, rocket, {x: 0, y: Sketchpad.simulation.g})
+    rc.addConstraint(Sketchpad.simulation.VelocityConstraint, undefined, rocket)
 
 }

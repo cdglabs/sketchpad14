@@ -12,12 +12,10 @@ examples['pendulum']= function() {
     
     // --- Constraints ---------------------------------------------------------
 
-    rc.addConstraint(Sketchpad.simulation3d.VelocityConstraint, b2)
-    rc.addConstraint(Sketchpad.simulation3d.AccelerationConstraint, b2, b2.acceleration)
-    rc.addConstraint(Sketchpad.simulation3d.AccelerationConstraint, b2, new Vector3D(0, -Sketchpad.simulation.g,0))
-    rc.addConstraint(Sketchpad.simulation3d.SpringConstraint, b1, b2, spring)
-     rc.addConstraint(Sketchpad.simulation.TimerConstraint, rc.add(new Timer(0.5)))
-
-   
+    rc.addConstraint(Sketchpad.simulation3d.VelocityConstraint, undefined, b2)
+    rc.addConstraint(Sketchpad.simulation3d.AccelerationConstraint, undefined, b2, b2.acceleration)
+    rc.addConstraint(Sketchpad.simulation3d.AccelerationConstraint, undefined, b2, new Vector3D(0, -Sketchpad.simulation.g,0))
+    rc.addConstraint(Sketchpad.simulation3d.SpringConstraint, undefined, b1, b2, spring)
+    rc.addConstraint(Sketchpad.simulation.TimerConstraint, undefined, rc.add(new Timer(0.5)))   
 };
 

@@ -68,8 +68,8 @@ examples['parpendicular'] = function() {
     var l2 = rc.add(new Line(p3, p4))    
 
 // --- Constraints ---------------------------------------------------------
-    rc.addConstraint(Sketchpad.simulation.TimerConstraint, rc.add(new Timer(1)))
-    rc.addConstraint(Sketchpad.geom.LengthConstraint, p1, p2, 300)
-    rc.addConstraint(Sketchpad.geom.LengthConstraint, p3, p4, 300)	
-    rc.addConstraint(Sketchpad.geom.ParPendicularConstraint, p1, p2, p3, p4)
+    rc.addConstraint(Sketchpad.simulation.TimerConstraint, undefined, rc.add(new Timer(1)))
+    rc.addConstraint(Sketchpad.geom.LengthConstraint, undefined, p1, p2, 300)
+    rc.addConstraint(Sketchpad.geom.LengthConstraint, undefined, p3, p4, 300)	
+    rc.addConstraint(Sketchpad.geom.ParPendicularConstraint, undefined, p1, p2, p3, p4)
 }
