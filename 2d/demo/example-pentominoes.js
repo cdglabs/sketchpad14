@@ -338,7 +338,7 @@ examples['pentominoes'] = function() {
     for (o in orients) {
 	var piece = rc.add(new Examples.pentominoes.Piece(o, orients[o], 0, 0, colors[o], rc.getRandomPoint(200, 150, 400, 400), squareLength), undefined, true)
 	pieces[o] = piece
-	rc.addConstraint(Examples.pentominoes.PiecePlacementConstraint, piece, board)
+	rc.addConstraint(Examples.pentominoes.PiecePlacementConstraint, undefined, piece, board)
     }
     rc.add(new TextBox(new Point(350, 50), "Select piece by clicking on its shape. Press 'space' to rotate & 'shift' to flip.", false, 20, 670, 40, '#81f781'))
     scratch.solveButton = rc.add(new TextBox(new Point(420, 100), "Click to toggle solve mode (wait a while...):", false, 20, 450, 40, '#81f781'))

@@ -136,13 +136,13 @@ examples['send money'] = function() {
     var origin = {x: 400, y: 550}, unit = 75
     for (var letter in values) {
 	if (values[letter] == -1) {
-	    rc.addConstraint(Examples.sendmoney.ChooseLetterConstraint, letter, values)
+	    rc.addConstraint(Examples.sendmoney.ChooseLetterConstraint, undefined, letter, values)
 	}
 	var letterPos = rc.add(new Point(0, 550, 'red', 14))
 	var letterVec = new Vector(0, 0)
 	letterPos._selectionIndices.push(letter)
-	rc.addConstraint(Sketchpad.arith.EqualityConstraint, {obj: letterVec, prop: 'x'}, {obj: values, prop: letter}, [1])
-	rc.addConstraint(Sketchpad.geom.CartesianPointConstraint, letterPos, letterVec, origin, unit)
+	rc.addConstraint(Sketchpad.arith.EqualityConstraint, undefined, {obj: letterVec, prop: 'x'}, {obj: values, prop: letter}, [1])
+	rc.addConstraint(Sketchpad.geom.CartesianPointConstraint, undefined, letterPos, letterVec, origin, unit)
     }
     var problemConstraint = new Examples.sendmoney.SendMoreMoneyConstraint(rows, values)
     var solveOn = false

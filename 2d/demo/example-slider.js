@@ -23,11 +23,12 @@ sketchpad.addClass(Examples.slider.Slider)
 Examples.slider.Slider.prototype.propertyTypes = {framePosition: 'Point'}
 
 Examples.slider.Slider.prototype.init = function() {
-    rc.addConstraint(Sketchpad.arith.EqualityConstraint, {obj: this.frame.position, prop: this._prop2}, {obj: this.position, prop: this._prop2}, [2])
-    rc.addConstraint(Sketchpad.arith.InequalityConstraint, {obj: this.position, prop: this._prop1}, {obj: this.frame.position, prop: this._prop1}, true)
-    rc.addConstraint(Sketchpad.arith.SumInequalityConstraint, {obj: this.position, prop: this._prop1}, {obj: this.frame.position, prop: this._prop1}, {obj: this.frame, prop: this._prop3}, false, 1, 1, 1, -this.button[this._prop3])
+    // higher priority than drag coordinate constraint to ensure never goes out of frame
+    rc.addConstraint(Sketchpad.arith.EqualityConstraint, 2, {obj: this.frame.position, prop: this._prop2}, {obj: this.position, prop: this._prop2}, [2]) 
+    rc.addConstraint(Sketchpad.arith.InequalityConstraint, 0, {obj: this.position, prop: this._prop1}, {obj: this.frame.position, prop: this._prop1}, true)
+    rc.addConstraint(Sketchpad.arith.SumInequalityConstraint, 0, {obj: this.position, prop: this._prop1}, {obj: this.frame.position, prop: this._prop1}, {obj: this.frame, prop: this._prop3}, false, 1, 1, 1, -this.button[this._prop3])
     if (this.valueView)
-	this.valueConstraint = rc.addConstraint(Examples.slider.SliderValueConstraint, this, this.valueView)
+	this.valueConstraint = rc.addConstraint(Examples.slider.SliderValueConstraint, undefined, this, this.valueView)
 }
 
 Examples.slider.Slider.prototype.valueFromPosition = function() {
@@ -107,6 +108,8 @@ Examples.slider.SliderValueConstraint.prototype.solve = function(pseudoTime, pre
 }
 
 examples.slider = function() {
+    //sketchpad.setOption('debug', true)
+    sketchpad.setOption('solveEvenWithoutErrorOnPriorityDifferences', true)
     rc.setOption('dragConstraintPriority', 0)
     // --- Data ----------------------------------------------------------------
     // --- Constraints ---------------------------------------------------------

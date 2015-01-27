@@ -69,12 +69,12 @@ examples['bounce'] = function() {
     
 // --- Constraints ---------------------------------------------------------
 
-    rc.addConstraint(Sketchpad.simulation.TimerConstraint, rc.add(new Timer(1)))
-    rc.addConstraint(Sketchpad.simulation.BounceConstraint, rocket, ground1.p1, ground1.p2)
-    rc.addConstraint(Sketchpad.simulation.BounceConstraint, rocket, ground2.p1, ground2.p2)
-    rc.addConstraint(Sketchpad.simulation.BounceConstraint, rocket, wall1.p1, wall1.p2)
-    rc.addConstraint(Sketchpad.simulation.BounceConstraint, rocket, wall2.p1, wall2.p2)
-    rc.addConstraint(Sketchpad.simulation.AccelerationConstraint, rocket, {x: 0, y: Sketchpad.simulation.g / 10})
-    rc.addConstraint(Sketchpad.simulation.VelocityConstraint, rocket)
-    rc.addConstraint(Sketchpad.simulation.JetEngineConstraint, rocket, jetAcceleration)
+    rc.addConstraint(Sketchpad.simulation.TimerConstraint, undefined, rc.add(new Timer(1)))
+    rc.addConstraint(Sketchpad.simulation.BounceConstraint, undefined, rocket, ground1.p1, ground1.p2)
+    rc.addConstraint(Sketchpad.simulation.BounceConstraint, undefined, rocket, ground2.p1, ground2.p2)
+    rc.addConstraint(Sketchpad.simulation.BounceConstraint, undefined, rocket, wall1.p1, wall1.p2)
+    rc.addConstraint(Sketchpad.simulation.BounceConstraint, undefined, rocket, wall2.p1, wall2.p2)
+    rc.addConstraint(Sketchpad.simulation.AccelerationConstraint, undefined, rocket, {x: 0, y: Sketchpad.simulation.g / 10})
+    rc.addConstraint(Sketchpad.simulation.VelocityConstraint, undefined, rocket)
+    rc.addConstraint(Sketchpad.simulation.JetEngineConstraint, undefined, rocket, jetAcceleration)
 }

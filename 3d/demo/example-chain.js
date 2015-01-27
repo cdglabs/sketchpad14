@@ -13,13 +13,13 @@ examples['chain']= function() {
 	p2 = new Point3D(x, y, z)
 	s2 = rc.add(new Sphere(p2))
 	var l1 = rc.add(new Cylinder(p1, p2))
-	rc.addConstraint(Sketchpad.geom3d.LengthConstraint, p1, p2, 50)
+	rc.addConstraint(Sketchpad.geom3d.LengthConstraint, undefined, p1, p2, 50)
 	points.push(p1)
 	if (i < 8)
 	    p1 = p2
     }
-    rc.addConstraint(Sketchpad.geom3d.MotorConstraint, points[0], points[1], 1)
-    rc.addConstraint(Sketchpad.geom3d.MotorConstraint, points[count-2], points[count-1], 1)
-    rc.addConstraint(Sketchpad.simulation.TimerConstraint, rc.add(new Timer3D(10)))
+    rc.addConstraint(Sketchpad.geom3d.MotorConstraint, undefined, points[0], points[1], 1)
+    rc.addConstraint(Sketchpad.geom3d.MotorConstraint, undefined, points[count-2], points[count-1], 1)
+    rc.addConstraint(Sketchpad.simulation.TimerConstraint, undefined, rc.add(new Timer3D(10)))
 };
 

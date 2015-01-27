@@ -153,5 +153,5 @@ examples['hello world'] = function() {
 
 // --- Constraints ---------------------------------------------------------
     
-    rc.addConstraint(Examples.hello.StackedBoxesConstraint, b1, b2)
+    rc.addConstraint(Examples.hello.StackedBoxesConstraint, undefined, b1, b2)
 }

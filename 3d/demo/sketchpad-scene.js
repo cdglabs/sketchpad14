@@ -380,8 +380,7 @@ SketchpadScene.prototype.pointerdown = function(e) {
 	var x = point.x
 	var y = point.y
 	var z = point.z
-	this.mouseDragCoordConstraint = this.addConstraint(Sketchpad.geom3d.CoordinateConstraint, point, x, y, z)
-	this.mouseDragCoordConstraint.__priority = this.dragConstraintPriority
+	this.mouseDragCoordConstraint = this.addConstraint(Sketchpad.geom3d.CoordinateConstraint, this.dragConstraintPriority, point, x, y, z)
     } 
     this.redraw()
 }
@@ -594,11 +593,13 @@ SketchpadScene.prototype.addTemp = function(t) {
     return t
 }
 
-SketchpadScene.prototype.addConstraint = function(ctor /* , arguments, ... */) {
+SketchpadScene.prototype.addConstraint = function(ctor, priority /* , arguments, ... */) {
     if (ctor) {
-	var args = Array.prototype.slice.call(arguments)
+	var args = Array.prototype.slice.call(arguments, 2)
+	args.unshift(undefined)
 	ctor = ctor.bind.apply(ctor, args)
 	var c = new ctor()
+	if (priority !== undefined) c.__priority = priority
 	return this.addNewConstraint(c)
     } else
 	alert('No such class')
@@ -1090,8 +1091,8 @@ function SketchpadTile(name, inputs, ownRun, buttonsInfo, inspectorOfObj, fixedI
 		var pointerLine = new Line(pointerLinePt, inputValue.center(), 'orange', 2, 4)
 		input.pointerLine = pointerLine
 		self.parts.push(pointerLine)
-		self.isOwnerOf.push(rc.addConstraint(Sketchpad.arith.SumConstraint, {obj: self.position, prop: 'x'}, {obj: inputCoord, prop: 'x'}, {obj: pointerLinePt, prop: 'x'}, [3]))
-		self.isOwnerOf.push(rc.addConstraint(Sketchpad.arith.SumConstraint, {obj: self.position, prop: 'y'}, {obj: inputCoord, prop: 'y'}, {obj: pointerLinePt, prop: 'y'}, [3]))
+		self.isOwnerOf.push(rc.addConstraint(Sketchpad.arith.SumConstraint, undefined, {obj: self.position, prop: 'x'}, {obj: inputCoord, prop: 'x'}, {obj: pointerLinePt, prop: 'x'}, [3]))
+		self.isOwnerOf.push(rc.addConstraint(Sketchpad.arith.SumConstraint, undefined, {obj: self.position, prop: 'y'}, {obj: inputCoord, prop: 'y'}, {obj: pointerLinePt, prop: 'y'}, [3]))
 	    }
 	}
     })

@@ -1,7 +1,6 @@
 examples['bridge'] = function() {
     //sketchpad.solveEvenWithoutError = true
-// --- Data ----------------------------------------------------------------
-
+// --- Data ----------------------------------------------------------------    
     var massCount = 13, springCount = 22, center = [700, 200]
     var masses = [], bodies = [], springKs = [], springs = []
     for (var i = 0; i < massCount; i++)
@@ -32,6 +31,8 @@ examples['bridge'] = function() {
     var springLens = [60, 60, 100, 100, 80, 80, 80, 80, 100, 100, 20 * Math.sqrt(17), 20 * Math.sqrt(17), 80, 80, 60, 60, 100, 100, 20 * Math.sqrt(10), 20 * Math.sqrt(10), 100, 100, 60, 60, 20 * Math.sqrt(34), 20 * Math.sqrt(34), 20 * Math.sqrt(10), 20 * Math.sqrt(10)]
     var springEnds = [[0, 1], [2, 3], [0, 4], [2, 4], [1, 4], [3, 4], [0, 5], [2, 7], [1, 5], [3, 7], [1, 6], [3, 8], [5, 6], [7, 8], [5, 9], [7, 11], [9, 6], [11, 8], [10, 6], [12, 8], [9, 10], [11, 12], [9, 13], [11, 15], [13, 10], [15, 12], [13, 14], [15, 16], [10, 14], [16, 12]]
 
+    var solveButton = rc.add(new TextBox(new Point(1000, 50), ('Turn wind off'), false, 20, 250, 40, '#f6ceec'))
+
     // wind
     var windOrigin = new Point(700, 100)
     var windEnd = rc.add(new Point(650, 100, 'green'))
@@ -59,17 +60,17 @@ examples['bridge'] = function() {
 
 // --- Constraints ---------------------------------------------------------
 
-    rc.addConstraint(Sketchpad.simulation.TimerConstraint, rc.add(new Timer(1)))
+    rc.addConstraint(Sketchpad.simulation.TimerConstraint, undefined, rc.add(new Timer(1)))
 
     for (var i = 0; i < massCount; i++) {
 	var mass = masses[i]
 	if (mass > 0) {
 	    var body = bodies[i]
-	    rc.addConstraint(Sketchpad.simulation.VelocityConstraint, body)
-	    rc.addConstraint(Sketchpad.simulation.AccelerationConstraint, body, new Vector(0, 1)) //gravity
-	    //rc.addConstraint(Sketchpad.simulation.AirResistanceConstraint, body, 0.0000001)
-	    rc.addConstraint(Sketchpad.simulation.AccelerationConstraint, body, body.acceleration) //spring force
-	    rc.addConstraint(Sketchpad.simulation.VelocityConstraint2, body, wind) //wind 
+	    rc.addConstraint(Sketchpad.simulation.VelocityConstraint, undefined, body)
+	    rc.addConstraint(Sketchpad.simulation.AccelerationConstraint, undefined, body, new Vector(0, 1)) //gravity
+	    //rc.addConstraint(Sketchpad.simulation.AirResistanceConstraint, undefined, body, 0.0000001)
+	    rc.addConstraint(Sketchpad.simulation.AccelerationConstraint, undefined, body, body.acceleration) //spring force
+	    rc.addConstraint(Sketchpad.simulation.VelocityConstraint2, undefined, body, wind) //wind 
 	}
     }
 
@@ -80,16 +81,29 @@ examples['bridge'] = function() {
 	var end2 = ends[1]
 	var body1 = bodies[end1]
 	var body2 = bodies[end2]
-	rc.addConstraint(Sketchpad.simulation.SpringConstraint, body1, body2, spring)
+	rc.addConstraint(Sketchpad.simulation.SpringConstraint, undefined, body1, body2, spring)
     }
 
     // Events
+
+    var windOn = true
     
     sketchpad.setOnEachTimeStep(function(pseudoTime, prevPseudoTime) {
-	var d = Math.random() * 2 * (Math.random() > 0.5 ? 1 : -1)
-	wind.end.x += d
-	wind.end.y += d
+	if (windOn) {
+	    var d = Math.random() * 2 * (Math.random() > 0.5 ? 1 : -1)
+	    wind.end.x += d
+	    wind.end.y += d
+	}
     }, "randomize intendity of wind")
 
+    sketchpad.registerEvent('pointerup', function(e) {
+	if (rc.selection == solveButton) {
+	    windOn = !windOn
+	    if (!windOn) 
+		wind.end.set(wind.origin)
+	    solveButton.text = 'Turn wind ' + (windOn ? 'off' : 'on')
+	    rc.redraw()
+	}}, "button toggles wind")
+    
 
 }

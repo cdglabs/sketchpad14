@@ -26,10 +26,10 @@ Examples.textlayout.TextArea.prototype.init = function() {
     rc.add(this.cursor, this)
     this.slider = rc.add(new Examples.slider.Slider({obj: this, prop: 'viewOffset'}, false, new Point(0, 0), 20, this.box.height, {start: 0, end: 1}, true))
     this.slider.init()
-    rc.addConstraint(Sketchpad.arith.EqualityConstraint, {obj: this.box.bottomCorner, prop: 'x'}, {obj: this.slider.frame.position, prop: 'x'}, [2])
-    rc.addConstraint(Sketchpad.arith.EqualityConstraint, {obj: this.box.position, prop: 'y'}, {obj: this.slider.frame.position, prop: 'y'}, [2])
-    rc.addConstraint(Sketchpad.arith.EqualityConstraint, {obj: this.box, prop: 'height'}, {obj: this.slider.frame, prop: 'height'}, [2])
-    this.cursorConstraint = rc.addConstraint(Examples.textlayout.CharFollowAdjacentsConstraint, this.cursor, this)
+    rc.addConstraint(Sketchpad.arith.EqualityConstraint, undefined, {obj: this.box.bottomCorner, prop: 'x'}, {obj: this.slider.frame.position, prop: 'x'}, [2])
+    rc.addConstraint(Sketchpad.arith.EqualityConstraint, undefined, {obj: this.box.position, prop: 'y'}, {obj: this.slider.frame.position, prop: 'y'}, [2])
+    rc.addConstraint(Sketchpad.arith.EqualityConstraint, undefined, {obj: this.box, prop: 'height'}, {obj: this.slider.frame, prop: 'height'}, [2])
+    this.cursorConstraint = rc.addConstraint(Examples.textlayout.CharFollowAdjacentsConstraint, undefined, this.cursor, this)
     this.optimalBreaksConstraint = new Examples.textlayout.WordWrapOptimalBreaks(this)
     this.optimalBreaksConstraint.__priority = 2
     this.justifyConstraint = new Examples.textlayout.WordWrapJustify(this)
@@ -109,7 +109,7 @@ Examples.textlayout.TextArea.prototype.addChar = function(chr) {
     }
     cursor.prev = newChar
 
-    var constraint = rc.addConstraint(Examples.textlayout.CharFollowAdjacentsConstraint, newChar, this)
+    var constraint = rc.addConstraint(Examples.textlayout.CharFollowAdjacentsConstraint, undefined, newChar, this)
     constraint.___container = this.box
     var mode = sketchpad.scratch.wordWrapModes[sketchpad.scratch.wordWrapMode]
     if (mode === 'optimal' || mode === 'justify') {
@@ -409,9 +409,7 @@ Examples.textlayout.WordWrapOptimalBreaks.prototype.description = function() {
     return "Examples.textlayout.WordWrapOptimalBreaks(TextArea T) states that the text in the T should have optimal placement of line breaks (based on the dynamic programming algorithm). For those character's that have been chosen to be first in lines, the constraint sates that they should be placed in the beginning of the lines."
 }
 
-
 sketchpad.addClass(Examples.textlayout.WordWrapOptimalBreaks, true)
-
 
 Examples.textlayout.WordWrapOptimalBreaks.prototype.effects = function() {
     var textArea = this.textArea
