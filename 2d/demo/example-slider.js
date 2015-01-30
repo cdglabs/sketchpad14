@@ -13,9 +13,11 @@ Examples.slider.Slider = function Examples__slider__Slider(valueView, isHoriz, f
     var m = Math.max(2, (this.range.end - this.range.start) / 10)
     var w = this.frame.width / (isHoriz ? m : 1)
     var h = this.frame.height / (isHoriz ? 1 : m)
-    this.button = new Box(new Point(this.frame.position.x, this.frame.position.y), w, h, undefined, undefined, undefined, 'black')
+    this.button = new Box(new Point(this.frame.position.x, this.frame.position.y), w, h, undefined, undefined, undefined, '#bdbdbd')
     this.position = this.button.position
     this.valueToSliderPositionMode = valueToSliderPositionMode
+    var p = this.button.position   
+    this._buttonLine = new Line(p.plus({x: w/2, y: 5}), p.plus({x: w/2, y: h - 5}))
 }
 
 sketchpad.addClass(Examples.slider.Slider)
@@ -51,6 +53,10 @@ Examples.slider.Slider.prototype.draw = function(canvas, origin, options) {
     var ctxt = canvas.ctxt
     this.frame.draw(canvas, origin)
     this.button.draw(canvas, origin)
+    var p = this.button.position, w = this.button.width
+    this._buttonLine.p1 = p.plus({x: w/2, y: 5})
+    this._buttonLine.p2 = p.plus({x: w/2, y: this.button.height - 5})
+    this._buttonLine.draw(canvas, origin)
 }
 
 Examples.slider.Slider.prototype.grabPoint = function() {

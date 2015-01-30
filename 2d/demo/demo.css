@@ -9,7 +9,7 @@ canvas {
 }
 
 demos, constraints, classes, tiles, shortcuts {
-    position: absolute;
+    position: fixed;
     top: 20px;
     right: 20px;
     z-index: 2000;
@@ -19,26 +19,26 @@ demos, constraints, classes, tiles, shortcuts {
 }
 
 actions {
-    position: absolute;
+    position: fixed;
     top: 20px;
     left: 20px;
     z-index: 2000;
 }
 
 bins {
-    position: absolute;
+    position: fixed;
     bottom: 20px;
     left: 20px;
     z-index: 2000;
 }
 
 buttons {
-    position: absolute;
+    position: fixed;
     z-index: 2000;
 }
 
 button {
-    position: absolute;
+    position: fixed;
     z-index: 2000;
     left: 730px;
     top: 550px;
@@ -87,7 +87,7 @@ button:hover {
 showEachIterationButton {
     padding: 4pt;
     background: #eef;
-    position: absolute;
+    position: fixed;
     bottom: 20px;
     left: 40%;
     color: blue;
@@ -101,7 +101,7 @@ showEachIterationButton:hover {
 iterationsPerFrame {
     padding: 4pt;
     background: #f8f8f8;
-    position: absolute;
+    position: fixed;
     bottom: 20px;
     right: 20px;
     color: blue;

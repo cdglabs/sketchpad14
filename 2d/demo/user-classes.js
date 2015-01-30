@@ -171,7 +171,7 @@ Line.prototype.border = function() {
     return this
 }
 
-function Box(position, width, height, resizable, optMaintainBottomCorner, optColor, optBgColor, optNoBorder, optLineDash) {
+function Box(position, width, height, resizable, optMaintainBottomCorner, optColor, optBgColor, optNoBorder, optLineDash, optOpacity) {
     this.__origin = position
     this.position = position    
     this.width = width
@@ -180,6 +180,7 @@ function Box(position, width, height, resizable, optMaintainBottomCorner, optCol
     this.bgColor = optBgColor
     this.hasBorder = !optNoBorder
     this.lineDash = optLineDash
+    this.opacity = optOpacity
     if (optMaintainBottomCorner || resizable) {
 	this.bottomCorner = new Point(position.x + width, position.y + height, 'gray', 6)
 	this.bottomCornerConstraint1 = rc.addConstraint(Sketchpad.arith.SumConstraint, undefined, {obj: position, prop: 'x'}, {obj: this, prop: 'width'}, {obj: this.bottomCorner, prop: 'x'}, [3])
@@ -229,8 +230,10 @@ Box.prototype.grabPoint = function() {
 }
 
 Box.prototype.draw = function(canvas, origin, options) {
-    var ctxt = canvas.ctxt
+    var ctxt = canvas.ctxt    
     ctxt.beginPath()
+    if (this.opacity)
+	ctxt.globalAlpha = this.opacity
     ctxt.rect(this.position.x + origin.x, this.position.y + origin.y, this.width, this.height)
     ctxt.lineWidth = 1
     var color = options && options['color'] ? options['color'] : this.color
@@ -265,7 +268,7 @@ Box.prototype.center = function() {
     return this.position.midPoint(new Point(this.position.x + this.width, this.position.y + this.height))
 }
 
-function TextBox(position, optText, optMultiLine, optFontSize, optWidth, optHeight, optBgColor, optFont, optFontColor, optHasNoBorder) {
+function TextBox(position, optText, optMultiLine, optFontSize, optWidth, optHeight, optBgColor, optFont, optFontColor, optHasNoBorder, optFontStyle, optNoCentering, optMargin) {
     this.position = position
     this.text = optText === undefined ? '' : optText
     this.multiLine = optMultiLine
@@ -275,6 +278,10 @@ function TextBox(position, optText, optMultiLine, optFontSize, optWidth, optHeig
     this.height = optHeight || (this.fontSize * 3)
     this.font = optFont || 'Georgia'
     this.fontColor = optFontColor || 'black'
+    this.margin = optMargin || (this.fontSize / 3)
+    this.hasBorder = !optHasNoBorder
+    this.centering = !optNoCentering
+    this.style = optFontStyle || ''
     this.box = new Box(position, this.width, this.height, false, false, optBgColor, optBgColor, optHasNoBorder)
     if (this.multiLine) {
 	this.lines = []
@@ -298,16 +305,18 @@ TextBox.prototype.solutionJoins = function() {
 TextBox.prototype.draw = function(canvas, origin) {
     var ctxt = canvas.ctxt
     var x = this.position.x + origin.x, y = this.position.y + origin.y
-    this.box.draw(canvas, origin)
-    ctxt.font = this.fontSize + 'px ' + this.font
+    if (this.hasBorder)
+	this.box.draw(canvas, origin)
+    ctxt.font = this.style + ' ' + this.fontSize + 'px ' + this.font
     ctxt.fillStyle = this.fontColor    
     var lines = this.multiLine ? this.lines : [this.text]
     var width = this.width
-    var margin = this.fontSize / 3
+    var margin = this.margin
+    var centering = this.centering
     for (var i = 0; i < lines.length; i++) {
 	var txt = lines[i]
-	var offset = (width - (('' + txt).length * this.fontSize / 2.5)) / 2
-	ctxt.fillText(txt, x + offset, y + margin + i * this.fontSize + 20)
+	var offset = centering ? (width - (('' + txt).length * this.fontSize / 2.5)) / 2 : 0
+	ctxt.fillText(txt, x + offset, y + margin + i * (this.fontSize + 12) + 15)
     }
 }
 
@@ -409,6 +418,66 @@ PointVector.prototype.magnitude = function() {
     return scaledBy(minus(this.end, this.origin), this.scale)
 }
 
+function Image1(position, url, optRotation, optScale, optOpacity) {
+    this.position = position
+    this.url = url
+    this.rotation = optRotation
+    this.scale = optScale || 1
+    this.opacity = optOpacity
+    this._img = new Image()
+    this._img.src = url
+    this._box = new Box(position, this._img.width * this.scale, this._img.height * this.scale)
+}
+
+Image1.prototype.propertyTypes = {position: 'Point', url: 'String'}
+
+Image1.dummy = function(x, y) {
+    return new Image1(new Point(x - 50, y - 50), '')
+}
+
+sketchpad.addClass(Image1)
+
+Image1.prototype.solutionJoins = function() { 
+    return {url: sketchpad.lastOneWinsJoinSolutions}
+}
+
+Image1.prototype.draw = function(canvas, origin, options) {
+    var ctxt = canvas.ctxt
+    var position = this.position, scale = this.scale
+    this._img.src = this.url
+    if (this.opacity)
+	ctxt.globalAlpha = this.opacity
+    var objectRotationCenterX = position.x, objectRotationCenterY = position.y
+    var widthScale = (this._box.width),  heightScale = (this._box.height)
+    if (this.rotation) {
+	var offX = objectRotationCenterX + (widthScale / 2), offY = objectRotationCenterY + (heightScale / 2)
+	ctxt.translate(offX, offY)
+	ctxt.rotate(this.rotation)
+	ctxt.drawImage(this._img, -(widthScale / 2), -(heightScale / 2), widthScale, heightScale)
+	ctxt.rotate(-this.rotation)
+	ctxt.translate(-offX, -offY)
+    } else
+	ctxt.drawImage(this._img,  objectRotationCenterX, objectRotationCenterY, widthScale, heightScale)
+    this._box.width = (this._img.width) * scale
+    this._box.height = (this._img.height) * scale
+}
+
+Image1.prototype.containsPoint = function(x, y) {
+    return this._box.containsPoint(x, y)
+}
+
+Image1.prototype.center = function() {
+    return this._box.center()
+}
+
+Image1.prototype.border = function() {
+    return this._box
+}
+
+Image1.prototype.grabPoint = function() {
+    return this.position
+}
+
 function Timer(stepSize, optPos) {
     this.stepSize = stepSize
     this.position = optPos || new Point(150,25)
@@ -442,7 +511,9 @@ Timer.prototype.center = function(x, y) {
 }
 
 Timer.prototype.draw = function(canvas, origin) {
-    this.position.draw(canvas, origin)
-    var txt = 'time: ' + Math.floor(rc.sketchpad.pseudoTime) + ', step: ' + this.stepSize
-    rc.ctxt.fillText(txt, this.position.x + origin.x - 30, this.position.y + origin.y + 25)
+    if (!this._invisible) {
+	this.position.draw(canvas, origin)
+	var txt = 'time: ' + Math.floor(rc.sketchpad.pseudoTime) + ', step: ' + this.stepSize
+	rc.ctxt.fillText(txt, this.position.x + origin.x - 30, this.position.y + origin.y + 25)
+    }
 }

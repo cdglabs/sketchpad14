@@ -219,7 +219,10 @@ Sketchpad.prototype.doOneIteration = function(timeMillis) {
     if (didSomething) {
 	var allSolutions = res.solutions
 	var collectedSolutions = this.collectPerPropertySolutions(allSolutions)
-	applySolutions(this, collectedSolutions)
+	if (this.unrollOnConflicts)
+	    applySolutionsWithUnrollOnConflict(this, collectedSolutions)
+	else
+	    applySolutions(this, collectedSolutions)
     }
     return totalError
 }
@@ -362,6 +365,9 @@ Sketchpad.prototype.iterateSearchChoicesForUpToMillis = function(timeMillis) {
 	    //copy here...	    
 	    if (!last)
 		copied = this.getCurrentPropValuesAffectableBySolutions(collectedSolutions)
+	    if (this.unrollOnConflicts)
+	    applySolutionsWithUnrollOnConflict(this, collectedSolutions)
+	else
 	    applySolutions(this, collectedSolutions)
 	    res = this.iterateForUpToMillis(choiceTO)	    
 	    var choiceErr = this.computeCurrentError()
@@ -456,6 +462,23 @@ Sketchpad.prototype.arrayAddJoinSolutions = function(curr, solutions) {
 Sketchpad.prototype.dictionaryAddJoinSolutions = function(curr, solutions) {
     solutions.forEach(function(v) { for (var k in v) curr[k] = v[k] })
     return curr
+}
+
+Sketchpad.prototype.dictionaryAddNoConflictJoinSolutions = function(curr, solutions) {
+    var seen = {}
+    solutions.forEach(function(v) {
+	for (var k in v) {
+	    var prev = seen[k]
+	    var newV = v[k]
+	    if (prev && prev !== newV) {
+		this.discardIteration = true
+		log('conflict in this solution set:', solutions) 
+		return curr
+	    }
+	    seen[k] = newV
+	}
+    })
+    return this.dictionaryAddJoinSolutions(curr, solutions)
 }
 
 Sketchpad.prototype.defaultJoinSolutions = function(curr, solutions) {
@@ -571,6 +594,44 @@ function applySolutions(sketchpad, solutions) {
 	}
     }
 }
+
+function applySolutionsWithUnrollOnConflict(sketchpad, solutions) {
+    this.discardIteration = false   
+    //log2(solutions)
+    var keys1 = Object.keys(solutions)
+    for (var i = 0; i < keys1.length; i++) {
+	var objId = keys1[i]
+	var perProp = solutions[objId]
+	var currObj = sketchpad.objMap[objId]
+	var keys2 = Object.keys(perProp)
+	for (var j = 0; j < keys2.length; j++) {
+	    var prop = keys2[j]
+	    var propSolns = perProp[prop]
+	    var currVal = currObj[prop]
+	    currObj[prop + '__old'] = currVal
+	    var joinFn = (currObj.solutionJoins !== undefined && (currObj.solutionJoins())[prop] !== undefined) ?
+		(currObj.solutionJoins())[prop] : sketchpad.sumJoinSolutions
+	    currObj[prop] = (joinFn.bind(sketchpad))(currVal, propSolns)
+	}
+    }
+    if (!this.discardIteration)
+	return
+    log('discarding solutions since there was a conflict...')
+    for (var i = 0; i < keys1.length; i++) {
+	var objId = keys1[i]
+	var perProp = solutions[objId]
+	var currObj = sketchpad.objMap[objId]
+	var keys2 = Object.keys(perProp)
+	for (var j = 0; j < keys2.length; j++) {
+	    var prop = keys2[j]
+	    var propSolns = perProp[prop]
+	    var currVal = currObj[prop]
+	    currObj[prop] = currObj[prop + '__old']
+	    delete currObj[prop + '__old']
+	}
+    }
+}
+
 
 function involves(constraint, obj) {
     for (var p in constraint) {
