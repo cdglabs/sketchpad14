@@ -322,8 +322,8 @@ SketchpadCanvas.prototype.findThingPointedTo = function(e) {
 	var t = all[idx]
 	if (t.containsPoint && !t._unselectable) {
 	    var origin = t.__container.__origin
-	    var x = e.clientX - origin.x
-	    var y = e.clientY - origin.y
+	    var x = e.clientX + window.scrollX - origin.x 
+	    var y = e.clientY + window.scrollY - origin.y 
 	    if (t.containsPoint(x, y)) {
 		found = true
 		thing = t
@@ -401,7 +401,7 @@ SketchpadCanvas.prototype.pointerdown = function(e) {
 	this.clearSelections()
 	if (!this.pointMode) { 
 	    if (!this.inDragSelectMode) {
-		this.selectionBox = new Box(new Point(e.clientX, e.clientY), 0, 0, false, false, undefined, undefined, undefined, 10)
+		this.selectionBox = new Box(new Point(e.clientX + window.scrollX, e.clientY + window.scrollY), 0, 0, false, false, undefined, undefined, undefined, 10)
 	    }
 	}
     }
@@ -410,8 +410,8 @@ SketchpadCanvas.prototype.pointerdown = function(e) {
     if (point) {
 	if (!thing._unmovable) {
 	    var offset = pointedToThing.offset	
-	    var x = e.clientX
-	    var y = e.clientY
+	    var x = e.clientX + window.scrollX
+	    var y = e.clientY + window.scrollY
 	    var constraint = this.addConstraint(Sketchpad.geom.CoordinateConstraint, this.dragConstraintPriority, point, x, y)
 	    constraint._offset = offset
 	    this.points.splice(pointIdx, 1)
@@ -429,7 +429,7 @@ SketchpadCanvas.prototype.pointerdown = function(e) {
 	}
     } else if (this.pointMode) {
 	var oldLastPoint = this.lastPoint
-	this.lastPoint = this.addPoint(e.clientX, e.clientY)
+	this.lastPoint = this.addPoint(e.clientX + window.scrollX, e.clientY + window.scrollY)
 	if (oldLastPoint) {
 	    this.addLine(oldLastPoint, this.lastPoint)
 	}
@@ -440,13 +440,13 @@ SketchpadCanvas.prototype.pointerdown = function(e) {
 SketchpadCanvas.prototype.pointermove = function(e) {    
     var finger = this.fingers[e.pointerId]
     if (finger) {
-	finger.x = e.clientX
-	finger.y = e.clientY
+	finger.x = e.clientX + window.scrollX
+	finger.y = e.clientY + window.scrollY
     }
     if (this.inDragSelectMode) {
 	var p = this.selectionBox.position
-	this.selectionBox.width = e.clientX - p.x
-	this.selectionBox.height = e.clientY - p.y
+	this.selectionBox.width = e.clientX + window.scrollX - p.x
+	this.selectionBox.height = e.clientY + window.scrollY - p.y
     }
 }
 
@@ -751,6 +751,8 @@ SketchpadCanvas.prototype.mergeInputElementValueWithSelection = function(inputEl
 	var isThing = thing && thing.__isSketchpadThing
 	var prop = inputElement.representsProperty
 	var tp = currObject.propertyTypes ? currObject.propertyTypes[prop] : undefined
+	if (thing.grabPoint && tp === 'Point' && tp !== thing.__type)
+	    thing = thing.grabPoint()
 	if (tp === undefined || (tp === thing.__type)) {
 	    var oldThing
 	    if (isThing) {
@@ -837,6 +839,8 @@ SketchpadCanvas.prototype.removeConstraintsInvolving = function(unwanted) {
 SketchpadCanvas.prototype.removeConstraint = function(unwanted) {
     if (unwanted.grabPoint && unwanted !== unwanted.grabPoint) 
         this.removeGrabPoint(unwanted.grabPoint(), true)
+    this.sketchpad.thingsWithOnEachTimeStepFn = this.sketchpad.thingsWithOnEachTimeStepFn.filter(function(thing) { return thing !== unwanted })
+    this.sketchpad.thingsWithAfterEachTimeStepFn = this.sketchpad.thingsWithAfterEachTimeStepFn.filter(function(thing) { return thing !== unwanted })
     this.sketchpad.removeConstraint(unwanted)
 }
 
@@ -848,6 +852,8 @@ SketchpadCanvas.prototype.clearCanvas = function() {
 SketchpadCanvas.prototype.clear = function() {
     if (this.codeEditMode) this.toggleCodeEditMode()
     this.sketchpad.clear()
+    this.canvas.width = window.innerWidth
+    this.canvas.height = window.innerHeight    
     this.clearCanvas()
     this.millisecondsPerFrame = 1000 / 65
     this.onlyRenderOnConvergence = false   
@@ -1219,8 +1225,8 @@ SketchpadTile.prototype.draw = function(canvas, origin) {
     var bottom = this.position.y - (canvas.codeEditMode ? (canvas.thingCodeInspectorSize.height + 7) : 0)
     for (var i = 0; i < this.buttons.length; i++) {
 	var b = this.buttons[i]
-	b.style.setProperty('left', (right - (-23 + (20 * i))) + 'px')
-	b.style.setProperty('top',  (bottom - 9) + 'px')
+	b.style.setProperty('left', (right - (-31 + (20 * i)) - window.scrollX) + 'px')
+	b.style.setProperty('top',  (bottom - (1 + window.scrollY)) + 'px')
     }
     if (this.drawMtd)
 	this.drawMtd(canvas, pos)
