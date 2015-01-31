@@ -335,7 +335,9 @@ examples['polygons'] = function() {
     var swingingShapes = []
     rc.add(new Box(new Point(frame1.x, frame1.y), frame1.width, frame1.height, false, false, 'black', 'black', true, undefined, undefined), undefined, undefined, true, {unselectable: true, unmovable: true})
     rc.add(new TextBox(new Point(frame1.x + (frame1.width / 2) - 590, frame1.y + 100), 'PARABLE OF (CONSTRAINABLE) POLYGONS', false, 45, 800, 80, 'black', 'fantasy', 'white', true), undefined, undefined, true, {unselectable: true, unmovable: true})
-    rc.add(new TextBox(new Point(frame1.x + (frame1.width / 2) - 570, frame1.y + 200), 'A PLAYABLE (CONSTRAINT-BASED) POST ON THE SHAPE OF SOCIETY', false, 25, 800, 80, 'black', 'fantasy', 'white', true), undefined, undefined, true, {unselectable: true, unmovable: true})
+    rc.add(new TextBox(new Point(frame1.x + (frame1.width / 2) - 570, frame1.y + 200), 'A PLAYABLE (CONSTRAINT-BASED) POST ON THE SHAPE OF SOCIETY', false, 25, 800, 80, 'black', 'fantasy', 'gray', true), undefined, undefined, true, {unselectable: true, unmovable: true})
+    rc.add(new TextBox(new Point(frame1.x + (frame1.width / 2) - 60, frame1.y + 300), 'based on "Parable of the Polygons":', false, 16, 100, 80, 'black', 'fantasy', 'gray', false), undefined, undefined, true, {unselectable: true, unmovable: true})
+    var link = rc.add(new TextBox(new Point(frame1.x + (frame1.width / 2) - 120, frame1.y + 330), 'http://ncase.me/polygons/', false, 16, 220, 30, 'black', 'fantasy', 'white', false), undefined, undefined, true, {unselectable: false, unmovable: true})
 
     for(var i=frame1.x;i<frame1.x + frame1.width;i+=50){
 	var tt = (i-frame1.midx)/frame1.midx;
@@ -360,8 +362,8 @@ examples['polygons'] = function() {
 		swingingShapes.push(rc.add(new Examples.polygons.Shape(new Point(x, frame1.y + y), kind, 0, randomRotation()), undefined, undefined, true))
 	}	
     }
-    swingingShapes.push(rc.add(new Examples.polygons.Shape(new Point(frame1.midx - 50 - 30 , frame1.endy - 70), 2, 0,  randomRotation()), undefined, undefined, true))
-    swingingShapes.push(rc.add(new Examples.polygons.Shape(new Point(frame1.midx - 50 + 30 , frame1.endy - 70), 1, 0, randomRotation()), undefined, undefined, true))
+    swingingShapes.push(rc.add(new Examples.polygons.Shape(new Point(frame1.midx - 20 - 30 , frame1.endy - 70), 2, 0,  randomRotation()), undefined, undefined, true))
+    swingingShapes.push(rc.add(new Examples.polygons.Shape(new Point(frame1.midx - 20 + 30 , frame1.endy - 70), 1, 0, randomRotation()), undefined, undefined, true))
 
     // --- Constraints ---------------------------------------------------------
       swingingShapes.forEach(function(shape) {
@@ -574,6 +576,8 @@ examples['polygons'] = function() {
 					if (s !== 0)
 					    rc.addConstraint(Examples.polygons.ShapeMoveWhenSadConstraint, undefined, s)
 				    })
+				} else if (thing === link) {
+				    location.href = 'http://ncase.me/polygons/'
 				}
 			    }, '')
 }
