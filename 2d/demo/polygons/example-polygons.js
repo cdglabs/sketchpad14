@@ -4,7 +4,7 @@ var plus = Sketchpad.geom.plus
 var minus = Sketchpad.geom.minus
 var magnitude = Sketchpad.geom.magnitude
 var scaledBy = Sketchpad.geom.scaledBy
-var urls = {meh_triangle: './polygons/img/meh_triangle.png', meh_square: './polygons/img/meh_square.png', sad_triangle: './polygons/img/sad_triangle.png', sad_square: './polygons/img/sad_square.png', yay_triangle: './polygons/img/yay_triangle.png', yay_square: './polygons/img/yay_square.png', banner: './polygons/img/intro_banner.png', dragging: './polygons/img/dragging.png'}
+var urls = {meh_triangle: './polygons/img/meh_triangle.png', meh_square: './polygons/img/meh_square.png', sad_triangle: './polygons/img/sad_triangle.png', sad_square: './polygons/img/sad_square.png', yay_triangle: './polygons/img/yay_triangle.png', yay_square: './polygons/img/yay_square.png', dragging: './polygons/img/dragging.png'}
  
 // --- Classes -------------------------------------------------------
 
@@ -521,9 +521,9 @@ examples['polygons'] = function() {
     var frame9 = {x: frame6.x, y: frame8.endy + 30, cols: 10, rows: 10, width: 10 * 55, height: 10 * 55, squareLength: 55, margin: frame6.margin}
     frame9.endy = frame9.y + frame9.height + 50
     var text10 = rc.add(new TextBox(new Point(frame9.x + frame9.margin + 260,   frame9.y + 90), 'WRAPPING UP:', true, 48, 100, 80, 'black', 'sans-serif', 'black', true, 'bold', false), undefined, undefined, true, {unselectable: true, unmovable: true})
-    var text11 = rc.add(new TextBox(new Point(frame9.x + frame9.margin, frame9.y + 170), 'Defining the behavior of a program using continuous and discrete constraints', true, 22, 800, 80, 'black', 'sans-serif', 'black', true, 'lighter', true), undefined, undefined, true, {unselectable: true, unmovable: true})
-    text11.add('seems to help a alot in thinking about its design, understandability, and.')
-    text11.add('extensiblity. It makes the process quite "linear."')
+    var text11 = rc.add(new TextBox(new Point(frame9.x + frame9.margin, frame9.y + 170), 'Defining the behavior of a program using pre-defined continuous and discrete', true, 22, 800, 80, 'black', 'sans-serif', 'black', true, 'lighter', true), undefined, undefined, true, {unselectable: true, unmovable: true})
+    text11.add('constraints seems to help a a lot in thinking about its design, understandability,')
+    text11.add('and extensiblity. It makes the process quite "linear."')
 
     // --- Constraints ---------------------------------------------------------
 
@@ -538,7 +538,7 @@ examples['polygons'] = function() {
 				    swingingShapes.forEach(function(shape) {
 					var pos = shape.position
 					var dist = distance(mouse, pos)
-					shape.image._swingSpeed = 2 + (dist < 200 ?  ((200-dist)/200*5) : 0)
+					shape.image._swingSpeed = 2 + (dist < 200 ?  ((200-dist)/200*10) : 0)
 				    })
 				}
 			    }, 'when mouse pointer nears shapes swing faster')
@@ -546,11 +546,13 @@ examples['polygons'] = function() {
     sketchpad.registerEvent('pointerup',
 			    function(e) {
 				var thing = rc.selection
-				if (thing instanceof Examples.polygons.Shape && thing.board)
+				if (thing instanceof Examples.polygons.Shape && thing.board) {
 				    scratch.dragPlacementConstraint = rc.addConstraint(Examples.polygons.ShapePlacementConstraint, undefined, thing)
+				    thing.image._swingSpeed = 2
+				}
 				if (scratch.dragDangleConstraint !== undefined) {
 				    rc.removeConstraint(scratch.dragDangleConstraint)
-				    thing.image._swingSpeed = 0
+				    thing.image._swingSpeed = 2
 				    scratch.dragDangleConstraint = undefined
 				}
 			    }, 'add shape placement constraint when shape is dropped')
