@@ -68,7 +68,7 @@ Examples.slider.Slider.prototype.containsPoint = function(x, y) {
 }
 
 Examples.slider.Slider.prototype.center = function() {
-    return this.button.center(x, y)
+    return this.button.center()
 }
 
 Examples.slider.Slider.prototype.border = function() {
@@ -150,7 +150,7 @@ examples.slider = function() {
 			    })
 
     // deleting a digit from value view
-    rc.sketchpad.registerEvent('keydown', function(e) { 
+    rc.sketchpad.registerEvent('keydown', function(e) {
 	if (rc.selection == sliderValueView) {
 	    var k = e.keyCode
 	    if (k == 8) {

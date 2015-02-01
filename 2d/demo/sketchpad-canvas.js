@@ -9,7 +9,6 @@ function SketchpadCanvas(sketchpad, canvas) {
     this.sketchpad = sketchpad
     this.optionsRequiringSIILableUpdate = ['renderMode', 'millisecondsPerFrame',  'onlyRenderOnConvergence', 'onlyRenderOnNoError', 'showEachIteration']
     this.renderMode = 0
-    this.millisecondsPerFrame = 1000 / 65
     this.onlyRenderOnConvergence = false
     this.renderEvenOnConvergence = false
     this.onlyRenderOnNoError = false
@@ -17,7 +16,6 @@ function SketchpadCanvas(sketchpad, canvas) {
     this.showEachIteration = false
     this.iterationsPerFrame = 0
     this.paused = false
-    this.threeD = false
     this.things = []
     this.points = []
     this.thingGrabPoints = []
@@ -49,7 +47,8 @@ function SketchpadCanvas(sketchpad, canvas) {
 	"Opt/Alt + P (or Z) + click + hold + repeat: Line": {},
 	"Opt/Alt + C: Show constraints": {},
 	"Opt/Alt + G: Show grab points": {},
-	"Opt/Alt + T: Show trace": {}
+	"Opt/Alt + T: Show trace": {},
+	"Opt/Alt + R: Reset options": {}
     }
 
     this.fingers = {}
@@ -64,9 +63,8 @@ function SketchpadCanvas(sketchpad, canvas) {
 
     this.initPlatformId()
     this.initCanvas(canvas)
-    
+    this.resetOptions()    
     var self = this
-
     this.stepFn = this.step.bind(this)
     this.step()
 }
@@ -146,9 +144,10 @@ SketchpadCanvas.prototype.preventSketchpadDefaultKeyEvents = function() {
 }
 
 SketchpadCanvas.prototype.preventBrowserDefaultKeyEvents = function() {
+    var preventKeys = [8, 9, 32]
     window.onkeydown = function(event) {
 	var tag = event.target.tagName
-	if (event.keyCode == 8 && ['CANVAS', 'BODY'].indexOf(tag) >= 0) {
+	if (preventKeys.indexOf(event.keyCode) >= 0 && ['CANVAS', 'BODY'].indexOf(tag) >= 0) {
             event.preventDefault()
 	    event.stopPropagation()
 	}
@@ -171,6 +170,7 @@ SketchpadCanvas.prototype.keydown = function(e) {
     case 'D': this.removeAll(this.selection ? [this.selection] : this.secondarySelections); break
     case 'C': this.showConstraints = !this.showConstraints; break
     case 'T': this.renderStateTrace = !this.renderStateTrace; break
+    case 'R': this.resetOptions(); break
     case 'I': this.inspectState(this.selection); break
     case 'X': this.toggleProgramExplainMode(); break
     case 'E': this.toggleCodeEditMode(); break
@@ -712,7 +712,9 @@ SketchpadCanvas.prototype.defineDrawMethodForThing = function(c) {
 }
 
 SketchpadCanvas.prototype.getRandomPoint = function(minX, minY, maxX, maxY) {    
-    return new Point((minX || 150) + Math.ceil(Math.random() * (maxX || 600)), (minY || 50) + Math.ceil(Math.random() * (maxY || 500)), 'gray')
+    return new Point((minX || 150) + Math.ceil(Math.random() * (maxX || 600)) + window.scrollX,
+		     (minY || 50) + Math.ceil(Math.random() * (maxY || 500)) + window.scrollY,
+		     'gray')
 }
 
 SketchpadCanvas.prototype.mergePairwise = function(pwList) {
@@ -735,7 +737,7 @@ SketchpadCanvas.prototype.mergeFromMergeList = function(srcs, dsts, removes) {
     for (var i = 0; i < l; i++) {
 	var src = srcs[i]
 	var dst = dsts[i]
-	if (all.indexOf(src) >= 0 && all.indexOf(dst) >= 0) {
+	if (all.indexOf(src) >= 0) {
 	    if (removes.indexOf(src) < 0)
 		removes.push(src)
 	    all = this.things.concat(this.sketchpad.constraints)
@@ -848,6 +850,13 @@ SketchpadCanvas.prototype.clearCanvas = function() {
     this.ctxt.fillStyle = 'white'
     this.ctxt.fillRect(0, 0, this.canvas.width, this.canvas.height)
 }
+SketchpadCanvas.prototype.resetOptions = function() {
+    this.millisecondsPerFrame = 1000 / 65
+    this.dragConstraintPriority = 10
+    this.onlyRenderOnConvergence = false   
+    this.renderEvenOnConvergence = false    
+    this.onlyRenderOnNoError = false
+}
 
 SketchpadCanvas.prototype.clear = function() {
     if (this.codeEditMode) this.toggleCodeEditMode()
@@ -855,11 +864,8 @@ SketchpadCanvas.prototype.clear = function() {
     this.canvas.width = window.innerWidth
     this.canvas.height = window.innerHeight    
     this.clearCanvas()
-    this.millisecondsPerFrame = 1000 / 65
-    this.onlyRenderOnConvergence = false   
-    this.renderEvenOnConvergence = false    
-    this.onlyRenderOnNoError = false
-    this.threeD = false
+    this.clearTemps()
+    this.resetOptions()
     this.points = []
     this.things = []
     this.thingGrabPoints = []
@@ -876,11 +882,9 @@ SketchpadCanvas.prototype.clear = function() {
     this.inDragSelectMode = false
     this.startDragSelectMode = false
     this.codeEditMode = false
-    this.dragConstraintPriority = 10
     this.fingers = {} // because fingers can refer to points
     this.dragFingersCount = 0
     this.disableDefaultKeyEvents = false
-    this.clearTemps()
 }
 
 SketchpadCanvas.prototype.clearSelections = function() {    
@@ -1374,8 +1378,12 @@ function drawBorderOf(thing, color, canvas) {
 
 
 function generateMergeListH(src, dst, sofarSrcs, sofarDsts) {
-    if (src.__type !== dst.__type)
-	return
+    if (src.__type !== dst.__type) {
+	if (dst.grabPoint && src.__type === 'Point')
+	    dst = dst.grabPoint()
+	else
+	    return
+    }
     var srcIdx = sofarSrcs.indexOf(src)
     var dstIdx = sofarDsts.indexOf(dst)
     if ((srcIdx >= 0 && srcIdx === dstIdx) || src === dst)
