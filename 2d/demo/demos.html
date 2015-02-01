@@ -55,6 +55,7 @@ canvas.width = window.innerWidth
 canvas.height = window.innerHeight
 
 var rc = new SketchpadCanvas(sketchpad, canvas)
+var lastBinKindArg = undefined
 var clearRButtons = function() { lists.forEach(function(i) { while (i.firstChild) { i.removeChild(i.firstChild) } }) }
 
 var showFns = {
@@ -88,9 +89,7 @@ for (var idx = 0; idx < actions.length; idx++) {
     actFn = function() { rc.clear(); rc.redraw(); }
   } else if (actName === 'pause') {
     actFn = function() { rc.togglePause() }
-  } else if (actName === '3d') {
-    actFn = function() { rc.toggle3D() }
-  } 
+  }
   action.onclick = actFn			
 }
 var bins = document.getElementsByTagName('bin')
@@ -117,8 +116,11 @@ for (var idx = 0; idx < bins.length; idx++) {
      itemNames = rc.keyShortcuts
   }
   (function(itemDOMNodesArg, itemNamesArg, binKindArg) {  
-    bin.onclick = function() {
-      clearRButtons()
+	bin.onclick = function() {
+	clearRButtons()
+	if (lastBinKindArg === binKindArg)
+		lastBinKindArg = undefined
+	else {
       Object.keys(itemNamesArg).forEach(function(e) {
         var thing = document.createElement(binKindArg)
         thing.appendChild(document.createTextNode(e))
@@ -126,7 +128,9 @@ for (var idx = 0; idx < bins.length; idx++) {
           showFns[binKindArg](e)
         }
         itemDOMNodesArg.appendChild(thing)
-      })
+			})
+			lastBinKindArg = binKindArg
+	}
     }})(itemDOMNodes, itemNames, binKind)
 }
     </script>

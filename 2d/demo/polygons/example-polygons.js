@@ -315,10 +315,9 @@ function randomRotation() {
 
 examples['polygons'] = function() {
     //sketchpad.setOption('debug', true)
-    //sketchpad.setOption('unrollOnConflicts', true)
+    rc.preventBrowserDefaultKeyEvents()
     sketchpad.setOption('solveEvenWithoutErrorOnPriorityDifferences', true)
     rc.setOption('dragConstraintPriority', 0)
-
     rc.setOption('renderMode', 1)
     rc.canvas.height = window.innerHeight * 5
 
@@ -334,10 +333,10 @@ examples['polygons'] = function() {
 
     var swingingShapes = []
     rc.add(new Box(new Point(frame1.x, frame1.y), frame1.width, frame1.height, false, false, 'black', 'black', true, undefined, undefined), undefined, undefined, true, {unselectable: true, unmovable: true})
-    rc.add(new TextBox(new Point(frame1.x + (frame1.width / 2) - 590, frame1.y + 100), 'PARABLE OF (CONSTRAINABLE) POLYGONS', false, 45, 800, 80, 'black', 'fantasy', 'white', true), undefined, undefined, true, {unselectable: true, unmovable: true})
-    rc.add(new TextBox(new Point(frame1.x + (frame1.width / 2) - 570, frame1.y + 200), 'A PLAYABLE (CONSTRAINT-BASED) POST ON THE SHAPE OF SOCIETY', false, 25, 800, 80, 'black', 'fantasy', 'gray', true), undefined, undefined, true, {unselectable: true, unmovable: true})
-    rc.add(new TextBox(new Point(frame1.x + (frame1.width / 2) - 60, frame1.y + 300), 'based on "Parable of the Polygons":', false, 16, 100, 80, 'black', 'fantasy', 'gray', false), undefined, undefined, true, {unselectable: true, unmovable: true})
-    var link = rc.add(new TextBox(new Point(frame1.x + (frame1.width / 2) - 120, frame1.y + 330), 'http://ncase.me/polygons/', false, 16, 220, 30, 'black', 'fantasy', 'white', false), undefined, undefined, true, {unselectable: false, unmovable: true})
+    rc.add(new TextBox(new Point(frame1.x + (frame1.width / 2) - 590, frame1.y + 100), 'PARABLE OF (CONSTRAINABLE) POLYGONS', false, 45, 800, 80, 'black', 'fantasy', 'white', true), undefined, undefined, true)
+    rc.add(new TextBox(new Point(frame1.x + (frame1.width / 2) - 570, frame1.y + 200), 'A PLAYABLE (CONSTRAINT-BASED) POST ON THE SHAPE OF SOCIETY', false, 25, 800, 80, 'black', 'fantasy', 'gray', true), undefined, undefined, true)
+    rc.add(new TextBox(new Point(frame1.x + (frame1.width / 2) - 60, frame1.y + 300), 'based on "Parable of the Polygons":', false, 16, 100, 30, 'black', 'fantasy', 'gray', false), undefined, undefined, true)
+    var link = rc.add(new TextBox(new Point(frame1.x + (frame1.width / 2) - 120, frame1.y + 330), 'http://ncase.me/polygons/', false, 16, 220, 30, 'black', 'fantasy', 'white', false), undefined, undefined, true)
 
     for(var i=frame1.x;i<frame1.x + frame1.width;i+=50){
 	var tt = (i-frame1.midx)/frame1.midx;
@@ -376,8 +375,8 @@ examples['polygons'] = function() {
     var frame2 = {x: 270, y: frame1.endy + 50, width: frame1.width, height: 130, margin: 100}
     frame2.endy = frame2.y + frame2.height
 
-    var text1 = rc.add(new TextBox(new Point(frame2.x + frame2.margin,   frame2.y), 'This is a story of how harmless choices can make a harmful world.', false, 22, 800, 80, 'black', 'sans-serif', 'black', true, 'bold', true), undefined, undefined, true, {unselectable: true, unmovable: true})
-    var text2 = rc.add(new TextBox(new Point(frame2.x + frame2.margin, frame2.y + 50), 'These little cuties are 50% Triangles, 50% Squares, and 100% slightly shapist.', true, 22, 800, 80, 'black', 'sans-serif', 'black', true, 'lighter', true), undefined, undefined, true, {unselectable: true, unmovable: true})
+    var text1 = rc.add(new TextBox(new Point(frame2.x + frame2.margin,   frame2.y), 'This is a story of how harmless choices can make a harmful world.', false, 22, 800, 80, 'black', 'sans-serif', 'black', true, 'bold', true))
+    var text2 = rc.add(new TextBox(new Point(frame2.x + frame2.margin, frame2.y + 50), 'These little cuties are 50% Triangles, 50% Squares, and 100% slightly shapist.', true, 22, 800, 80, 'black', 'sans-serif', 'black', true, 'lighter', true))
     text2.add('But only slightly! In fact, every polygon *prefers* being in a diverse crowd:')
 
     // ==================== Mini =================
@@ -407,11 +406,11 @@ examples['polygons'] = function() {
 	    rc.addConstraint(Examples.polygons.ImageSwingConstraint, undefined, shape, true)
 	})
 	if (addSlider) {
-	    slider = rc.add(new Examples.slider.Slider({obj: board, prop: 'kindPercentage'}, true, new Point(frame.x + (frame.width / 2) + 335, frame.endy - 160), 430, 40, {start: 0 , end:100}, true),  undefined, undefined, true, {unselectable: false, unmovable: false})
+	    slider = rc.add(new Examples.slider.Slider({obj: board, prop: 'kindPercentage'}, true, new Point(frame.x + (frame.width / 2) + 335, frame.endy - 160), 430, 40, {start: 0 , end:100}, true), undefined, undefined, true)
 	    slider.init()
 	    board.slider = slider
-	    var text9a = rc.add(new TextBox(new Point(frame.x + (frame.width / 2) + 145, frame.endy - 200), 'i\'ll move if less than       %  of my neighbors are like me.', false, 16, 800, 80, 'black', 'sans-serif', 'white', true, 'lighter', false), undefined, undefined, true, {unselectable: true, unmovable: true})
-	    var text9b = rc.add(new TextBox(new Point(frame.x + (frame.width / 2) + 480, frame.endy - 200), board.kindPercentage, false, 16, 50, 80, 'black', 'sans-serif', '#ff0000', true, 'lighter', false), undefined, undefined, true, {unselectable: true, unmovable: true})
+	    var text9a = rc.add(new TextBox(new Point(frame.x + (frame.width / 2) + 445, frame.endy - 200), 'i\'ll move if less than       %  of my neighbors are like me.', false, 16, 200, 20, 'black', 'sans-serif', 'white', true, 'lighter', false), undefined, undefined, true)
+	    var text9b = rc.add(new TextBox(new Point(frame.x + (frame.width / 2) + 480, frame.endy - 200), board.kindPercentage, false, 16, 50, 20, 'black', 'sans-serif', '#ff0000', true, 'lighter', false), undefined, undefined, true)
 	    board.sliderText1 = text9a
 	    board.sliderText2 = text9b
 	    rc.addConstraint(Sketchpad.arith.EqualityConstraint, undefined,  {obj: board, prop: 'kindPercentage'}, {obj: text9b, prop: 'text'}, [2], 1, 1)
@@ -452,11 +451,11 @@ examples['polygons'] = function() {
     var frame4 = {x: 270, y: frame3.endy + 80, width: frame1.width, height: 130, margin: 100}
     frame4.endy = frame4.y + frame4.height
 
-    var text1 = rc.add(new TextBox(new Point(frame4.x + frame4.margin, frame4.y), '', true, 22, 800, 80, 'black', 'sans-serif', 'black', true, 'lighter', true), undefined, undefined, true, {unselectable: true, unmovable: true})
+    var text1 = rc.add(new TextBox(new Point(frame4.x + frame4.margin, frame4.y), '', true, 22, 800, 80, 'black', 'sans-serif', 'black', true, 'lighter', true))
     text1.add('You can only move them if they\'re unhappy with their immediate neighborhood.')
     text1.add('Once they\'re OK where they are, you can\'t move them until they\'re unhappy with')
     text1.add('their neighbors again. Theyve got one, simple rule:')
-    var text2 = rc.add(new TextBox(new Point(frame4.x + frame4.margin - 75,   frame4.y + 120), '"I wanna move if less than 1/3 of my neighbors are like me."', false, 22, 800, 80, 'black', 'sans-serif', 'black', true, 'bold', false), undefined, undefined, true, {unselectable: true, unmovable: true})
+    var text2 = rc.add(new TextBox(new Point(frame4.x + frame4.margin - 75,   frame4.y + 120), '"I wanna move if less than 1/3 of my neighbors are like me."', false, 22, 800, 80, 'black', 'sans-serif', 'black', true, 'bold', false))
 
     // --- Data ----------------------------------------------------------------
     var slider
@@ -468,12 +467,12 @@ examples['polygons'] = function() {
 	1,0,2
     ];    
     var board2 = addBoard(frame5, grid2, .7)
-    var text3a = rc.add(new TextBox(new Point(frame5.x + frame5.margin - 30, frame5.endy + 20), 'unhappy', true, 15, 800, 80, 'black', 'sans-serif', 'red', true, 'lighter', true), undefined, undefined, true, {unselectable: true, unmovable: true})
-    var text3b = rc.add(new TextBox(new Point(frame5.x + frame5.margin + 30, frame5.endy + 20), ': only 1 out of 6 neighbors', true, 15, 800, 80, 'black', 'sans-serif', 'black', true, 'lighter', true), undefined, undefined, true, {unselectable: true, unmovable: true})
+    var text3a = rc.add(new TextBox(new Point(frame5.x + frame5.margin - 30, frame5.endy + 20), 'unhappy', true, 15, 800, 80, 'black', 'sans-serif', 'red', true, 'lighter', true))
+    var text3b = rc.add(new TextBox(new Point(frame5.x + frame5.margin + 30, frame5.endy + 20), ': only 1 out of 6 neighbors', true, 15, 800, 80, 'black', 'sans-serif', 'black', true, 'lighter', true))
     text3b.add('are like me. less than 1/3.')
 
     frame5.x += frame5.width + 30
-    rc.add(new Box(new Point(frame5.x - 15, frame5.y), 5, frame5.height + 50, false, false, '#bdbdbd', '#bdbdbd', true, undefined, undefined), undefined, undefined, true, {unselectable: true, unmovable: true})
+    rc.add(new Box(new Point(frame5.x - 15, frame5.y), 5, frame5.height + 50, false, false, '#bdbdbd', '#bdbdbd', true, undefined, undefined))
     var grid3 = [
 	1,0,1,
 	1,2,1,
@@ -481,10 +480,10 @@ examples['polygons'] = function() {
     ];
     var board3 = addBoard(frame5, grid3, .7)
     frame5.x += frame5.width + 30
-    var text4a = rc.add(new TextBox(new Point(frame5.x + frame5.margin - 300, frame5.endy + 20), 'happy', true, 15, 800, 80, 'black', 'sans-serif', 'red', true, 'lighter', true), undefined, undefined, true, {unselectable: true, unmovable: true})
-    var text4b = rc.add(new TextBox(new Point(frame5.x + frame5.margin - 250, frame5.endy + 20), ': 2 out of 6 neighbors are like ', true, 15, 800, 80, 'black', 'sans-serif', 'black', true, 'lighter', true), undefined, undefined, true, {unselectable: true, unmovable: true})
+    var text4a = rc.add(new TextBox(new Point(frame5.x + frame5.margin - 300, frame5.endy + 20), 'happy', true, 15, 800, 80, 'black', 'sans-serif', 'red', true, 'lighter', true))
+    var text4b = rc.add(new TextBox(new Point(frame5.x + frame5.margin - 250, frame5.endy + 20), ': 2 out of 6 neighbors are like ', true, 15, 800, 80, 'black', 'sans-serif', 'black', true, 'lighter', true))
     text4b.add('me. exactly 1/3.')
-    rc.add(new Box(new Point(frame5.x - 15, frame5.y), 5, frame5.height + 50, false, false, '#bdbdbd', '#bdbdbd', true, undefined, undefined), undefined, undefined, true, {unselectable: true, unmovable: true})
+    rc.add(new Box(new Point(frame5.x - 15, frame5.y), 5, frame5.height + 50, false, false, '#bdbdbd', '#bdbdbd', true, undefined, undefined))
     var grid4 = [
 	2,0,2,
 	2,2,2,
@@ -492,36 +491,36 @@ examples['polygons'] = function() {
     ];
     var board4 = addBoard(frame5, grid4, .7)
     frame5.x += frame5.width + 30
-    var text4a = rc.add(new TextBox(new Point(frame5.x + frame5.margin - 290, frame5.endy + 20), 'meh', true, 15, 800, 80, 'black', 'sans-serif', 'red', true, 'lighter', true), undefined, undefined, true, {unselectable: true, unmovable: true})
-    var text4b = rc.add(new TextBox(new Point(frame5.x + frame5.margin - 250, frame5.endy + 20), ': all neighbors are like me. (also ', true, 15, 800, 80, 'black', 'sans-serif', 'black', true, 'lighter', true), undefined, undefined, true, {unselectable: true, unmovable: true})
+    var text4a = rc.add(new TextBox(new Point(frame5.x + frame5.margin - 290, frame5.endy + 20), 'meh', true, 15, 800, 80, 'black', 'sans-serif', 'red', true, 'lighter', true))
+    var text4b = rc.add(new TextBox(new Point(frame5.x + frame5.margin - 250, frame5.endy + 20), ': all neighbors are like me. (also ', true, 15, 800, 80, 'black', 'sans-serif', 'black', true, 'lighter', true))
     text4b.add('meh if i\'ve got no neighbors')
 
     var frame6 = {x: frame4.x, y: frame5.endy + 120, width: frame5.width, height: 100, margin: frame4.margin}
     frame6.endy = frame5.y + frame6.height
-    var text5 = rc.add(new TextBox(new Point(frame6.x + frame6.margin, frame6.y), 'Harmless, right? Every polygon would be happy with a mixed neighborhood.', true, 22, 800, 80, 'black', 'sans-serif', 'black', true, 'lighter', true), undefined, undefined, true, {unselectable: true, unmovable: true})
+    var text5 = rc.add(new TextBox(new Point(frame6.x + frame6.margin, frame6.y), 'Harmless, right? Every polygon would be happy with a mixed neighborhood.', true, 22, 800, 80, 'black', 'sans-serif', 'black', true, 'lighter', true))
     text5.add('Surely their small bias can\'t affect the larger shape society that much? Well...')
-    var text6 = rc.add(new TextBox(new Point(frame6.x + frame6.margin - 75,   frame6.y + 90), 'drag & drop unhappy polygons until nobody is unhappy:', true, 22, 800, 80, 'black', 'sans-serif', 'black', true, 'bold', false), undefined, undefined, true, {unselectable: true, unmovable: true})
-    var text7 = rc.add(new TextBox(new Point(frame6.x + frame6.margin - 75,   frame6.y + 120), '(just move them to random empty spots. don\'t think too much about it.)', true, 18, 800, 80, 'black', 'sans-serif', 'black', true, 'bold', false), undefined, undefined, true, {unselectable: true, unmovable: true})
+    var text6 = rc.add(new TextBox(new Point(frame6.x + frame6.margin - 75,   frame6.y + 90), 'drag & drop unhappy polygons until nobody is unhappy:', true, 22, 800, 80, 'black', 'sans-serif', 'black', true, 'bold', false))
+    var text7 = rc.add(new TextBox(new Point(frame6.x + frame6.margin - 75,   frame6.y + 120), '(just move them to random empty spots. don\'t think too much about it.)', true, 18, 800, 80, 'black', 'sans-serif', 'black', true, 'bold', false))
 
     var frame7 = {x: frame6.x + 210, y: frame6.endy + 470, cols: 10, rows: 10, width: 10 * 55, height: 10 * 55, squareLength: 55}
     frame7.endy = frame7.y + frame7.height + 50
     rc.add(new Box(new Point(frame1.x, frame7.y - 20), frame1.width, frame7.height + 140, false, false, '#151515', '#151515', true, undefined, undefined), undefined, undefined, true, {unselectable: true, unmovable: true})
     var board5 = resetBoard(frame7, .5) 
-    var resetButton1 = rc.add(new TextBox(new Point(frame1.x + (frame1.width / 2) - 140, frame7.endy - 20), ('   NEW BOARD'), false, 30, 225, 40, '#b40404', 'sans-serif', 'white', false, 'lighter', true, 16), undefined, undefined, true, {unselectable: false, unmovable: true})
+    var resetButton1 = rc.add(new TextBox(new Point(frame1.x + (frame1.width / 2) - 140, frame7.endy - 20), ('   NEW BOARD'), false, 30, 225, 40, '#b40404', 'sans-serif', 'white', false, 'lighter', true, 16), undefined, undefined, true)
 
     var frame8 = {x: frame6.x, y: frame7.endy + 200, cols: 20, rows: 20, width: 20 * 30, height: 600, squareLength: 30}
     frame8.endy = frame8.y + frame8.height
-    var text8 = rc.add(new TextBox(new Point(frame8.x + 60,   frame8.y - 80 ), 'finally, a big ol\' sandbox to play around in.', true, 22, 800, 80, 'black', 'sans-serif', 'black', true, 'bold', false), undefined, undefined, true, {unselectable: true, unmovable: true})
+    var text8 = rc.add(new TextBox(new Point(frame8.x + 60,   frame8.y - 80 ), 'finally, a big ol\' sandbox to play around in.', true, 22, 800, 80, 'black', 'sans-serif', 'black', true, 'bold', false))
 
     rc.add(new Box(new Point(frame1.x, frame8.y - 20), frame1.width, frame8.height + 100, false, false, '#151515', '#151515', true, undefined, undefined), undefined, undefined, true, {unselectable: true, unmovable: true})
     var board6 = resetBoard(frame8, .3, undefined, true) 
-    var startButton1 = rc.add(new TextBox(new Point(frame1.x + (frame1.width / 2) + 130, frame8.endy - 60), ('START MOVING'), false, 30, 220, 40, '#b40404', 'sans-serif', 'white', false, 'lighter', true, 16), undefined, undefined, true, {unselectable: false, unmovable: true})
-    var resetButton2 = rc.add(new TextBox(new Point(frame1.x + (frame1.width / 2) + 360, frame8.endy - 60), (' NEW BOARD'), false, 30, 200, 40, 'gray', 'sans-serif', 'white', false, 'lighter', true, 16), undefined, undefined, true, {unselectable: false, unmovable: true})
+    var startButton1 = rc.add(new TextBox(new Point(frame1.x + (frame1.width / 2) + 130, frame8.endy - 60), ('START MOVING'), false, 30, 220, 40, '#b40404', 'sans-serif', 'white', false, 'lighter', true, 16), undefined, undefined, true)
+    var resetButton2 = rc.add(new TextBox(new Point(frame1.x + (frame1.width / 2) + 360, frame8.endy - 60), (' NEW BOARD'), false, 30, 200, 40, 'gray', 'sans-serif', 'white', false, 'lighter', true, 16), undefined, undefined, true)
 
     var frame9 = {x: frame6.x, y: frame8.endy + 30, cols: 10, rows: 10, width: 10 * 55, height: 10 * 55, squareLength: 55, margin: frame6.margin}
     frame9.endy = frame9.y + frame9.height + 50
-    var text10 = rc.add(new TextBox(new Point(frame9.x + frame9.margin + 260,   frame9.y + 90), 'WRAPPING UP:', true, 48, 100, 80, 'black', 'sans-serif', 'black', true, 'bold', false), undefined, undefined, true, {unselectable: true, unmovable: true})
-    var text11 = rc.add(new TextBox(new Point(frame9.x + frame9.margin, frame9.y + 170), 'Defining the behavior of a program using pre-defined continuous and discrete', true, 22, 800, 80, 'black', 'sans-serif', 'black', true, 'lighter', true), undefined, undefined, true, {unselectable: true, unmovable: true})
+    var text10 = rc.add(new TextBox(new Point(frame9.x + frame9.margin + 260,   frame9.y + 90), 'WRAPPING UP:', true, 48, 100, 80, 'black', 'sans-serif', 'black', true, 'bold', false))
+    var text11 = rc.add(new TextBox(new Point(frame9.x + frame9.margin, frame9.y + 170), 'Defining the behavior of a program using pre-defined continuous and discrete', true, 22, 800, 80, 'black', 'sans-serif', 'black', true, 'lighter', true))
     text11.add('constraints seems to help a a lot in thinking about its design, understandability,')
     text11.add('and extensiblity. It makes the process quite "linear."')
 
