@@ -13,6 +13,7 @@ function SketchpadCanvas(sketchpad, canvas) {
     this.renderEvenOnConvergence = false
     this.onlyRenderOnNoError = false
     this.showConstraints = false
+    this.listConstraints = true
     this.showEachIteration = false
     this.iterationsPerFrame = 0
     this.paused = false
@@ -130,12 +131,20 @@ SketchpadCanvas.prototype.setRenderMode = function(mode) {
 }
     
 SketchpadCanvas.prototype.initThingCodeInspector = function() {
+    var self = this
     // editor
     this.thingCodeInspectorDiv = document.getElementById('code-inspector-div')
     this.thingCodeInspectorBottomDiv = document.getElementById('code-inspector-bottom-div')
+    this.thingCodeInspectorSaveButton = document.getElementById('code-inspector-save-button')
+    this.thingCodeInspectorSaveButton.onclick = function() { self.saveCodeEdit() }
+    this.thingCodeInspectorCancelButton = document.getElementById('code-inspector-cancel-button')
+    this.thingCodeInspectorCancelButton.onclick = function() { self.toggleCodeEditMode(false) }
+    this.thingCodeInspectorCancelButton.style.setProperty('left', '1010px')
+    this.thingCodeInspectorCancelButton.style.setProperty('top', '155px')
+    this.thingCodeInspectorSaveButton.style.setProperty('left', '960px')
+    this.thingCodeInspectorSaveButton.style.setProperty('top', '190px')
     this.thingCodeInspector = CodeMirror.fromTextArea(document.getElementById('code-inspector'), {lineWrapping: true})
-    this.thingCodeInspectorSize = {width: 1400, height: 400}
-    this.thingCodeInspector.setSize(this.thingCodeInspectorSize.width, this.thingCodeInspectorSize.height)
+    this.thingCodeInspectorSize = {width: 1000, height: 400}
 }
 
 // turn off backspace functionality in chrome:
@@ -169,11 +178,12 @@ SketchpadCanvas.prototype.keydown = function(e) {
     case 'Z': this.enterPointMode();  break
     case 'D': this.removeAll(this.selection ? [this.selection] : this.secondarySelections); break
     case 'C': this.showConstraints = !this.showConstraints; break
+    case 'L': this.toggleListConstraintsMode(); break
     case 'T': this.renderStateTrace = !this.renderStateTrace; break
     case 'R': this.resetOptions(); break
     case 'I': this.inspectState(this.selection); break
-    case 'X': this.toggleProgramExplainMode(); break
-    case 'E': this.toggleCodeEditMode(); break
+    case 'X': this.toggleProgramExplainMode(!this.codeEditMode); break
+    case 'E': this.toggleCodeEditMode(!this.codeEditMode); break
     case 'S': this.saveCodeEdit(); break
     case 'N': this.newUserClassFromThings(this.selection ? [this.selection] : this.secondarySelections, false); break
     case 'B': this.newUserClassFromThings(this.selection ? [this.selection] : this.secondarySelections, true); break
@@ -198,24 +208,28 @@ SketchpadCanvas.prototype.keyup = function(e) {
     }
 }
 
-SketchpadCanvas.prototype.toggleCodeEditMode = function() {
-    if (this.selection || this.codeEditMode) {
-	this.thingCodeInspectorDiv.hidden = this.codeEditMode
-	this.codeEditMode = !this.codeEditMode
-	if (this.codeEditMode) {
-	    this.thingCodeInspectorBottomDiv.scrollIntoView()
-	    this.inspectCode(this.selection)	
-	}
-    }
+SketchpadCanvas.prototype.toggleCodeEditMode = function(on, thing) {
+    thing = thing || this.selection
+    on = on && thing
+    this.codeEditMode = on
+    this.thingCodeInspectorDiv.hidden = !on
+    this.thingCodeInspectorBottomDiv.hidden = !on
+    if (on) {
+	this.thingCodeInspectorSaveButton.disabled = false
+	this.thingCodeInspectorBottomDiv.scrollIntoView()
+	this.inspectCode(thing)	
+    } else
+	this.ctxt.globalAlpha = undefined
 }
 
-SketchpadCanvas.prototype.toggleProgramExplainMode = function() {
-    this.thingCodeInspectorDiv.hidden = this.codeEditMode
-    this.codeEditMode = !this.codeEditMode
-    if (this.codeEditMode) {
-	document.scrollTop = 200
+SketchpadCanvas.prototype.toggleProgramExplainMode = function(on) {
+    this.codeEditMode = on
+    this.thingCodeInspectorDiv.hidden = !on
+    this.thingCodeInspectorBottomDiv.hidden = !on
+    if (on) {
+	this.thingCodeInspectorSaveButton.disabled = true
 	this.thingCodeInspectorBottomDiv.scrollIntoView()
-	this.describeProgram()	
+	this.describeProgram()
     }
 }
 
@@ -251,6 +265,51 @@ SketchpadCanvas.prototype.clearSelectionPoints = function() {
     })
 }
 
+SketchpadCanvas.prototype.toggleListConstraintsMode = function() {
+    this.listConstraints = !this.listConstraints
+    this.makeConstraintListView()
+}
+
+SketchpadCanvas.prototype.makeConstraintListView = function() {
+    var self = this
+    this.removeTempDOMElements()
+    if (this.listConstraints) {
+	var tree = sketchpad.constraintTreeList
+	var width = 250, height = 35
+	for (var tp in tree) {
+	    var list = tree[tp]
+	    var count = list.length
+	    if (list.length > 0) {
+		var fn1 = function(dscr, proto, atp) { return function(event) {
+		    if (self.constraintInstancesViewSelected !== undefined && self.constraintInstancesViewSelected !== atp)
+			rc.removeTempDOMElements(['buttons'], self.constraintInstancesViewElements)
+		    self.toggleCodeEditMode(!self.codeEditMode, proto)
+		} }
+		var fn2 = function(alist, atp) { return function(event) {
+		    event.stopPropagation()
+		    self.constraintInstancesViewSelected = atp
+		    rc.removeTempDOMElements(['buttons'], self.constraintInstancesViewElements)
+		    self.constraintInstancesViewElements = []
+		    alist.forEach(function(c) { self.constraintInstancesViewElements.push(self.makeDOMElement('button', {name: c.__toString, onclick: function() { self.toggleCodeEditMode(false); self.inspectState(c) }, style: {background: '#ffffcc', width: width, height: height}}))})
+		} }
+		var first = list[0]
+		var shortTp = first.__shortType
+		var dscr = first.constructor.description ? first.constructor.description.call() : undefined
+		var b1 = this.makeDOMElement('button', {name: shortTp, onclick: fn1(dscr, first, tp), style: {background: '#c0c0c0', width: width, height: height}})
+		var b2 = this.makeDOMElement('label', {name: count, onclick: fn2(list, tp), style: {background: '#f5a9a9', height: 20}}, b1)
+	    }
+	}
+	if (self.constraintInstancesViewSelected) {
+	    var list = tree[self.constraintInstancesViewSelected]
+	    var count = list.length
+	    if (list.length > 0) {
+		self.constraintInstancesViewElements = []
+		list.forEach(function(c) { self.constraintInstancesViewElements.push(self.makeDOMElement('button', {name: c.__toString, onclick: function() { self.inspectState(c) }, style: {background: '#ffffcc', width: width, height: height}}))})
+	    }
+	}
+    }
+}
+
 SketchpadCanvas.prototype.describeProgram = function() {
     var self = this
     var state = '\n// -- State --\n\n'
@@ -280,14 +339,18 @@ SketchpadCanvas.prototype.describeProgram = function() {
 	for (var tp in dict) {
 	    var cs = dict[tp]
 	    one = cs[0]
-	    cs.forEach(function(c) { state += self.stateToString(c) + "\n" })
+	    var dscrFn = one.constructor.description
+	    var constraintsDscr = ''
+	    if (dscrFn)
+		constraintsDscr += "\n // " + dscrFn.call(one) + "\n"
+	    cs.forEach(function(c) { state += self.stateToString(c) + "\n"; if (c.description) constraintsDscr += "\n\"" + c.description.call(c) + '"' })
+	    if (dscrFn)
+		constraintsDscr += "\n" 
 	    var ids = cs.map(function(t) { return t.__id })
 	    var csList = ids.join(',')
-	    var dscrFn = one.description
 	    var plural = cs.length > 1 
-	    description += "\n" + (i == 0 ? 'Constraint' : 'Thing') + (plural ? 's ' : ' ') + csList + ' ' + (plural ? 'are' : 'is') + ' ' + tp + "\n"
-	    if (dscrFn)
-		description += "\n" + dscrFn() + "\n"
+	    description += "\n" + (i == 0 ? 'Constraint' : 'Thing') + (plural ? 's ' : ' ') + csList + ' ' + (plural ? 'are' : 'is') + ' ' + tp + ".\n"
+	    description += constraintsDscr
 	    if (one.onEachTimeStepDescription) 
 		handlers += "'" + one.__type + "': " + one.onEachTimeStepDescription() + "\n" 		
 	}
@@ -300,9 +363,11 @@ SketchpadCanvas.prototype.describeProgram = function() {
     if (handlers !== '')
 	description += "\n// -- Ticking Handlers --\n\n" + handlers
     description += state
-    this.codeEditMode = true
-    this.thingCodeInspectorDiv.hidden = false
-    this.thingCodeInspector.setValue(description)
+    this.setCodeInspectorText(description)
+}
+
+SketchpadCanvas.prototype.setCodeInspectorText = function(text) {
+    this.thingCodeInspector.setValue(text)
 }
 
 SketchpadCanvas.prototype.computeAllSelectableThings = function() {
@@ -671,13 +736,15 @@ SketchpadCanvas.prototype.addConstraint = function(ctor, priority /* , arguments
 
 SketchpadCanvas.prototype.addNewConstraint = function(c) {
     this.sketchpad.addConstraint(c)
-    this.doOneTimeThingsForNewThing(c)
+    //this.doOneTimeThingsForNewThing(c)
     if (c.grabPoint)
 	this.addGrabPointFor(c, true, true)
     if (c.onEachTimeStep)
 	this.sketchpad.thingsWithOnEachTimeStepFn.push(c)
     if (c.afterEachTimeStep)
 	this.sketchpad.thingsWithAfterEachTimeStepFn.push(c)
+    if (!this.paused)
+	this.makeConstraintListView()
     return c
 }
 
@@ -696,6 +763,7 @@ SketchpadCanvas.prototype.addGrabPointFor = function(thing, isConstraint, isTopL
     }
 }
 
+/*
 SketchpadCanvas.prototype.doOneTimeThingsForNewThing = function(c) {
     this.defineDrawMethodForThing(c)
 }
@@ -710,10 +778,15 @@ SketchpadCanvas.prototype.defineDrawMethodForThing = function(c) {
 	c.draw = drawConstraint.bind(c)
     }    
 }
+*/
 
-SketchpadCanvas.prototype.getRandomPoint = function(minX, minY, maxX, maxY) {    
-    return new Point((minX || 150) + Math.ceil(Math.random() * (maxX || 600)) + window.scrollX,
-		     (minY || 50) + Math.ceil(Math.random() * (maxY || 500)) + window.scrollY,
+SketchpadCanvas.prototype.getRandomPoint = function(minX, minY, maxX, maxY) {
+    minX = minX || 150
+    maxX = maxX || 600
+    minY = minY || 50
+    maxY = maxY || 500
+    return new Point(minX + Math.ceil(Math.random() * (maxX - minX)) + window.scrollX,
+		     minY + Math.ceil(Math.random() * (maxY - minY)) + window.scrollY,
 		     'gray')
 }
 
@@ -842,8 +915,10 @@ SketchpadCanvas.prototype.removeConstraint = function(unwanted) {
     if (unwanted.grabPoint && unwanted !== unwanted.grabPoint) 
         this.removeGrabPoint(unwanted.grabPoint(), true)
     this.sketchpad.thingsWithOnEachTimeStepFn = this.sketchpad.thingsWithOnEachTimeStepFn.filter(function(thing) { return thing !== unwanted })
-    this.sketchpad.thingsWithAfterEachTimeStepFn = this.sketchpad.thingsWithAfterEachTimeStepFn.filter(function(thing) { return thing !== unwanted })
+    this.sketchpad.thingsWithAfterEachTimeStepFn = this.sketchpad.thingsWithAfterEachTimeStepFn.filter(function(thing) { return thing !== unwanted })    
     this.sketchpad.removeConstraint(unwanted)
+    if (!this.paused)
+	this.makeConstraintListView()
 }
 
 SketchpadCanvas.prototype.clearCanvas = function() {
@@ -859,7 +934,7 @@ SketchpadCanvas.prototype.resetOptions = function() {
 }
 
 SketchpadCanvas.prototype.clear = function() {
-    if (this.codeEditMode) this.toggleCodeEditMode()
+    this.toggleCodeEditMode(false)
     this.sketchpad.clear()
     this.canvas.width = window.innerWidth
     this.canvas.height = window.innerHeight    
@@ -876,6 +951,8 @@ SketchpadCanvas.prototype.clear = function() {
     this.selection = undefined
     this.secondarySelections = []
     this.selectionChoiceIdx = 0
+    this.showConstraints = false
+    this.listConstraints = true
     this.renderStateTrace = false
     this.selectionPoints = []    
     this.clickSelectMode = false
@@ -885,6 +962,8 @@ SketchpadCanvas.prototype.clear = function() {
     this.fingers = {} // because fingers can refer to points
     this.dragFingersCount = 0
     this.disableDefaultKeyEvents = false
+    this.constraintInstancesViewElements = []
+    this.constraintInstancesViewSelected = undefined
 }
 
 SketchpadCanvas.prototype.clearSelections = function() {    
@@ -904,21 +983,42 @@ SketchpadCanvas.prototype.clearTemps = function() {
         buttons.removeChild(buttons.firstChild)
 }
 
-SketchpadCanvas.prototype.makeDOMButton = function(a) {
+SketchpadCanvas.prototype.removeTempDOMElements = function(kinds, unwanteds) {
+    kinds = kinds || ['buttons', 'labels']//, 'viewbuttons']
+    kinds.forEach(function(kind) {
+	var elements = document.getElementById(kind);
+	var toRemove = []
+	for (var i = 0; i < elements.children.length; i++) {
+	    var b = elements.children[i]
+	    if (!unwanteds || unwanteds.indexOf(b) >= 0)
+		toRemove.push(b)
+	}
+	toRemove.forEach(function(b) { elements.removeChild(b) })
+    })
+}
+
+SketchpadCanvas.prototype.makeDOMElement = function(aclass, a, parent, atIdx) {
     var style = a.style
     var name = a.name
-    var button = document.createElement('button')
-    if (!style.width)
-	style.width = '20px'
-    if (!style.height)
-	style.height = '20px'
+    var elm = document.createElement(aclass)
+    elm.appendChild(document.createTextNode(name))
     for (p in style)
 	if (style.hasOwnProperty(p))
-	    button.style.setProperty(p, style[p])
-    button.appendChild(document.createTextNode(name.charAt(0).toUpperCase() + name.slice(1).toLowerCase()))
-    button.onclick = a.onclick
-    document.getElementById('buttons').appendChild(button)
-    return button
+	    elm.style.setProperty(p, style[p])
+    elm.onclick = a.onclick
+    elm.setAttribute('class', aclass)
+    var parent = parent || document.getElementById(aclass + 's')
+    if (atIdx === undefined)
+	parent.appendChild(elm)
+    else {
+	var next = parent.firstChild
+	while(atIdx > 0) {
+	    next = next.nextSibling
+	    atIdx--
+	}	    
+	parent.insertBefore(elm, next)
+    }
+    return elm
 }
 
 SketchpadCanvas.prototype.setSelection = function(thing) {
@@ -937,15 +1037,15 @@ SketchpadCanvas.prototype.inspectState = function(thing) {
 	var defined = pVal !== undefined
 	props.push({name: p, type: defined ? pVal.__shortType : undefined, value: pVal, expr: defined ? self.unparseJS(pVal, true, false) : undefined, hiddenExpr: defined ? self.unparseJS(pVal, false, false) : undefined})
     })
-    var randP = this.getRandomPoint()
-    var posX = 50 + (thing.x ? thing.x : (thing.position ? thing.position.x : randP.x))
-    var posY = 50 + (thing.y ? thing.y : (thing.position ? thing.position.y : randP.y))
-    if (posX > 750)
-	posX -= 100
-    if (posY > 500)
-	posY -= 100
-    var pos = new Point(posX, posY, 'gray')
-    this.addTemp(new SketchpadTile('View ' + thing.__toString, props, undefined, undefined, thing, true, undefined, pos, new Box(new Point(0, 0), 350, 250, false, false, 'gray', '#ffffcc')))
+    var newPos
+    if (thing instanceof Point)
+	newPos = thing.copy()
+    else if (thing.grabPoint)
+	newPos = thing.grabPoint().copy()
+    else
+	newPos = this.getRandomPoint(undefined, undefined, 400, 500)
+    var pos = new Point(newPos.x + 25, newPos.y + 25, 'gray')
+    var st = this.addTemp(new SketchpadTile('View ' + thing.__toString, props, undefined, undefined, thing, true, undefined, pos, new Box(new Point(0, 0), 700, 250, false, false, 'black', '#ffffcc')))
     rc.redraw()
 }
 
@@ -971,7 +1071,7 @@ SketchpadCanvas.prototype.stateToString = function(thing) {
 
 SketchpadCanvas.prototype.inspectCode = function(thing) {
     this.thingCodeInspectorCurrentProto = thing.__proto__
-    this.thingCodeInspector.setValue(codeToString(this.thingCodeInspectorCurrentProto))
+    this.setCodeInspectorText(codeToString(this.thingCodeInspectorCurrentProto))
 }
 
 SketchpadCanvas.prototype.newUserClassFromThings = function(things, isConstraint) {
@@ -1033,6 +1133,7 @@ SketchpadCanvas.prototype.saveCodeEdit = function() {
 	    proto[p] = newProps[p]
 	}
     }
+    this.redraw()
 }
 
 // gets constraints exclusively involving the given set of things
@@ -1073,39 +1174,47 @@ function SketchpadTile(name, inputs, ownRun, buttonsInfo, inspectorOfObj, fixedI
     }.bind(self)
     buttonsInfo = buttonsInfo || []
     this.drawMtd = optDraw
-    this.position = optPosition || rc.getRandomPoint()
+    this.position = optPosition || rc.getRandomPoint(undefined, undefined, 400)
     this.__origin = this.position
     this.parts = []
     var o = new Point(0, 0)
     this.box = optBox || new Box(o, 350, 50, false, false, 'gray', '#ccccff')
     this.box.___container = this
+    this.box.opacity = .7
     this.parts.push(this.box)
     var box = this.box
-    var pos = box.position, width = box.width, height = 50, left = pos.x, top = pos.y
+    var pos = box.position, width = box.width, left = pos.x, top = pos.y
     this.isOwnerOf = [this.position]    
     rc.addTemp(this.position)
-    this.tileLabel = new TextBox(new Point(15, top + 5), this.name, false, 16, undefined, undefined, undefined, undefined, 'gray', true)    
+    this.tileLabel = new TextBox(new Point(15, top + 5), this.name, false, 16, undefined, undefined, undefined, undefined, 'black', true)    
     this.tileLabel.___container = this
     this.parts.push(this.tileLabel)
     var y = top + 40
-    this.inputsLabel = new TextBox(new Point(10, y), 'Inputs', false, 14, undefined, undefined, undefined, undefined, 'gray', true)
+    if (inspectorOfObj) {
+	this.inspectorOfObj = inspectorOfObj
+	if (inspectorOfObj.description) {
+	    var tb = new TextBox(new Point(20, y), '"' + inspectorOfObj.description.call(inspectorOfObj) + '"', true, 16, width - 100, undefined, undefined, undefined, 'black', true, undefined, true)
+	    y += 40 * (tb.lines.length)
+	    tb.___container = this
+	    this.parts.push(tb)
+	}
+    }
+    var fontSize = 16
+    this.inputsLabel = new TextBox(new Point(10, y), 'Inputs', false, fontSize, undefined, undefined, undefined, undefined, 'black', true)
     this.inputsLabel.___container = this
-    this.tilesLabel = new TextBox(new Point((width / 2) + 10, y), 'Tiles', false, 14, undefined, undefined, undefined, undefined, 'gray', true)
+    this.tilesLabel = new TextBox(new Point((width / 2) + 10, y), 'Tiles', false, fontSize, undefined, undefined, undefined, undefined, 'black', true)
     this.tilesLabel.___container = this
     var inputElements = {}
     this.inputLabels = []
-    if (inspectorOfObj)
-	this.inspectorOfObj = inspectorOfObj
     this.inputs.forEach(function(inputInfo) {
 	var inputName = inputInfo.name
 	var inputType = inputInfo.type
 	var inputValue = inputInfo.value
 	var inputLabel = (inputType ? (inputType + ' ') : '') + inputName
-	var isThing = inputValue && inputValue.__isSketchpadThing
+	var isThing = inputValue && inputValue.__isSketchpadThing && !inputValue.__isConstraint
         y += 35
-	height += 35
 	var pLabelLength = inputLabel.length
-	var inputCoord = {x: 30 + pLabelLength * 8, y: y, w: 200 - (pLabelLength * 8), h: 20}
+	var inputCoord = {x: 150 , y: y, w: width - 200, h: 20}
 	var input = new CanvasInput({
 	    canvas: rc.canvas,
 	    x: inputCoord.x,
@@ -1113,7 +1222,7 @@ function SketchpadTile(name, inputs, ownRun, buttonsInfo, inspectorOfObj, fixedI
 	    placeHolder: isThing ? '' : inputName,
 	    value: inputInfo.expr,
 	    hiddenValue: inputInfo.hiddenExpr,
-	    fontSize: 14,
+	    fontSize: fontSize,
 	    fontFamily: 'Arial',
 	    fontColor: 'blue',
 	    fontWeight: 'bold',
@@ -1140,7 +1249,7 @@ function SketchpadTile(name, inputs, ownRun, buttonsInfo, inspectorOfObj, fixedI
 	self.parts.push(input)
 	inputElements[inputName] = input
 	var labelPoint = new Point(15, y)
-	var label = new TextBox(labelPoint, inputLabel + ':', false, 14, undefined, undefined, undefined, undefined, 'gray', true)
+	var label = new TextBox(labelPoint, inputLabel + ':', false, fontSize, undefined, undefined, undefined, undefined, 'black', true)
 	label.___container = self
 	self.parts.push(label)
 	self.inputLabels.push(label)
@@ -1159,7 +1268,8 @@ function SketchpadTile(name, inputs, ownRun, buttonsInfo, inspectorOfObj, fixedI
 	}
     })
     this.inputElements = inputElements
-    height += 50
+    y += 100
+    var height = y - top
     if (height > box.height)
 	box.height = height
     this.buttons = []
@@ -1172,11 +1282,11 @@ function SketchpadTile(name, inputs, ownRun, buttonsInfo, inspectorOfObj, fixedI
 		y: 75 + self.childTileInputs.length * 35,
 		placeHolder: 'tile',
 		value: '',
-		fontSize: 14,
+		fontSize: fontSize,
 		fontFamily: 'Arial',
 		fontColor: 'blue',
 		fontWeight: 'bold',
-		width: 60,
+		width: 160,
 		padding: 8,
 		borderWidth: 1,
 		borderColor: 'gray',
@@ -1195,9 +1305,11 @@ function SketchpadTile(name, inputs, ownRun, buttonsInfo, inspectorOfObj, fixedI
 	}
 	buttonsInfo.unshift({name: '+', onclick: addChildFn, style: {background: 'orange'}})
     }
-    var removeFn = function() { rc.removeTemp(self) }
+    var removeFn = function() { rc.removeTempDOMElements(['viewbuttons'], self.buttons); rc.removeTemp(self) }
+    var viewClassFn = function() { rc.removeTempDOMElements(['viewbuttons'], self.buttons); rc.removeTemp(self); rc.toggleCodeEditMode(true, self.inspectorOfObj)}
+    buttonsInfo.unshift({name: 'Class', onclick: viewClassFn, style: {width: 40, background: 'pink'}})
     buttonsInfo.unshift({name: 'X', onclick: removeFn, style: {background: '#ff6666'}})
-    buttonsInfo.forEach(function(a) { self.buttons.push(rc.makeDOMButton(a)) })
+    buttonsInfo.forEach(function(a) { self.buttons.push(rc.makeDOMElement('viewbutton', a)) })
 }
 
 SketchpadTile.prototype.addChildTileInput = function(input) {
@@ -1205,7 +1317,7 @@ SketchpadTile.prototype.addChildTileInput = function(input) {
     var tileCount = this.childTileInputs.length
     var labelName = 'tile' + tileCount
     var h = 50 + (tileCount * 35)
-    var label = new TextBox(new Point(this.box.width / 2 + 40, h + 5), labelName + ':', false, 14)
+    var label = new TextBox(new Point(this.box.width / 2 + 40, h + 5), labelName + ':', false, 16)
     label.___container = this
     this.parts.push(label)
     h += 30
@@ -1226,11 +1338,11 @@ SketchpadTile.prototype.draw = function(canvas, origin) {
     if (this.inputs.length > 0)
 	draw(this.inputsLabel, canvas)
     var right = this.position.x + this.box.width - 50
-    var bottom = this.position.y - (canvas.codeEditMode ? (canvas.thingCodeInspectorSize.height + 7) : 0)
+    var bottom = this.position.y
     for (var i = 0; i < this.buttons.length; i++) {
 	var b = this.buttons[i]
-	b.style.setProperty('left', (right - (-31 + (20 * i)) - window.scrollX) + 'px')
-	b.style.setProperty('top',  (bottom - (1 + window.scrollY)) + 'px')
+	b.style.setProperty('left', Math.floor(right + 8 - (52 * i)) + 'px')
+	b.style.setProperty('top',  Math.floor(bottom - 22) + 'px')
     }
     if (this.drawMtd)
 	this.drawMtd(canvas, pos)
@@ -1530,7 +1642,10 @@ function alertMessage(m) {
 }
 
 codeToString = function(thing) {
-    var res = "/* " + thing.__type + " */\n\n"
+    var res = "/*\n" + thing.__type + "\n"
+    if (thing.__isConstraint && thing.constructor.description)
+	res += "\n" + thing.constructor.description() + "\n"
+    res += " */\n\n"
     for (p in thing) {
 	if (p.charAt(0) !== '_') {
 	    var v = thing[p]

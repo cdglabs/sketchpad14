@@ -12,8 +12,8 @@
     <script src="../../dist/sketchpad14.js"></script>
     <script src="user-classes.js"></script>
     <script src="sketchpad-canvas.js"></script>
+    <div id="code-inspector-div" hidden><table><tr><td><textarea id="code-inspector" name="code-inspector"></textarea></td></tr></table></div><div id="code-inspector-bottom-div" hidden><button id="code-inspector-save-button" type="button">Save</button><button id="code-inspector-cancel-button" type="button">X</button></div>  
     <canvas id="canvas" touch-action="none" tabindex="0"></canvas>
-    <div id="code-inspector-div" hidden><table><tr><td><textarea id="code-inspector" name="code-inspector"></textarea></td></tr></table></div><div id="code-inspector-bottom-div"></div>
     <lists id="lists">
       <shortcuts id="shortcuts"></shortcuts>
       <demos id="demos"></demos>
@@ -28,8 +28,9 @@
       <bin id='CoBin' key='CoBin' kind='constraint'>Constraint Bin</bin>
       <bin id='DeBin' key='DeBin' kind='demo'>Example Bin</bin>
     </bins>    
-    <buttons id="buttons">
-    </buttons>
+    <buttons id="buttons"></buttons>
+    <labels id="labels"></labels>
+    <viewbuttons id="viewbuttons"></viewbuttons>
     <actions id="actions">
       <action key='clear'>Clear</action>
       <action key='pause'>Pause</action>
@@ -56,12 +57,12 @@ canvas.height = window.innerHeight
 
 var rc = new SketchpadCanvas(sketchpad, canvas)
 var lastBinKindArg = undefined
-var clearRButtons = function() { lists.forEach(function(i) { while (i.firstChild) { i.removeChild(i.firstChild) } }) }
+var clearRButtons = function() { rc.removeTempDOMElements(); lists.forEach(function(i) { while (i.firstChild) { i.removeChild(i.firstChild) } }) }
 
 var showFns = {
   demo: 
 function(name) {
-      clearRButtons(); rc.clear(); rc.pause(); examples[name](); rc.redraw(); rc.unpause();
+      clearRButtons(); lastBinKindArg = undefined; rc.clear(); rc.pause(); examples[name](); rc.makeConstraintListView(); rc.redraw(); rc.unpause();
     },
   constraint: 
     function(name) { 
@@ -118,9 +119,10 @@ for (var idx = 0; idx < bins.length; idx++) {
   (function(itemDOMNodesArg, itemNamesArg, binKindArg) {  
 	bin.onclick = function() {
 	clearRButtons()
-	if (lastBinKindArg === binKindArg)
-		lastBinKindArg = undefined
-	else {
+			if (lastBinKindArg === binKindArg) {			
+			lastBinKindArg = undefined
+			rc.makeConstraintListView()
+	} else {
       Object.keys(itemNamesArg).forEach(function(e) {
         var thing = document.createElement(binKindArg)
         thing.appendChild(document.createTextNode(e))

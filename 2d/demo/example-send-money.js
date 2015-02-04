@@ -51,8 +51,12 @@ Examples.sendmoney.SendMoreMoneyConstraint = function Examples__sendmoney__SendM
 
 sketchpad.addClass(Examples.sendmoney.SendMoreMoneyConstraint, true)
 
+Examples.sendmoney.SendMoreMoneyConstraint.description = function() {
+    return "Examples.sendmoney.SendMoreMoneyConstraint(Tile[][] Rows, Dictionary Vs) states the SEND+MORE=MONEY problem: Rows is an array of words (one for each three word here) where each word is an array of letters represented as Tile types. Vs is a mapping from a letter (one of {S, E, N, D, M, O, R, Y}) to an integer in range [0, 9]."
+}
+
 Examples.sendmoney.SendMoreMoneyConstraint.prototype.description = function() {
-    return "Examples.sendmoney.SendMoreMoneyConstraint(Tile[][] Rows, Dictionary Vs) states the SEND+MORE=MONERY problem: Rows is an array of words (one for each three word here) where each word is an array of letters represented as Tile types. Vs is a mapping from a letter (one of {S, E, N, D, M, O, R, Y}) to an integer in range [0, 9]."
+    return "SEND+MORE=MONEY."
 }
 
 Examples.sendmoney.SendMoreMoneyConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
@@ -83,8 +87,12 @@ Examples.sendmoney.ChooseLetterConstraint = function Examples__sendmoney__Choose
 
 sketchpad.addClass(Examples.sendmoney.ChooseLetterConstraint, true)
 
-Examples.sendmoney.ChooseLetterConstraint.prototype.description = function() {
+Examples.sendmoney.ChooseLetterConstraint.description = function() {
     return "Examples.sendmoney.ChooseLetterConstraint(String Letter, Dictionary M) says that mapping M should map Letter to an integer in range [0, 9]."
+}
+
+Examples.sendmoney.ChooseLetterConstraint.prototype.description = function() {
+    return "mapping " + JSON.stringify(this.values) + " should map letter '" + this.letter + "' to an integer in range [0, 9]."
 }
 
 Examples.sendmoney.ChooseLetterConstraint.prototype.__searchable = true

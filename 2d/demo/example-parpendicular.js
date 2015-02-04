@@ -14,8 +14,12 @@ Sketchpad.geom.ParPendicularConstraint = function Sketchpad__geom__ParPendicular
 
 sketchpad.addClass(Sketchpad.geom.ParPendicularConstraint, true)
 
-Sketchpad.geom.ParPendicularConstraint.prototype.description = function() {
+Sketchpad.geom.ParPendicularConstraint.description = function() {
     return "Sketchpad.geom.ParPendicularConstraint(Point P1, Point P2, Point P3, Point P4) says line sections P1-2 & P3-4 should be either parallel or perpendicular. If in 'auto' mode, the switch happens on every 100 ticks. Else, if 'space' has been pressed ('manual' mode) the toggle happens with each hit of the 'space.'"
+}
+
+Sketchpad.geom.ParPendicularConstraint.prototype.description = function() {
+    return "line sections  " + this.p1.__toString + "-" + this.p2.__toString + " and  " + this.p3.__toString + "-" + this.p4.__toString + " should be either parallel or perpendicular. If in 'auto' mode, the switch happens on every 100 ticks. Else, if 'space' has been pressed ('manual' mode) the toggle happens with each hit of the 'space.'"
 }
 
 Sketchpad.geom.ParPendicularConstraint.prototype.propertyTypes = {p1: 'Point', p2: 'Point', p3: 'Point', p4: 'Point', parC: 'OrientationConstraint', perC: 'OrientationConstraint'}

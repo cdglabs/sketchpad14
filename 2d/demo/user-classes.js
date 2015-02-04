@@ -79,7 +79,7 @@ Point.prototype.drawSelectionIndices = function(ctxt, radius, origin, pointColor
     ctxt.textAlign = 'center'
     ctxt.textBaseline = 'middle'
     ctxt.lineWidth = 1
-    ctxt.font = (optTextSize || (this.radius * 2)) + 'px ' + (optTextFont || 'Arial')
+    ctxt.font = (optTextSize || (this.radius * 2)) + 'px ' + (optTextFont || 'Avenir')//'Arial')
     var color = optTextColor || 'yellow'
     ctxt.strokeStyle = pointColor
     ctxt.fillStyle = color
@@ -269,26 +269,30 @@ Box.prototype.center = function() {
 }
 
 function TextBox(position, optText, optMultiLine, optFontSize, optWidth, optHeight, optBgColor, optFont, optFontColor, optHasNoBorder, optFontStyle, optNoCentering, optMargin) {
+    var self = this
     this.position = position
     this.text = optText === undefined ? '' : optText
     this.multiLine = optMultiLine
     this.bgColor = optBgColor// || 'white'
-    this.fontSize = optFontSize || '12'
+    this.fontSize = optFontSize || '14'
     this.width = optWidth || ((1+('' + this.text).length) * this.fontSize * .5)
     this.height = optHeight || (this.fontSize * 3)
-    this.font = optFont || 'Georgia'
+    this.font = optFont || 'Avenir' //'Georgia'
     this.fontColor = optFontColor || 'black'
     this.margin = optMargin || (this.fontSize / 3)
     this.hasBorder = !optHasNoBorder
     this.centering = !optNoCentering
     this.style = optFontStyle || ''
     this.box = new Box(position, this.width, this.height, false, false, optBgColor, optBgColor, optHasNoBorder)
-    if (this.multiLine) {
+    if (this.multiLine) {	
 	this.lines = []
-	if (optText)
-	    this.lines.push(optText)
+	if (optText) {
+	    var textWrapped = this.wrapTextByWidth(optText, this.width, this.fontSize * .5)
+	    textWrapped.forEach(function(l) { self.lines.push(l) })
+	}
     } 
 }
+
 
 TextBox.prototype.propertyTypes = {position: 'Point', text: 'String'}
 
@@ -316,7 +320,7 @@ TextBox.prototype.draw = function(canvas, origin) {
     for (var i = 0; i < lines.length; i++) {
 	var txt = lines[i]
 	var offset = centering ? (width - (('' + txt).length * this.fontSize / 2.5)) / 2 : 0
-	ctxt.fillText(txt, x + offset, y + margin + i * (this.fontSize + 12) + 15)
+	ctxt.fillText(txt, x + offset, y + margin + i * (this.fontSize + 12) + 20)
     }
 }
 
@@ -341,6 +345,21 @@ TextBox.prototype.add = function(text) {
 	this.text += text
 }
 
+TextBox.prototype.wrapTextByWidth = function(text, width, fontSize) {
+    var res = [], len = 0, idx = 0, currLine = ""
+    var words = text.split(/\s+/), size = words.length
+    while (idx < size) {
+	while (len < width && idx < size) {
+	    var wd = words[idx++]
+	    currLine += wd + ' '
+	    len += fontSize * wd.length
+	}
+	len = 0
+	res.push(currLine)
+	currLine = ''
+    }
+    return res
+}
 
 function Vector(x, y, optPos, optLabel, optColor) {
     this.x = x

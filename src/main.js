@@ -63,6 +63,7 @@ function Sketchpad() {
     this.solveEvenWithoutError = false
     this.solveEvenWithoutErrorOnPriorityDifferences = false
     this.constraints = []
+    this.constraintTreeList = {}
     this.thingConstructors = {}
     this.constraintConstructors = {}
     this.objMap = {}
@@ -113,6 +114,10 @@ Sketchpad.prototype.addConstraint = function(constraint) {
 	if (this.debug) log(this.perThingPerPropEffectingConstraints)
     }
     this.constraints.splice(addIdx, 0, constraint)
+    var cTp = constraint.__type    
+    if (!this.constraintTreeList[cTp])
+	this.constraintTreeList[cTp] = []
+    this.constraintTreeList[cTp].push(constraint)
     for (var p in constraint) {
 	if (constraint.hasOwnProperty(p)) {
 	    var obj = constraint[p]
@@ -125,9 +130,22 @@ Sketchpad.prototype.addConstraint = function(constraint) {
 
 Sketchpad.prototype.removeConstraint = function(unwantedConstraint) {
     var self = this
+    var removed = [unwantedConstraint]
     this.constraints = this.constraints.filter(function(constraint) {
-	return constraint !== unwantedConstraint &&
-            !(involves(constraint, unwantedConstraint))
+	var keep = true
+	if (constraint === unwantedConstraint) {
+	    keep = false
+	} else {
+	    keep = !involves(constraint, unwantedConstraint)
+	    if (!keep)
+		removed.push(constraint)
+	}
+	return keep
+    })
+    var tree = this.constraintTreeList
+    removed.forEach(function(constraint) {
+	var list = tree[constraint.__type]
+	list.splice(list.indexOf(constraint), 1)	
     })
     if (this.solveEvenWithoutErrorOnPriorityDifferences)
 	this.computePerThingPerPropertyEffectors()
@@ -140,6 +158,7 @@ Sketchpad.prototype.clear = function() {
     this.solveEvenWithoutError = false
     this.solveEvenWithoutErrorOnPriorityDifferences = false
     this.constraints = []
+    this.constraintTreeList = {}
     this.objMap = {}
     this.eventHandlers = []
     this.events = []

@@ -335,10 +335,19 @@ Examples.textlayout.CharFollowAdjacentsConstraint = function Examples__textlayou
 
 sketchpad.addClass(Examples.textlayout.CharFollowAdjacentsConstraint, true)
 
-Examples.textlayout.CharFollowAdjacentsConstraint.prototype.description = function() {
+Examples.textlayout.CharFollowAdjacentsConstraint.description = function() {
     var mode = sketchpad.scratch.wordWrapModes[sketchpad.scratch.wordWrapMode]
     var isGreedy = mode === 'greedy'
     return "Examples.textlayout.CharFollowAdjacentsConstraint(Char C, TextArea T) states that character C should follow its predecessor character, or if it has none should reside on the top left corner of the T's paragraph." + (isGreedy ? "If character's word would not fit in the same line, it should be placed at the beginning of the next line." : '')
+}
+
+Examples.textlayout.CharFollowAdjacentsConstraint.prototype.description = function() {
+    var mode = sketchpad.scratch.wordWrapModes[sketchpad.scratch.wordWrapMode]
+    var isGreedy = mode === 'greedy'
+    return "character '" + this.character.chr + "' should " + (this.character.prev ? 
+							       ("follow its predecessor character '" + this.character.prev.chr + "'.")
+							       : "reside on the top left corner of the T's paragraph.")
+	+ (isGreedy ? " If character's word would not fit in the same line, it should be placed at the beginning of the next line." : '')
 }
 
 Examples.textlayout.CharFollowAdjacentsConstraint.prototype.effects = function() {
@@ -405,8 +414,12 @@ Examples.textlayout.WordWrapOptimalBreaks = function Examples__textlayout__WordW
     this.textArea = textArea
 }
 
-Examples.textlayout.WordWrapOptimalBreaks.prototype.description = function() {
+Examples.textlayout.WordWrapOptimalBreaks.description = function() {
     return "Examples.textlayout.WordWrapOptimalBreaks(TextArea T) states that the text in the T should have optimal placement of line breaks (based on the dynamic programming algorithm). For those character's that have been chosen to be first in lines, the constraint sates that they should be placed in the beginning of the lines."
+}
+
+Examples.textlayout.WordWrapOptimalBreaks.prototype.description = function() {
+    return "text in the textarea should have optimal placement of line breaks (based on the dynamic programming algorithm). For those character's that have been chosen to be first in lines, the constraint sates that they should be placed in the beginning of the lines."
 }
 
 sketchpad.addClass(Examples.textlayout.WordWrapOptimalBreaks, true)
@@ -470,8 +483,12 @@ Examples.textlayout.WordWrapJustify = function Examples__textlayout__WordWrapJus
 
 sketchpad.addClass(Examples.textlayout.WordWrapJustify, true)
 
-Examples.textlayout.WordWrapJustify.prototype.description = function() {
+Examples.textlayout.WordWrapJustify.description = function() {
     return "Examples.textlayout.WordWrapJustify(TextArea T) states that spaces in each line of T's paragraph should be paded so that each line is expanded to the fully fill the margins of the column."
+}
+
+Examples.textlayout.WordWrapJustify.prototype.description = function() {
+    return "spaces in each line of text area's paragraph should be paded so that each line is expanded to the fully fill the margins of the column."
 }
 
 Examples.textlayout.WordWrapJustify.prototype.computeTarget = function(pseudoTime, prevPseudoTime) {
