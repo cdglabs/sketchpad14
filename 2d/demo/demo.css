@@ -1,5 +1,5 @@
-body {
-    font-family: "PT Sans", Arial, Helvetica, sans-serif;
+body, button, label {
+    font-family: "Avenir", Arial, Helvetica, sans-serif;
 }
 
 canvas {
@@ -15,7 +15,7 @@ demos, constraints, classes, tiles, shortcuts {
     z-index: 2000;
     height: 680px;
     overflow-y: scroll;
-
+/*    overflow: hidden;*/
 }
 
 actions {
@@ -23,6 +23,7 @@ actions {
     top: 20px;
     left: 20px;
     z-index: 2000;
+    overflow: hidden;
 }
 
 bins {
@@ -30,34 +31,79 @@ bins {
     bottom: 20px;
     left: 20px;
     z-index: 2000;
+    overflow: hidden;
 }
 
 buttons {
     position: fixed;
     z-index: 2000;
+    left: 1080px;
+    top: 10px;
+    height: 680px;
+    overflow-y: scroll;
+    overflow: hidden;
 }
 
-button {
-    position: fixed;
+viewbuttons {
+    position: absolute;
     z-index: 2000;
-    left: 730px;
-    top: 550px;
 }
 
-demo, constraint, class, tile, shortcut, action, bin, iterationsPerFrame, showEachIterationButton {
+button, viewbutton {
+    position: relative;
+    font-size: 16;
+    z-index: 2000;
+    background: #66FF66;
+}
+
+#code-inspector-cancel-button {
+    background: #ff6666;    
+}
+
+#code-inspector-save-button {
+    background: #ccffcc;    
+}
+
+demo, constraint, class, tile, shortcut, action, bin, iterationsPerFrame, showEachIterationButton, button, viewbutton {
     display: block;
     margin: 10pt;
     padding: 1pt 4pt;
     background: #eee;
     border: 1px solid #ddd;
     border-radius: 4pt;
-    box-shadow: 4px 4px 6px 0px rgba(0, 0, 0, .4);
+    /*box-shadow: 4px 4px 6px 0px rgba(0, 0, 0, .4);*/
     -webkit-user-select: none;
 }
 
-demo:hover, constraint:hover, class:hover, tile:hover, shortcut:hover, action:hover, bin:hover, button:hover {
+viewbutton {
+    position: absolute;
+}
+
+button, demo {
+    text-align: right;
+}
+
+button {
+    margin: 6pt;
+    padding: 1pt 4pt;
+}
+
+label {
+    text-align: left;
+    position: absolute;
+    left: -5px;
+    top: -9px;
+    margin: 10pt;
+    padding: 1pt 4pt;
+    background: #eee;
+    border: 1px solid #ddd;
+    border-radius: 4pt;
+    -webkit-user-select: none;
+}
+
+demo:hover, constraint:hover, class:hover, tile:hover, shortcut:hover, action:hover, bin:hover, button:hover, label:hover {
     background: #ddd;
-    box-shadow: 2px 2px 2px 0px rgba(0, 0, 0, .4);
+    /*box-shadow: 2px 2px 2px 0px rgba(0, 0, 0, .4);*/
 }
 
 action {
@@ -76,10 +122,6 @@ bin:hover {
     background: #99cc99
 }
 
-button {
-    background: #66FF66;
-}
-
 button:hover {
     background: #66CC66;
 }
@@ -95,7 +137,7 @@ showEachIterationButton {
 
 showEachIterationButton:hover {
     background: #dde;
-    box-shadow: 2px 2px 2px 0px rgba(0, 0, 0, .4);
+    /*box-shadow: 2px 2px 2px 0px rgba(0, 0, 0, .4);*/
 }
 
 iterationsPerFrame {

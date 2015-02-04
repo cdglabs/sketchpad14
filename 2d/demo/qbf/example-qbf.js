@@ -123,8 +123,12 @@ Examples.qbf.TileActivationConstraint = function Examples__qbf__TileActivationCo
 
 sketchpad.addClass(Examples.qbf.TileActivationConstraint, true)
 
-Examples.qbf.TileActivationConstraint.prototype.description = function() {
+Examples.qbf.TileActivationConstraint.description = function() {
     return "Examples.qbf.TileActivationConstraint(Tile T, Point P1, Point P2) states that tile T's 'active' property should be true when T is sitting on line section P1-2."
+}
+
+Examples.qbf.TileActivationConstraint.prototype.description = function() {
+    return "tile " + this.tile.__toString + "'s 'active' property should be true when it is sitting on line section " + this.surfaceP1.__toString + "-" + this.surfaceP2.__toString + "."
 }
 
 Examples.qbf.TileActivationConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
@@ -153,8 +157,12 @@ Examples.qbf.TileChoosingConstraint = function Examples__qbf__TileChoosingConstr
 
 sketchpad.addClass(Examples.qbf.TileChoosingConstraint, true)
 
-Examples.qbf.TileChoosingConstraint.prototype.description = function() {
+Examples.qbf.TileChoosingConstraint.description = function() {
     return "Examples.qbf.TileChoosingConstraint(Tile T, Tile[] Ts, WordRack Rack) states if tile is active and its letter matches with latest typed character (scratch.letterTyped) and there are no other matching tiles that come before this tile, then this tile T should become inactive and Rack's next character index should be incremented by 1."
+}
+
+Examples.qbf.TileChoosingConstraint.prototype.description = function() {
+    return "if tile" + this.tile.__toString + "is active and its letter matches with latest typed character (scratch.letterTyped) and there are no other matching tiles that come before this tile, then this tile T should become inactive and Rack's next character index should be incremented by 1."
 }
 
 Examples.qbf.TileChoosingConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
@@ -199,8 +207,12 @@ Examples.qbf.TileUnchoosingConstraint = function Examples__qbf__TileUnchoosingCo
 
 sketchpad.addClass(Examples.qbf.TileUnchoosingConstraint, true)
 
-Examples.qbf.TileUnchoosingConstraint.prototype.description = function() {
+Examples.qbf.TileUnchoosingConstraint.description = function() {
     return "Examples.qbf.TileUnchoosingConstraint(Tile T, Tile[] Ts, WordRack Rack) states that if user has pressed 'backspace' and tile T happens to be the last letter put on the Rack, then it must be reactivated."
+}
+
+Examples.qbf.TileUnchoosingConstraint.prototype.description = function() {
+    return "if user has pressed 'backspace' and tile " + this.tile.__toString + " happens to be the last letter put on the Rack, then it must be reactivated."
 }
 
 Examples.qbf.TileUnchoosingConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
@@ -230,8 +242,12 @@ Examples.qbf.FeederTileCountConstraint = function Examples__qbf__FeederTileCount
 
 sketchpad.addClass(Examples.qbf.FeederTileCountConstraint, true)
 
-Examples.qbf.FeederTileCountConstraint.prototype.description = function() {
+Examples.qbf.FeederTileCountConstraint.description = function() {
     return "Examples.qbf.FeederTileCountConstraint(Feeder F, Belt B, Tile[] Ts) states that the number displayed on the feeder should equal to the number of tiles in Ts that happen to be currently on top of belt B."
+}
+
+Examples.qbf.FeederTileCountConstraint.prototype.description = function() {
+    return " the number displayed on the feeder should equal to the number of tiles in Ts that happen to be currently on top of belt " + this.feederBelt.__toString + "."
 }
 
 Examples.qbf.FeederTileCountConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {

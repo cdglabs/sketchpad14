@@ -187,7 +187,7 @@ SketchpadScene.prototype.keydown = function(e) {
     //case 'C': this.showConstraints = !this.showConstraints; break
     //case 'I': this.inspectState(this.selection); break
     case 'X': this.toggleProgramExplainMode(); break
-    //case 'E': this.toggleCodeEditMode(); break
+    //case 'E': this.toggleCodeEditMode(!codeEditMode); break
     //case 'S': this.saveCodeEdit(); break
     //case 'N': this.newUserClassFromThings(this.selection ? [this.selection] : this.secondarySelections, false); break
    // case 'B': this.newUserClassFromThings(this.selection ? [this.selection] : this.secondarySelections, true); break
@@ -223,13 +223,12 @@ SketchpadScene.prototype.keyup = function(e) {
 }
 
 SketchpadScene.prototype.toggleCodeEditMode = function() {
-    if (this.selection || this.codeEditMode) {
-	this.thingCodeInspectorDiv.hidden = this.codeEditMode
-	this.codeEditMode = !this.codeEditMode
-	if (this.codeEditMode) {
-	    this.thingCodeInspectorBottomDiv.scrollIntoView()
-	    this.inspectCode(this.selection)	
-	}
+    this.codeEditMode = on
+    this.thingCodeInspectorDiv.hidden = !on
+    this.thingCodeInspectorBottomDiv.hidden = !on
+    if (on) {
+	this.thingCodeInspectorBottomDiv.scrollIntoView()
+	this.inspectCode(this.selection)	
     }
 }
 
@@ -782,7 +781,7 @@ SketchpadScene.prototype.removeConstraint = function(unwanted) {
 }
 
 SketchpadScene.prototype.clear = function() {
-    if (this.codeEditMode) this.toggleCodeEditMode()
+    this.toggleCodeEditMode(false)
     this.sketchpad.clear()
     this.onlyRenderOnConvergence = false
     this.renderEvenOnConvergence = false

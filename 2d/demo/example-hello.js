@@ -80,7 +80,9 @@ Examples.hello.StackedBoxesConstraint = function Examples__hello__StackedBoxesCo
 
 sketchpad.addClass(Examples.hello.StackedBoxesConstraint, true)
 
-Examples.hello.StackedBoxesConstraint.prototype.description = function() { return "Examples.hello.StackedBoxesConstraint(Box b1, Box b2) states b2 should be just below b1 and aligned along X-axis." }
+Examples.hello.StackedBoxesConstraint.description = function() { return "Examples.hello.StackedBoxesConstraint(Box b1, Box b2) states b2 should be just below b1 and aligned along X-axis." }
+
+Examples.hello.StackedBoxesConstraint.prototype.description = function() { return "box " + this.b1.__toString + " should be just below box " + this.b2.__toString + " and aligned along X-axis." }
 
 Examples.hello.StackedBoxesConstraint.prototype.propertyTypes = {b1: 'Box', b2: 'Box', p1: 'Point', p2: 'Point'}
 

@@ -31,7 +31,7 @@ examples['bridge'] = function() {
     var springLens = [60, 60, 100, 100, 80, 80, 80, 80, 100, 100, 20 * Math.sqrt(17), 20 * Math.sqrt(17), 80, 80, 60, 60, 100, 100, 20 * Math.sqrt(10), 20 * Math.sqrt(10), 100, 100, 60, 60, 20 * Math.sqrt(34), 20 * Math.sqrt(34), 20 * Math.sqrt(10), 20 * Math.sqrt(10)]
     var springEnds = [[0, 1], [2, 3], [0, 4], [2, 4], [1, 4], [3, 4], [0, 5], [2, 7], [1, 5], [3, 7], [1, 6], [3, 8], [5, 6], [7, 8], [5, 9], [7, 11], [9, 6], [11, 8], [10, 6], [12, 8], [9, 10], [11, 12], [9, 13], [11, 15], [13, 10], [15, 12], [13, 14], [15, 16], [10, 14], [16, 12]]
 
-    var solveButton = rc.add(new TextBox(new Point(1000, 50), ('Turn wind off'), false, 20, 250, 40, '#f6ceec'))
+    var solveButton = rc.add(new TextBox(new Point(700, 50), ('Turn wind off'), false, 20, 250, 40, '#f6ceec'))
 
     // wind
     var windOrigin = new Point(700, 100)

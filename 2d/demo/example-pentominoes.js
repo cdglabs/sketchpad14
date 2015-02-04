@@ -159,8 +159,12 @@ Examples.pentominoes.PiecePlacementConstraint = function Examples__pentominoes__
 
 sketchpad.addClass(Examples.pentominoes.PiecePlacementConstraint, true)
 
-Examples.pentominoes.PiecePlacementConstraint.prototype.description = function() {
+Examples.pentominoes.PiecePlacementConstraint.description = function() {
     return "Examples.pentominoes.PiecePlacementConstraint(Piece P, Board B) states that if P is moved inside the board and it fits in the current square it should be placed nicely on the board B and B should add it in its list of placed pieces."
+}
+
+Examples.pentominoes.PiecePlacementConstraint.prototype.description = function() {
+    return "if piece " + this.piece.__toString + " is moved inside the board and it fits in the current square it should be placed nicely on the board  and board should add it in its list of placed pieces."
 }
 
 Examples.pentominoes.PiecePlacementConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
@@ -203,8 +207,12 @@ Examples.pentominoes.PentominoesConstraint = function Examples__pentominoes__Pen
 
 sketchpad.addClass(Examples.pentominoes.PentominoesConstraint, true)
 
-Examples.pentominoes.PentominoesConstraint.prototype.description = function() {
+Examples.pentominoes.PentominoesConstraint.description = function() {
     return "Examples.pentominoes.PentominoesConstraint(Board B) states the definition of a solution for the Pentominoes problem: all pieces should be placed on the board."
+}
+
+Examples.pentominoes.PentominoesConstraint.prototype.description = function() {
+    return "Pentominoes problem should be solved: all pieces should be placed on the board."
 }
 
 Examples.pentominoes.PentominoesConstraint.prototype.__searchable = true

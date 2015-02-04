@@ -86,7 +86,9 @@ Examples.slider.SliderValueConstraint = function Examples__slider__SliderValueCo
 
 sketchpad.addClass(Examples.slider.SliderValueConstraint, true)
 
-Examples.slider.SliderValueConstraint.prototype.description = function() { return "Examples.slider.SliderValueConstraint(Box slider, {obj: viewObj, prop: viewProp}) states that slider position corresponds with value of property viewProp of object viewObj" }
+Examples.slider.SliderValueConstraint.description = function() { return "Examples.slider.SliderValueConstraint(Box slider, {obj: viewObj, prop: viewProp}) states that slider position corresponds with value of property viewProp of object viewObj" }
+
+Examples.slider.SliderValueConstraint.prototype.description = function() { return "slider " + this.slider.__toString + " position corresponds with the value of " + this.sliderValueViewObj.__toString + "." + this.sliderValueViewProp + " ." }
 
 Examples.slider.SliderValueConstraint.prototype.propertyTypes = {slider: 'Examples.slider.Slider'}
 
@@ -122,7 +124,7 @@ examples.slider = function() {
 
     var center = {x: 700, y: 350}
     rc.add(new TextBox(new Point(center.x - 350, center.y - 100), "Edit the value by clicking and typing in or moving the slider.", false, 20, undefined, 40, '#81f781'))
-    var sliderValueView = rc.add(new TextBox(new Point(center.x - 85, center.y), '0', false, 40, 80, 50))
+    var sliderValueView = rc.add(new TextBox(new Point(center.x - 85, center.y), '0', false, 36, 80, 50))
     var slider = rc.add(new Examples.slider.Slider({obj: sliderValueView, prop: 'text'}, true, new Point(center.x - 250, center.y + 100), 400, 40, {start: 0, end: 100}))
     slider.init()
     

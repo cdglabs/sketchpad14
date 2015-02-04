@@ -9,7 +9,9 @@ Sketchpad.simulation.JetEngineConstraint = function Sketchpad__simulation__JetEn
 
 sketchpad.addClass(Sketchpad.simulation.JetEngineConstraint)
 
-Sketchpad.simulation.JetEngineConstraint.prototype.description = function() { return "Sketchpad.simulation.JetEngineConstrain(FreeBody Body, Vector Acceleration) applies for Body Acceleration to its Velocity only when flag scratch.spaceStillDown is true." }
+Sketchpad.simulation.JetEngineConstraint.description = function() { return "Sketchpad.simulation.JetEngineConstrain(FreeBody Body, Vector Acceleration) applies for Body Acceleration to its Velocity only when flag scratch.spaceStillDown is true." }
+
+Sketchpad.simulation.JetEngineConstraint.prototype.description = function() { return "Body " + this.body.__toString + "'s acceleration (" + this.acceleration.x + "," +  this.acceleration.y + ") applies to its Velocity only when flag scratch.spaceStillDown is true." }
 
 Sketchpad.simulation.JetEngineConstraint.prototype.propertyTypes = {body: 'FreeBody', acceleration: 'Vector', accelerationC: 'AccelerationConstraintC'}
 
