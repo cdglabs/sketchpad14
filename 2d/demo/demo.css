@@ -15,7 +15,15 @@ demos, constraints, classes, tiles, shortcuts {
     z-index: 2000;
     height: 680px;
     overflow-y: scroll;
-/*    overflow: hidden;*/
+}
+
+buttons {
+    position: fixed;
+    z-index: 2000;
+    left: 1160px;
+    top: 10px;
+    height: 680px;
+    overflow-y: scroll;
 }
 
 actions {
@@ -31,16 +39,6 @@ bins {
     bottom: 20px;
     left: 20px;
     z-index: 2000;
-    overflow: hidden;
-}
-
-buttons {
-    position: fixed;
-    z-index: 2000;
-    left: 1080px;
-    top: 10px;
-    height: 680px;
-    overflow-y: scroll;
     overflow: hidden;
 }
 
