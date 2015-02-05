@@ -6,6 +6,10 @@ Getting inspiration from Sutherland's 1961 Sketchpad and Overveld's retake on it
 * This is a fork of  [Relax](https://github.com/cdglabs/relax) project.
 * Only tested on Chrome browser
 
+## Blog Entry
+
+Read the [blog post](http://www.cdglabs.org/sketchpad14/blog) about it
+
 ## Demo
 
 [Try it](http://www.cdglabs.org/sketchpad14) 
