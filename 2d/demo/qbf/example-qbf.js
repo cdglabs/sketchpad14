@@ -86,7 +86,7 @@ Examples.qbf.Tile.prototype.containsPoint = function(x, y) {
     return res
 }
 
-Examples.qbf.WordRack = function(count) {
+Examples.qbf.WordRack = function Examples__qbf__WordRack(count) {
     this.count = count
     this.index = 0
     this.tiles = []

@@ -136,7 +136,7 @@ function installGeometricConstraints(Sketchpad) {
 
     Sketchpad.geom.CoordinateConstraint.description = function() { return  "Sketchpad.geom.CoordinateConstraint(Point P, Number X, Number Y) states that point P should stay at coordinate (X, Y)." }
 
-    Sketchpad.geom.CoordinateConstraint.prototype.description = function() { return  "point p" /*+ this.p.__toString*/ + " should stay at coordinate (" + this.c.x + ", " + this.c.y + ")." }
+    Sketchpad.geom.CoordinateConstraint.prototype.description = function() { return  "point p (" + this.p.__toString + ") should stay at coordinate (" + this.c.x + ", " + this.c.y + ")." }
 
     Sketchpad.geom.CoordinateConstraint.prototype.propertyTypes = {p: 'Point', c: 'Point'}
 
@@ -179,7 +179,7 @@ function installGeometricConstraints(Sketchpad) {
 
     Sketchpad.geom.XCoordinateConstraint.description = function() { return  "Sketchpad.geom.XCoordinateConstraint(Point P1, Point P2) states that point P1's x-coordinate should be at P2's x-coordinate." }
 
-    Sketchpad.geom.XCoordinateConstraint.prototype.description = function() { return  "point p1" /*+ this.p1.__toString*/ + "'s x-coordinate should be at p2" /*+ this.p2.__toString*/ + "'s x-coordinate." }
+    Sketchpad.geom.XCoordinateConstraint.prototype.description = function() { return  "point p1 (" + this.p1.__toString + ") 's x-coordinate should be at p2 (" + this.p2.__toString + ") 's x-coordinate." }
 
     Sketchpad.geom.XCoordinateConstraint.prototype.propertyTypes = {p1: 'Point', p2: 'Point'}
 
@@ -225,7 +225,7 @@ function installGeometricConstraints(Sketchpad) {
 
     Sketchpad.geom.CoincidenceConstraint.description = function() { return  "Sketchpad.geom.CoincidenceConstraint(Point P1, Poiont P2) states that points P1 & P2 should be at the same place." }
 
-    Sketchpad.geom.CoincidenceConstraint.prototype.description = function() { return  "points p1" /*+ this.p1.__toString*/ + " & p2" /*+ this.p2.__toString*/ + " should be at the same place." }
+    Sketchpad.geom.CoincidenceConstraint.prototype.description = function() { return  "points p1 (" + this.p1.__toString + ") & p2 (" + this.p2.__toString + ") should be at the same place." }
     
     Sketchpad.geom.CoincidenceConstraint.prototype.propertyTypes = {p1: 'Point', p2: 'Point'}
 
@@ -256,7 +256,7 @@ function installGeometricConstraints(Sketchpad) {
 
     Sketchpad.geom.EquivalenceConstraint.description = function() { return  "Sketchpad.geom.EquivalenceConstraint(Point P1, Point P2, Point P3, Point P4) says line sections P1-2 and P3-4 are parallel and of the same lengths." }
 
-    Sketchpad.geom.EquivalenceConstraint.prototype.description = function() { return  "line sections  p1" /*+ this.p1.__toString*/ + "-p2" /*+ this.p2.__toString*/ + " and  p3" /*+ this.p3.__toString*/ + "-p4" /*+ this.p4.__toString*/ + " are parallel and of the same lengths." }
+    Sketchpad.geom.EquivalenceConstraint.prototype.description = function() { return  "line sections  p1 (" + this.p1.__toString + ") -p2 (" + this.p2.__toString + ") and  p3 (" + this.p3.__toString + ") -p4 (" + this.p4.__toString + ") are parallel and of the same lengths." }
 
     Sketchpad.geom.EquivalenceConstraint.prototype.propertyTypes = {p1: 'Point', p2: 'Point', p3: 'Point', p4: 'Point'}
 
@@ -310,7 +310,7 @@ function installGeometricConstraints(Sketchpad) {
 
     Sketchpad.geom.OneWayEquivalenceConstraint.description = function() { return  "Sketchpad.geom.OneWayEquivalenceConstraint(Point P1, Point P2, Point P3, Point P4) says the vectors P1->P2 always matches with P3->P4" }
 
-    Sketchpad.geom.OneWayEquivalenceConstraint.prototype.description = function() { return  "vectors p1" /*+ this.p1.__toString*/ + "->p2" /*+ this.p2.__toString*/ + " always matches with p3" /*+ this.p3.__toString*/ + "->p4" /*+ this.p4.__toString*/ + "." }
+    Sketchpad.geom.OneWayEquivalenceConstraint.prototype.description = function() { return  "vectors p1 (" + this.p1.__toString + ") ->p2 (" + this.p2.__toString + ") always matches with p3 (" + this.p3.__toString + ") ->p4 (" + this.p4.__toString + ") ." }
 
     Sketchpad.geom.OneWayEquivalenceConstraint.prototype.propertyTypes = {p1: 'Point', p2: 'Point', p3: 'Point', p4: 'Point'}
 
@@ -342,7 +342,7 @@ function installGeometricConstraints(Sketchpad) {
 
     Sketchpad.geom.EqualDistanceConstraint.description = function() { return  "Sketchpad.geom.EqualDistanceConstraint(Point P1, Point P2, Point P3, Point P4) keeps distances P1->P2, P3->P4 equal." }
 
-    Sketchpad.geom.EqualDistanceConstraint.prototype.description = function() { return  "distances p1" /*+ this.p1.__toString*/ + "->p2" /*+ this.p2.__toString*/ + " & p3" /*+ this.p3.__toString*/ + "->p4" /*+ this.p4.__toString*/ + " are equal." }
+    Sketchpad.geom.EqualDistanceConstraint.prototype.description = function() { return  "distances p1 (" + this.p1.__toString + ") ->p2 (" + this.p2.__toString + ") & p3 (" + this.p3.__toString + ") ->p4 (" + this.p4.__toString + ") are equal." }
 
     Sketchpad.geom.EqualDistanceConstraint.prototype.propertyTypes = {p1: 'Point', p2: 'Point', p3: 'Point', p4: 'Point'}
 
@@ -380,7 +380,7 @@ function installGeometricConstraints(Sketchpad) {
 
     Sketchpad.geom.LengthConstraint.description = function() { return  "Sketchpad.geom.LengthConstraint(Point P1, Point P2, Number L) says points P1 and P2 always maintain a distance of L." }
 
-    Sketchpad.geom.LengthConstraint.prototype.description = function() { return  "points p1" /*+ this.p1.__toString*/ + " and p2" /*+ this.p2.__toString*/ + " always maintain a distance of " + this.l + "." }
+    Sketchpad.geom.LengthConstraint.prototype.description = function() { return  "points p1 (" + this.p1.__toString + ") and p2 (" + this.p2.__toString + ") always maintain a distance of " + this.l + "." }
 
     Sketchpad.geom.LengthConstraint.prototype.propertyTypes = {p1: 'Point', p2: 'Point', l: 'Number'}
 
@@ -458,7 +458,7 @@ function installGeometricConstraints(Sketchpad) {
 
     Sketchpad.geom.OrientationConstraint.description = function() { return  "Sketchpad.geom.OrientationConstraint(Point P1, Point P2, Point P3, Point P4, Number Theta) maintains angle between P1->P2 and P3->P4 at Theta." }
 
-    Sketchpad.geom.OrientationConstraint.prototype.description = function() { return  "angle is maintained between p1" /*+ this.p1.__toString*/ + "->p2" /*+ this.p2.__toString*/ + " and p3" /*+ this.p3.__toString*/ + "->p4" /*+ this.p4.__toString*/ + " at " + this.theta + " radians." }
+    Sketchpad.geom.OrientationConstraint.prototype.description = function() { return  "angle is maintained between p1 (" + this.p1.__toString + ") ->p2 (" + this.p2.__toString + ") and p3 (" + this.p3.__toString + ") ->p4 (" + this.p4.__toString + ") at " + this.theta + " radians." }
 
     Sketchpad.geom.OrientationConstraint.prototype.propertyTypes = {p1: 'Point', p2: 'Point', p3: 'Point', p4: 'Point', theta: 'Number'}
 
@@ -540,7 +540,7 @@ function installGeometricConstraints(Sketchpad) {
 
     Sketchpad.geom.MotorConstraint.description = function() { return  "Sketchpad.geom.MotorConstraint(Point P1, Point P2, Number W) causes P1 and P2 to orbit their midpoint at the given rate of w, in units of Hz: whole rotations per second." } 
 
-    Sketchpad.geom.MotorConstraint.prototype.description = function() { return  "p1" /*+ this.p1.__toString*/ + " and p2" /*+ this.p2.__toString*/ + " to orbit their midpoint at the given rate of " + this.w + ", in units of Hz: whole rotations per second." } 
+    Sketchpad.geom.MotorConstraint.prototype.description = function() { return  "p1 (" + this.p1.__toString + ") and p2 (" + this.p2.__toString + ") to orbit their midpoint at the given rate of " + this.w + ", in units of Hz: whole rotations per second." } 
     Sketchpad.geom.MotorConstraint.prototype.propertyTypes = {p1: 'Point', p2: 'Point', w: 'Number'}
     
     Sketchpad.geom.MotorConstraint.dummy = function(x, y) {

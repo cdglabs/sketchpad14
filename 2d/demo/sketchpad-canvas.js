@@ -290,7 +290,7 @@ SketchpadCanvas.prototype.makeConstraintListView = function() {
 		    self.constraintInstancesViewSelected = atp
 		    rc.removeTempDOMElements(['buttons'], self.constraintInstancesViewElements)
 		    self.constraintInstancesViewElements = []
-		    alist.forEach(function(c) { self.constraintInstancesViewElements.push(self.makeDOMElement('button', {name: c.__toString, onclick: function() { self.toggleCodeEditMode(false); self.inspectState(c) }, style: {background: '#ffffcc', width: width, height: height}}))})
+		    alist.forEach(function(c) { self.constraintInstancesViewElements.push(self.makeDOMElement('button', {name: c.__toString, onclick: function() { self.toggleCodeEditMode(false); self.inspectState(c) }, style: {background: '#f6ceec', width: width, height: height}}))})
 		} }
 		var first = list[0]
 		var shortTp = first.__shortType
@@ -304,7 +304,7 @@ SketchpadCanvas.prototype.makeConstraintListView = function() {
 	    var count = list.length
 	    if (list.length > 0) {
 		self.constraintInstancesViewElements = []
-		list.forEach(function(c) { self.constraintInstancesViewElements.push(self.makeDOMElement('button', {name: c.__toString, onclick: function() { self.inspectState(c) }, style: {background: '#ffffcc', width: width, height: height}}))})
+		list.forEach(function(c) { self.constraintInstancesViewElements.push(self.makeDOMElement('button', {name: c.__toString, onclick: function() { self.inspectState(c) }, style: {background: '#f6ceec', width: width, height: height}}))})
 	    }
 	}
     }
@@ -1180,27 +1180,27 @@ function SketchpadTile(name, inputs, ownRun, buttonsInfo, inspectorOfObj, fixedI
     var o = new Point(0, 0)
     this.box = optBox || new Box(o, 350, 50, false, false, 'gray', '#ccccff')
     this.box.___container = this
-    this.box.opacity = .7
+    this.box.opacity = .85
     this.parts.push(this.box)
     var box = this.box
     var pos = box.position, width = box.width, left = pos.x, top = pos.y
     this.isOwnerOf = [this.position]    
     rc.addTemp(this.position)
-    this.tileLabel = new TextBox(new Point(15, top + 5), this.name, false, 16, undefined, undefined, undefined, undefined, 'black', true)    
+    this.tileLabel = new TextBox(new Point(15, top + 5), this.name, false, 18, undefined, undefined, undefined, undefined, 'black', true, 'bold')    
     this.tileLabel.___container = this
     this.parts.push(this.tileLabel)
     var y = top + 40
     if (inspectorOfObj) {
 	this.inspectorOfObj = inspectorOfObj
 	if (inspectorOfObj.description) {
-	    var tb = new TextBox(new Point(20, y), '"' + inspectorOfObj.description.call(inspectorOfObj) + '"', true, 16, width - 100, undefined, undefined, undefined, 'black', true, undefined, true)
+	    var tb = new TextBox(new Point(20, y), '"' + inspectorOfObj.description.call(inspectorOfObj) + '"', true, 18, width - 100, undefined, undefined, undefined, 'black', true, undefined, true)
 	    y += 40 * (tb.lines.length)
 	    tb.___container = this
 	    this.parts.push(tb)
 	}
     }
     var fontSize = 16
-    this.inputsLabel = new TextBox(new Point(10, y), 'Inputs', false, fontSize, undefined, undefined, undefined, undefined, 'black', true)
+    this.inputsLabel = new TextBox(new Point(10, y), 'Inputs', false, fontSize, undefined, undefined, undefined, undefined, 'black', true, 'bold')
     this.inputsLabel.___container = this
     this.tilesLabel = new TextBox(new Point((width / 2) + 10, y), 'Tiles', false, fontSize, undefined, undefined, undefined, undefined, 'black', true)
     this.tilesLabel.___container = this
@@ -1259,7 +1259,7 @@ function SketchpadTile(name, inputs, ownRun, buttonsInfo, inspectorOfObj, fixedI
 	    if (isThing) {
 		inputCoord.y += inputCoord.h / 2 + 7
 		var pointerLinePt = new Point(inputCoord.x, inputCoord.y)
-		var pointerLine = new Line(pointerLinePt, inputValue.center(), 'orange', 2, 4)
+		var pointerLine = new Line(pointerLinePt, inputValue.center ? inputValue.center() : inputValue.grabPoint(), 'orange', 2, 4)
 		input.pointerLine = pointerLine
 		self.parts.push(pointerLine)
 		self.isOwnerOf.push(rc.addConstraint(Sketchpad.arith.SumConstraint, undefined, {obj: self.position, prop: 'x'}, {obj: inputCoord, prop: 'x'}, {obj: pointerLinePt, prop: 'x'}, [3]))
