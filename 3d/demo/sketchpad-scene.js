@@ -143,12 +143,20 @@ SketchpadScene.prototype.setRenderMode = function(mode) {
 }
     
 SketchpadScene.prototype.initThingCodeInspector = function() {
+    var self = this
     // editor
     this.thingCodeInspectorDiv = document.getElementById('code-inspector-div')
     this.thingCodeInspectorBottomDiv = document.getElementById('code-inspector-bottom-div')
+    this.thingCodeInspectorSaveButton = document.getElementById('code-inspector-save-button')
+    this.thingCodeInspectorSaveButton.onclick = function() { self.saveCodeEdit() }
+    this.thingCodeInspectorCancelButton = document.getElementById('code-inspector-cancel-button')
+    this.thingCodeInspectorCancelButton.onclick = function() { self.toggleCodeEditMode(false) }
+    this.thingCodeInspectorCancelButton.style.setProperty('left', '1010px')
+    this.thingCodeInspectorCancelButton.style.setProperty('top', '155px')
+    this.thingCodeInspectorSaveButton.style.setProperty('left', '960px')
+    this.thingCodeInspectorSaveButton.style.setProperty('top', '190px')
     this.thingCodeInspector = CodeMirror.fromTextArea(document.getElementById('code-inspector'), {lineWrapping: true})
-    this.thingCodeInspectorSize = {width: 1400, height: 400}
-    this.thingCodeInspector.setSize(this.thingCodeInspectorSize.width, this.thingCodeInspectorSize.height)
+    this.thingCodeInspectorSize = {width: 1000, height: 400}
 }
 
 // turn off backspace functionality in chrome:
@@ -184,9 +192,10 @@ SketchpadScene.prototype.keydown = function(e) {
     //case 'P': this.enterPointMode();  break
     //case 'Z': this.enterPointMode();  break
     //case 'D': this.removeAll(this.selection ? [this.selection] : this.secondarySelections); break
-    //case 'C': this.showConstraints = !this.showConstraints; break
-    //case 'I': this.inspectState(this.selection); break
-    case 'X': this.toggleProgramExplainMode(); break
+	//case 'C': this.showConstraints = !this.showConstraints; break
+    case 'L': this.toggleListConstraintsMode(); break
+	//case 'I': this.inspectState(this.selection); break
+    case 'X': this.toggleProgramExplainMode(!this.codeEditMode); break
     //case 'E': this.toggleCodeEditMode(!codeEditMode); break
     //case 'S': this.saveCodeEdit(); break
     //case 'N': this.newUserClassFromThings(this.selection ? [this.selection] : this.secondarySelections, false); break
@@ -222,23 +231,28 @@ SketchpadScene.prototype.keyup = function(e) {
 
 }
 
-SketchpadScene.prototype.toggleCodeEditMode = function() {
+SketchpadScene.prototype.toggleCodeEditMode = function(on, thing) {
+        thing = thing || this.selection
+    on = on && thing
     this.codeEditMode = on
     this.thingCodeInspectorDiv.hidden = !on
     this.thingCodeInspectorBottomDiv.hidden = !on
     if (on) {
+	this.thingCodeInspectorSaveButton.disabled = false
 	this.thingCodeInspectorBottomDiv.scrollIntoView()
-	this.inspectCode(this.selection)	
-    }
+	this.inspectCode(thing)	
+    } else
+	this.ctxt.globalAlpha = undefined
 }
 
-SketchpadScene.prototype.toggleProgramExplainMode = function() {
-    this.thingCodeInspectorDiv.hidden = this.codeEditMode
-    this.codeEditMode = !this.codeEditMode
-    if (this.codeEditMode) {
-	document.scrollTop = 200
+SketchpadScene.prototype.toggleProgramExplainMode = function(on) {
+    this.codeEditMode = on
+    this.thingCodeInspectorDiv.hidden = !on
+    this.thingCodeInspectorBottomDiv.hidden = !on
+    if (on) {
+	this.thingCodeInspectorSaveButton.disabled = true
 	this.thingCodeInspectorBottomDiv.scrollIntoView()
-	this.describeProgram()	
+	this.describeProgram()
     }
 }
 
@@ -274,6 +288,57 @@ SketchpadScene.prototype.clearSelectionPoints = function() {
     })
 }
 
+SketchpadScene.prototype.toggleListConstraintsMode = function() {
+    this.listConstraints = !this.listConstraints
+    this.makeConstraintListView()
+}
+
+SketchpadScene.prototype.makeConstraintListViewInstanceList = function(alist, width, height) {
+    var self = this
+    self.constraintInstancesViewElements = []
+    alist.forEach(function(c) {
+	var cb1 = self.makeDOMElement('button', {name: c.__toString, onclick: function() { self.toggleCodeEditMode(false); self.inspectState(c) }, style: {background: '#d8cef6', width: width, height: height}})
+	var cb2 = self.makeDOMElement('input', {onclick: function(event) { event.stopPropagation(); var aC = sketchpad.disabledConstraints[c.__id]; if (aC) { this.checked = true; self.addNewConstraint(c, true); delete sketchpad.disabledConstraints[c.__id] } else { this.checked = false; self.removeConstraint(c, true)}}, style: {background: '#bcf5a9', height: 20}}, cb1, undefined, 'checkbox', {checked: !sketchpad.disabledConstraints[c.__id]})
+	self.constraintInstancesViewElements.push(cb1)
+    })   
+}
+
+SketchpadScene.prototype.makeConstraintListView = function() {
+    var self = this
+    this.removeTempDOMElements()
+    if (this.listConstraints) {
+	var tree = sketchpad.constraintTreeList
+	var width = 250, height = 35
+	for (var tp in tree) {
+	    var list = tree[tp]
+	    var count = list.length
+	    if (list.length > 0) {
+		var fn1 = function(dscr, proto, atp) { return function(event) {
+		    if (self.constraintInstancesViewSelected !== undefined && self.constraintInstancesViewSelected !== atp)
+			rc.removeTempDOMElements(['buttons'], self.constraintInstancesViewElements)
+		    self.toggleCodeEditMode(!self.codeEditMode, proto)
+		} }
+		var fn2 = function(alist, atp) { return function(event) {
+		    event.stopPropagation()
+		    self.constraintInstancesViewSelected = atp
+		    rc.removeTempDOMElements(['buttons'], self.constraintInstancesViewElements)
+		    self.makeConstraintListViewInstanceList(alist, width, height)
+		} }
+		var first = list[0]
+		var shortTp = first.__shortType
+		var dscr = first.constructor.description ? first.constructor.description.call() : undefined
+		var b1 = this.makeDOMElement('button', {name: shortTp, onclick: fn1(dscr, first, tp), style: {background: '#c0c0c0', width: width, height: height}})
+		var b2 = this.makeDOMElement('label', {name: count, onclick: fn2(list, tp), style: {background: '#f5a9a9', height: 20}}, b1)
+	    }
+	}
+	if (self.constraintInstancesViewSelected) {
+	    var list = tree[self.constraintInstancesViewSelected]
+	    if (list.length > 0)
+		self.makeConstraintListViewInstanceList(list, width, height)
+	}
+    }
+}
+
 SketchpadScene.prototype.describeProgram = function() {
     var self = this
     var state = '\n// -- State --\n\n'
@@ -303,14 +368,18 @@ SketchpadScene.prototype.describeProgram = function() {
 	for (var tp in dict) {
 	    var cs = dict[tp]
 	    one = cs[0]
-	    cs.forEach(function(c) { state += self.stateToString(c) + "\n" })
+	    var dscrFn = one.constructor.description
+	    var constraintsDscr = ''
+	    if (dscrFn)
+		constraintsDscr += "\n // " + dscrFn.call(one) + "\n"
+	    cs.forEach(function(c) { state += self.stateToString(c) + "\n"; if (c.description) constraintsDscr += "\n\"" + c.description.call(c) + '"' })
+	    if (dscrFn)
+		constraintsDscr += "\n" 
 	    var ids = cs.map(function(t) { return t.__id })
 	    var csList = ids.join(',')
-	    var dscrFn = one.description
 	    var plural = cs.length > 1 
-	    description += "\n" + (i == 0 ? 'Constraint' : 'Thing') + (plural ? 's ' : ' ') + csList + ' ' + (plural ? 'are' : 'is') + ' ' + tp + "\n"
-	    if (dscrFn)
-		description += "\n" + dscrFn() + "\n"
+	    description += "\n" + (i == 0 ? 'Constraint' : 'Thing') + (plural ? 's ' : ' ') + csList + ' ' + (plural ? 'are' : 'is') + ' ' + tp + ".\n"
+	    description += constraintsDscr
 	    if (one.onEachTimeStepDescription) 
 		handlers += "'" + one.__type + "': " + one.onEachTimeStepDescription() + "\n" 		
 	}
@@ -323,9 +392,11 @@ SketchpadScene.prototype.describeProgram = function() {
     if (handlers !== '')
 	description += "\n// -- Ticking Handlers --\n\n" + handlers
     description += state
-    this.codeEditMode = true
-    this.thingCodeInspectorDiv.hidden = false
-    this.thingCodeInspector.setValue(description)
+    this.setCodeInspectorText(description)
+}
+
+SketchpadScene.prototype.setCodeInspectorText = function(text) {
+    this.thingCodeInspector.setValue(text)
 }
 
 SketchpadScene.prototype.computeAllSelectableThings = function() {
@@ -604,15 +675,17 @@ SketchpadScene.prototype.addConstraint = function(ctor, priority /* , arguments,
 	alert('No such class')
 }
 
-SketchpadScene.prototype.addNewConstraint = function(c) {
-    this.sketchpad.addConstraint(c)
-    this.doOneTimeThingsForNewThing(c)
+SketchpadScene.prototype.addNewConstraint = function(c, wasDisabled) {
+    this.sketchpad.addConstraint(c, wasDisabled)
+    //this.doOneTimeThingsForNewThing(c)
     if (c.grabPoint)
 	this.addGrabPointFor(c, true, true)
     if (c.onEachTimeStep)
 	this.sketchpad.thingsWithOnEachTimeStepFn.push(c)
     if (c.afterEachTimeStep)
 	this.sketchpad.thingsWithAfterEachTimeStepFn.push(c)
+    if (!this.paused)
+	this.makeConstraintListView()
     return c
 }
 
@@ -768,26 +841,77 @@ SketchpadScene.prototype.removeTemp = function(unwanted) {
     this.redraw()
 }
 
+SketchpadScene.prototype.removeTempDOMElements = function(kinds, unwanteds) {
+    kinds = kinds || ['buttons', 'labels']//, 'viewbuttons']
+    kinds.forEach(function(kind) {
+	var elements = document.getElementById(kind);
+	var toRemove = []
+	for (var i = 0; i < elements.children.length; i++) {
+	    var b = elements.children[i]
+	    if (!unwanteds || unwanteds.indexOf(b) >= 0)
+		toRemove.push(b)
+	}
+	toRemove.forEach(function(b) { elements.removeChild(b) })
+    })
+}
+
+SketchpadScene.prototype.makeDOMElement = function(aclass, a, parent, atIdx, type, values) {
+    var style = a.style
+    var name = a.name
+    var elm = document.createElement(aclass)
+    if (type)
+	elm.type = type
+    if (values)
+	for (k in values)
+	elm[k] = values[k]
+    elm.appendChild(document.createTextNode(name))
+    for (p in style)
+	if (style.hasOwnProperty(p))
+	    elm.style.setProperty(p, style[p])
+    elm.onclick = a.onclick
+    elm.setAttribute('class', aclass)
+    var parent = parent || document.getElementById(aclass + 's')
+    if (atIdx === undefined)
+	parent.appendChild(elm)
+    else {
+	var next = parent.firstChild
+	while(atIdx > 0) {
+	    next = next.nextSibling
+	    atIdx--
+	}	    
+	parent.insertBefore(elm, next)
+    }
+    return elm
+}
+
 SketchpadScene.prototype.removeConstraintsInvolving = function(unwanted) {
     var constraintsToRemove = this.sketchpad.constraints.filter(function(t) { return (t === unwanted || thingInvolvesThing(t, unwanted, {}) || (unwanted.isOwnerOf && unwanted.isOwnerOf.indexOf(t) >= 0)) })
     constraintsToRemove.forEach(function(c) { this.removeConstraint(c) }.bind(this))
     this.redraw()
 }
 
-SketchpadScene.prototype.removeConstraint = function(unwanted) {
+SketchpadScene.prototype.removeConstraint = function(unwanted, markAsDisabled) {
     if (unwanted.grabPoint && unwanted !== unwanted.grabPoint) 
         this.removeGrabPoint(unwanted.grabPoint(), true)
-    this.sketchpad.removeConstraint(unwanted)
+    this.sketchpad.removeConstraint(unwanted, markAsDisabled)
+    if (!this.paused)
+	this.makeConstraintListView()
+}
+
+SketchpadScene.prototype.resetOptions = function() {
+    this.millisecondsPerFrame = 1000 / 4//65
+    this.dragConstraintPriority = 10
+    this.onlyRenderOnConvergence = false   
+    this.renderEvenOnConvergence = false    
+    this.onlyRenderOnNoError = false
 }
 
 SketchpadScene.prototype.clear = function() {
     this.toggleCodeEditMode(false)
     this.sketchpad.clear()
-    this.onlyRenderOnConvergence = false
-    this.renderEvenOnConvergence = false
-    this.onlyRenderOnNoError = false
     this.points = []
     this.things = []
+    this.listConstraints = true
     this.thingGrabPoints = []
     this.constraintGrabPoints = []
     this.nonTopLevelThings = []
@@ -802,12 +926,14 @@ SketchpadScene.prototype.clear = function() {
     this.inDragSelectMode = false
     this.startDragSelectMode = false
     this.codeEditMode = false
-    this.dragConstraintPriority = 10
     this.fingers = {} // because fingers can refer to points
     this.disableDefaultKeyEvents = false
     this.renderSkipCount = 0
     this.clearTemps()
+    this.resetOptions()
     this.resetScene()
+    this.constraintInstancesViewElements = []
+    this.constraintInstancesViewSelected = undefined
 }
 
 SketchpadScene.prototype.resetScene = function() {
@@ -1009,39 +1135,47 @@ function SketchpadTile(name, inputs, ownRun, buttonsInfo, inspectorOfObj, fixedI
     }.bind(self)
     buttonsInfo = buttonsInfo || []
     this.drawMtd = optDraw
-    this.position = optPosition || rc.getRandomPoint()
+    this.position = optPosition || rc.getRandomPoint(undefined, undefined, 400)
     this.__origin = this.position
     this.parts = []
     var o = new Point(0, 0)
     this.box = optBox || new Box(o, 350, 50, false, false, 'gray', '#ccccff')
     this.box.___container = this
+    this.box.opacity = .85
     this.parts.push(this.box)
     var box = this.box
-    var pos = box.position, width = box.width, height = 50, left = pos.x, top = pos.y
+    var pos = box.position, width = box.width, left = pos.x, top = pos.y
     this.isOwnerOf = [this.position]    
     rc.addTemp(this.position)
-    this.tileLabel = new TextBox(new Point(15, top + 5), this.name, false, 16, undefined, undefined, undefined, undefined, 'gray', true)    
+    this.tileLabel = new TextBox(new Point(15, top + 5), this.name, false, 18, undefined, undefined, undefined, undefined, 'black', true, 'bold')    
     this.tileLabel.___container = this
     this.parts.push(this.tileLabel)
     var y = top + 40
-    this.inputsLabel = new TextBox(new Point(10, y), 'Inputs', false, 14, undefined, undefined, undefined, undefined, 'gray', true)
+    if (inspectorOfObj) {
+	this.inspectorOfObj = inspectorOfObj
+	if (inspectorOfObj.description) {
+	    var tb = new TextBox(new Point(20, y), '"' + inspectorOfObj.description.call(inspectorOfObj) + '"', true, 18, width - 100, undefined, undefined, undefined, 'black', true, undefined, true)
+	    y += 40 * (tb.lines.length)
+	    tb.___container = this
+	    this.parts.push(tb)
+	}
+    }
+    var fontSize = 16
+    this.inputsLabel = new TextBox(new Point(10, y), 'Inputs', false, fontSize, undefined, undefined, undefined, undefined, 'black', true, 'bold')
     this.inputsLabel.___container = this
-    this.tilesLabel = new TextBox(new Point((width / 2) + 10, y), 'Tiles', false, 14, undefined, undefined, undefined, undefined, 'gray', true)
+    this.tilesLabel = new TextBox(new Point((width / 2) + 10, y), 'Tiles', false, fontSize, undefined, undefined, undefined, undefined, 'black', true)
     this.tilesLabel.___container = this
     var inputElements = {}
     this.inputLabels = []
-    if (inspectorOfObj)
-	this.inspectorOfObj = inspectorOfObj
     this.inputs.forEach(function(inputInfo) {
 	var inputName = inputInfo.name
 	var inputType = inputInfo.type
 	var inputValue = inputInfo.value
 	var inputLabel = (inputType ? (inputType + ' ') : '') + inputName
-	var isThing = inputValue && inputValue.__isSketchpadThing
+	var isThing = inputValue && inputValue.__isSketchpadThing && !inputValue.__isConstraint
         y += 35
-	height += 35
 	var pLabelLength = inputLabel.length
-	var inputCoord = {x: 30 + pLabelLength * 8, y: y, w: 200 - (pLabelLength * 8), h: 20}
+	var inputCoord = {x: 150 , y: y, w: width - 200, h: 20}
 	var input = new CanvasInput({
 	    canvas: rc.canvas,
 	    x: inputCoord.x,
@@ -1049,7 +1183,7 @@ function SketchpadTile(name, inputs, ownRun, buttonsInfo, inspectorOfObj, fixedI
 	    placeHolder: isThing ? '' : inputName,
 	    value: inputInfo.expr,
 	    hiddenValue: inputInfo.hiddenExpr,
-	    fontSize: 14,
+	    fontSize: fontSize,
 	    fontFamily: 'Arial',
 	    fontColor: 'blue',
 	    fontWeight: 'bold',
@@ -1076,7 +1210,7 @@ function SketchpadTile(name, inputs, ownRun, buttonsInfo, inspectorOfObj, fixedI
 	self.parts.push(input)
 	inputElements[inputName] = input
 	var labelPoint = new Point(15, y)
-	var label = new TextBox(labelPoint, inputLabel + ':', false, 14, undefined, undefined, undefined, undefined, 'gray', true)
+	var label = new TextBox(labelPoint, inputLabel + ':', false, fontSize, undefined, undefined, undefined, undefined, 'black', true)
 	label.___container = self
 	self.parts.push(label)
 	self.inputLabels.push(label)
@@ -1084,10 +1218,9 @@ function SketchpadTile(name, inputs, ownRun, buttonsInfo, inspectorOfObj, fixedI
 	if (inspectorOfObj) {
 	    input.representsProperty = inputName
 	    if (isThing) {
-		//inputCoord.x += inputCoord.w / 2 + 7
 		inputCoord.y += inputCoord.h / 2 + 7
 		var pointerLinePt = new Point(inputCoord.x, inputCoord.y)
-		var pointerLine = new Line(pointerLinePt, inputValue.center(), 'orange', 2, 4)
+		var pointerLine = new Line(pointerLinePt, inputValue.center ? inputValue.center() : (inputValue.grabPoint ? inputValue.grabPoint() : new Point(0, 0)), 'orange', 2, 4)
 		input.pointerLine = pointerLine
 		self.parts.push(pointerLine)
 		self.isOwnerOf.push(rc.addConstraint(Sketchpad.arith.SumConstraint, undefined, {obj: self.position, prop: 'x'}, {obj: inputCoord, prop: 'x'}, {obj: pointerLinePt, prop: 'x'}, [3]))
@@ -1096,7 +1229,8 @@ function SketchpadTile(name, inputs, ownRun, buttonsInfo, inspectorOfObj, fixedI
 	}
     })
     this.inputElements = inputElements
-    height += 50
+    y += 100
+    var height = y - top
     if (height > box.height)
 	box.height = height
     this.buttons = []
@@ -1109,11 +1243,11 @@ function SketchpadTile(name, inputs, ownRun, buttonsInfo, inspectorOfObj, fixedI
 		y: 75 + self.childTileInputs.length * 35,
 		placeHolder: 'tile',
 		value: '',
-		fontSize: 14,
+		fontSize: fontSize,
 		fontFamily: 'Arial',
 		fontColor: 'blue',
 		fontWeight: 'bold',
-		width: 60,
+		width: 160,
 		padding: 8,
 		borderWidth: 1,
 		borderColor: 'gray',
@@ -1132,9 +1266,11 @@ function SketchpadTile(name, inputs, ownRun, buttonsInfo, inspectorOfObj, fixedI
 	}
 	buttonsInfo.unshift({name: '+', onclick: addChildFn, style: {background: 'orange'}})
     }
-    var removeFn = function() { rc.removeTemp(self) }
+    var removeFn = function() { rc.removeTempDOMElements(['viewbuttons'], self.buttons); rc.removeTemp(self) }
+    var viewClassFn = function() { rc.removeTempDOMElements(['viewbuttons'], self.buttons); rc.removeTemp(self); rc.toggleCodeEditMode(true, self.inspectorOfObj)}
+    buttonsInfo.unshift({name: 'Class', onclick: viewClassFn, style: {width: 40, background: 'pink'}})
     buttonsInfo.unshift({name: 'X', onclick: removeFn, style: {background: '#ff6666'}})
-    buttonsInfo.forEach(function(a) { self.buttons.push(rc.makeDOMButton(a)) })
+    buttonsInfo.forEach(function(a) { self.buttons.push(rc.makeDOMElement('viewbutton', a)) })
 }
 
 SketchpadTile.prototype.addChildTileInput = function(input) {

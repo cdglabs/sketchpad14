@@ -1,5 +1,5 @@
-body {
-    font-family: "PT Sans", Arial, Helvetica, sans-serif;
+body, button, label {
+    font-family: "Avenir", Arial, Helvetica, sans-serif;
     background-color: black;
 }
 
@@ -10,55 +10,107 @@ canvas {
 }
 
 demos, constraints, classes, tiles, shortcuts {
-    position: absolute;
+    position: fixed;
     top: 20px;
     right: 20px;
     z-index: 2000;
     height: 680px;
     overflow-y: scroll;
-
-}
-
-actions {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    z-index: 2000;
-}
-
-bins {
-    position: absolute;
-    bottom: 20px;
-    left: 20px;
-    z-index: 2000;
+    overflow: hidden;
 }
 
 buttons {
+    position: fixed;
+    z-index: 2000;
+    left: 1100px;
+    top: 10px;
+    height: 680px;
+    overflow-y: scroll;
+    overflow: hidden;
+}
+
+actions {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 2000;
+    overflow: hidden;
+}
+
+bins {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 2000;
+    overflow: hidden;
+}
+
+viewbuttons {
     position: absolute;
     z-index: 2000;
 }
 
-button {
-    position: absolute;
+button, viewbutton {
+    position: relative;
+    font-size: 16;
     z-index: 2000;
-    left: 730px;
-    top: 550px;
+    background: #66FF66;
 }
 
-demo, constraint, class, tile, shortcut, action, bin, iterationsPerFrame, showEachIterationButton {
+#code-inspector-cancel-button {
+    background: #ff6666;    
+}
+
+#code-inspector-save-button {
+    background: #ccffcc;    
+}
+
+demo, constraint, class, tile, shortcut, action, bin, iterationsPerFrame, showEachIterationButton, button, viewbutton {
     display: block;
     margin: 10pt;
-    padding: 4pt 4pt;
+    padding: 1pt 4pt;
     background: #eee;
     border: 1px solid #ddd;
     border-radius: 4pt;
-    box-shadow: 4px 4px 6px 0px rgba(0, 0, 0, .4);
+    /*box-shadow: 4px 4px 6px 0px rgba(0, 0, 0, .4);*/
     -webkit-user-select: none;
 }
 
-demo:hover, constraint:hover, class:hover, tile:hover, shortcut:hover, action:hover, bin:hover, button:hover {
+viewbutton {
+    position: absolute;
+}
+
+button, demo {
+    text-align: right;
+}
+
+button {
+    margin: 6pt;
+    padding: 1pt 4pt;
+}
+
+label,input {
+    text-align: left;
+    position: absolute;
+    left: -5px;
+    top: -9px;
+    margin: 10pt;
+    padding: 1pt 4pt;
+    background: #eee;
+    border: 1px solid #ddd;
+    border-radius: 4pt;
+    -webkit-user-select: none;
+}
+
+input {
+    left: 0px;
+    top: -6px;
+    -webkit-transform: scale(2);
+}
+
+demo:hover, constraint:hover, class:hover, tile:hover, shortcut:hover, action:hover, bin:hover, button:hover, label:hover {
     background: #ddd;
-    box-shadow: 2px 2px 2px 0px rgba(0, 0, 0, .4);
+    /*box-shadow: 2px 2px 2px 0px rgba(0, 0, 0, .4);*/
 }
 
 action {
@@ -77,10 +129,6 @@ bin:hover {
     background: #99cc99
 }
 
-button {
-    background: #66FF66;
-}
-
 button:hover {
     background: #66CC66;
 }
@@ -88,7 +136,7 @@ button:hover {
 showEachIterationButton {
     padding: 4pt;
     background: #eef;
-    position: absolute;
+    position: fixed;
     bottom: 20px;
     left: 40%;
     color: blue;
@@ -96,13 +144,13 @@ showEachIterationButton {
 
 showEachIterationButton:hover {
     background: #dde;
-    box-shadow: 2px 2px 2px 0px rgba(0, 0, 0, .4);
+    /*box-shadow: 2px 2px 2px 0px rgba(0, 0, 0, .4);*/
 }
 
 iterationsPerFrame {
     padding: 4pt;
     background: #f8f8f8;
-    position: absolute;
+    position: fixed;
     bottom: 20px;
     right: 20px;
     color: blue;
