@@ -20,7 +20,7 @@ demos, constraints, classes, tiles, shortcuts {
 buttons {
     position: fixed;
     z-index: 2000;
-    left: 1160px;
+    left: 1100px;
     top: 10px;
     height: 680px;
     overflow-y: scroll;
@@ -86,7 +86,7 @@ button {
     padding: 1pt 4pt;
 }
 
-label {
+label,input {
     text-align: left;
     position: absolute;
     left: -5px;
@@ -97,6 +97,12 @@ label {
     border: 1px solid #ddd;
     border-radius: 4pt;
     -webkit-user-select: none;
+}
+
+input {
+    left: 0px;
+    top: -6px;
+    -webkit-transform: scale(2);
 }
 
 demo:hover, constraint:hover, class:hover, tile:hover, shortcut:hover, action:hover, bin:hover, button:hover, label:hover {

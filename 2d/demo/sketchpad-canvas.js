@@ -46,8 +46,9 @@ function SketchpadCanvas(sketchpad, canvas) {
 	"Opt/Alt + M: Merge selections pairwise": {},
 	"Opt/Alt + P (or Z) + click + release: Point": {},
 	"Opt/Alt + P (or Z) + click + hold + repeat: Line": {},
-	"Opt/Alt + C: Show constraints": {},
+	"Opt/Alt + C: Draw constraints": {},
 	"Opt/Alt + G: Show grab points": {},
+	"Opt/Alt + L: Show constraints list": {},
 	"Opt/Alt + T: Show trace": {},
 	"Opt/Alt + R: Reset options": {}
     }
@@ -270,6 +271,16 @@ SketchpadCanvas.prototype.toggleListConstraintsMode = function() {
     this.makeConstraintListView()
 }
 
+SketchpadCanvas.prototype.makeConstraintListViewInstanceList = function(alist, width, height) {
+    var self = this
+    self.constraintInstancesViewElements = []
+    alist.forEach(function(c) {
+	var cb1 = self.makeDOMElement('button', {name: c.__toString, onclick: function() { self.toggleCodeEditMode(false); self.inspectState(c) }, style: {background: '#d8cef6', width: width, height: height}})
+	var cb2 = self.makeDOMElement('input', {onclick: function(event) { event.stopPropagation(); var aC = sketchpad.disabledConstraints[c.__id]; if (aC) { this.checked = true; self.addNewConstraint(c, true); delete sketchpad.disabledConstraints[c.__id] } else { this.checked = false; self.removeConstraint(c, true)}}, style: {background: '#bcf5a9', height: 20}}, cb1, undefined, 'checkbox', {checked: !sketchpad.disabledConstraints[c.__id]})
+	self.constraintInstancesViewElements.push(cb1)
+    })   
+}
+
 SketchpadCanvas.prototype.makeConstraintListView = function() {
     var self = this
     this.removeTempDOMElements()
@@ -289,8 +300,7 @@ SketchpadCanvas.prototype.makeConstraintListView = function() {
 		    event.stopPropagation()
 		    self.constraintInstancesViewSelected = atp
 		    rc.removeTempDOMElements(['buttons'], self.constraintInstancesViewElements)
-		    self.constraintInstancesViewElements = []
-		    alist.forEach(function(c) { self.constraintInstancesViewElements.push(self.makeDOMElement('button', {name: c.__toString, onclick: function() { self.toggleCodeEditMode(false); self.inspectState(c) }, style: {background: '#f6ceec', width: width, height: height}}))})
+		    self.makeConstraintListViewInstanceList(alist, width, height)
 		} }
 		var first = list[0]
 		var shortTp = first.__shortType
@@ -303,8 +313,7 @@ SketchpadCanvas.prototype.makeConstraintListView = function() {
 	    var list = tree[self.constraintInstancesViewSelected]
 	    var count = list.length
 	    if (list.length > 0) {
-		self.constraintInstancesViewElements = []
-		list.forEach(function(c) { self.constraintInstancesViewElements.push(self.makeDOMElement('button', {name: c.__toString, onclick: function() { self.inspectState(c) }, style: {background: '#f6ceec', width: width, height: height}}))})
+		self.makeConstraintListViewInstanceList(list, width, height)
 	    }
 	}
     }
@@ -734,8 +743,8 @@ SketchpadCanvas.prototype.addConstraint = function(ctor, priority /* , arguments
 	alert('No such class')
 }
 
-SketchpadCanvas.prototype.addNewConstraint = function(c) {
-    this.sketchpad.addConstraint(c)
+SketchpadCanvas.prototype.addNewConstraint = function(c, wasDisabled) {
+    this.sketchpad.addConstraint(c, wasDisabled)
     //this.doOneTimeThingsForNewThing(c)
     if (c.grabPoint)
 	this.addGrabPointFor(c, true, true)
@@ -911,12 +920,12 @@ SketchpadCanvas.prototype.removeConstraintsInvolving = function(unwanted) {
     this.redraw()
 }
 
-SketchpadCanvas.prototype.removeConstraint = function(unwanted) {
+SketchpadCanvas.prototype.removeConstraint = function(unwanted, markAsDisabled) {
     if (unwanted.grabPoint && unwanted !== unwanted.grabPoint) 
         this.removeGrabPoint(unwanted.grabPoint(), true)
     this.sketchpad.thingsWithOnEachTimeStepFn = this.sketchpad.thingsWithOnEachTimeStepFn.filter(function(thing) { return thing !== unwanted })
-    this.sketchpad.thingsWithAfterEachTimeStepFn = this.sketchpad.thingsWithAfterEachTimeStepFn.filter(function(thing) { return thing !== unwanted })    
-    this.sketchpad.removeConstraint(unwanted)
+    this.sketchpad.thingsWithAfterEachTimeStepFn = this.sketchpad.thingsWithAfterEachTimeStepFn.filter(function(thing) { return thing !== unwanted })
+    this.sketchpad.removeConstraint(unwanted, markAsDisabled)
     if (!this.paused)
 	this.makeConstraintListView()
 }
@@ -997,10 +1006,15 @@ SketchpadCanvas.prototype.removeTempDOMElements = function(kinds, unwanteds) {
     })
 }
 
-SketchpadCanvas.prototype.makeDOMElement = function(aclass, a, parent, atIdx) {
+SketchpadCanvas.prototype.makeDOMElement = function(aclass, a, parent, atIdx, type, values) {
     var style = a.style
     var name = a.name
     var elm = document.createElement(aclass)
+    if (type)
+	elm.type = type
+    if (values)
+	for (k in values)
+	elm[k] = values[k]
     elm.appendChild(document.createTextNode(name))
     for (p in style)
 	if (style.hasOwnProperty(p))
