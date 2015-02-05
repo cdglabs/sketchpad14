@@ -64,6 +64,7 @@ function Sketchpad() {
     this.solveEvenWithoutErrorOnPriorityDifferences = false
     this.constraints = []
     this.constraintTreeList = {}
+    this.disabledConstraints = {}
     this.thingConstructors = {}
     this.constraintConstructors = {}
     this.objMap = {}
@@ -101,7 +102,7 @@ Sketchpad.prototype.getObject = function(id) {
     return this.objMap[id]
 }
 
-Sketchpad.prototype.addConstraint = function(constraint) {
+Sketchpad.prototype.addConstraint = function(constraint, wasDisabled) {
     if (constraint.__priority === undefined)
 	constraint.__priority = 1
     var prio = constraint.__priority
@@ -114,10 +115,14 @@ Sketchpad.prototype.addConstraint = function(constraint) {
 	if (this.debug) log(this.perThingPerPropEffectingConstraints)
     }
     this.constraints.splice(addIdx, 0, constraint)
-    var cTp = constraint.__type    
-    if (!this.constraintTreeList[cTp])
-	this.constraintTreeList[cTp] = []
-    this.constraintTreeList[cTp].push(constraint)
+    if (wasDisabled)
+	delete this.disabledConstraints[constraint.__id]
+    else {
+	var cTp = constraint.__type    
+	if (!this.constraintTreeList[cTp])
+	    this.constraintTreeList[cTp] = []
+	this.constraintTreeList[cTp].push(constraint)
+    }
     for (var p in constraint) {
 	if (constraint.hasOwnProperty(p)) {
 	    var obj = constraint[p]
@@ -128,7 +133,7 @@ Sketchpad.prototype.addConstraint = function(constraint) {
     return constraint
 }
 
-Sketchpad.prototype.removeConstraint = function(unwantedConstraint) {
+Sketchpad.prototype.removeConstraint = function(unwantedConstraint, markAsDisabled) {
     var self = this
     var removed = [unwantedConstraint]
     this.constraints = this.constraints.filter(function(constraint) {
@@ -144,8 +149,12 @@ Sketchpad.prototype.removeConstraint = function(unwantedConstraint) {
     })
     var tree = this.constraintTreeList
     removed.forEach(function(constraint) {
-	var list = tree[constraint.__type]
-	list.splice(list.indexOf(constraint), 1)	
+	if (markAsDisabled) {
+	    self.disabledConstraints[constraint.__id] = constraint	
+	} else {
+	    var list = tree[constraint.__type]
+	    list.splice(list.indexOf(constraint), 1)
+	}
     })
     if (this.solveEvenWithoutErrorOnPriorityDifferences)
 	this.computePerThingPerPropertyEffectors()
@@ -159,6 +168,7 @@ Sketchpad.prototype.clear = function() {
     this.solveEvenWithoutErrorOnPriorityDifferences = false
     this.constraints = []
     this.constraintTreeList = {}
+    this.disabledConstraints = {}
     this.objMap = {}
     this.eventHandlers = []
     this.events = []
