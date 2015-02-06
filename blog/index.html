@@ -6,14 +6,57 @@
   </style>
 <body>
   <hd>Half-Century Later:<br>
-    From Sketchpad61 to Sketchpad14</hd>
+    "From Sketchpad<small>61</small> to Sketchpad<small>14</small>"</hd>
   <br><br>
-  Hesam Samimi
+  <small><a href="http://www.hesam.us">Hesam Samimi</a>, <a href="http://www.tinlizzie.org/~awarth">Alex Warth</a><br><a href="http://www.cdglabs.org">Communication Design Group</a></small>
+  <br><br>
+  <img src="1.png"></img>
+  <br>
+  <hd1>Intro to Sketchpad</hd1>
   <div class="chapter">
     <p>
-      In 1961, <a href="http://en.wikipedia.org/wiki/Ivan_Sutherland">Ivan Sutherland</a> built a computer program called <a href="http://en.wikipedia.org/wiki/Sketchpad">Sketchpad</a>. It was the first in many things: first graphical user interface (GUI), first time an oscilloscope was modified to be used as a computer monitor as we know it now, first gesture UI using a light pen, first computer drawing system. It was also first in categories not commonly known. To most, it appears to be a CAD drawing tool, something like the great-great grandpa of AutoCAD. Programming languages pioneer <a href="http://en.wikipedia.org/wiki/Alan_Kay">Alan Kay</a> points out that that it is really the first object oriented system as well as first fully declarative programming system. Listen to his video commentary here to see what he means by that:
+      In 1961, <a href="http://en.wikipedia.org/wiki/Ivan_Sutherland">Ivan Sutherland</a> built a computer program called <a href="http://en.wikipedia.org/wiki/Sketchpad">Sketchpad</a>. It was the first in many things: first graphical user interface (GUI), first time an oscilloscope was modified to be used as a computer monitor as we know it now, first gesture UI using a light pen, first computer drawing system. Still, to a casual observer it appears to be a CAD drawing tool, something like the great-great grandpa of AutoCAD. But programming languages pioneer <a href="http://en.wikipedia.org/wiki/Alan_Kay">Alan Kay</a> points out some other important categories it is a first in, not commonly known. It happens to be really the first object oriented system, as well as first fully declarative programming system. That is, the user simply expresses the <i>constraints</i> (requirements) of the drawing (e.g. two line sections must be parallel) and the system will automatically and continually <i>solves</i> the system of constraints to ensure they are maintained at all times. Listen to Kay's video commentary here to get a better idea:
     </p>
-    <iframe width="420" height="315" src="https://www.youtube.com/embed/495nCzxM9PI" frameborder="0" allowfullscreen></iframe>
+    <iframe src="https://www.youtube.com/embed/495nCzxM9PI" frameborder="0" allowfullscreen></iframe>
+  </div>
+  <div class="chapter">
+    <p>
+      Sadly, from what I've seen 1961 Sketchpad happens to be not only the first truely declarative programming system (albeit a limited and not really extensible one), but also one of the last ones! <a href="http://en.wikipedia.org/wiki/Alan_H._Borning">Alan Borning</a>'s <a href="http://en.wikipedia.org/wiki/ThingLab">ThingLab</a> of late 70s generalized it by packagaing it as a constraint-based "kit building kit," programmable within the <a href="http://en.wikipedia.org/wiki/Smalltalk">Smalltalk</a> environment.
+
+      Other forms of declarative programming and constraint-based programming came about in later years. Language researchers have also tried various forms of mixing declarative, constraint-based programming with the common imperative style programming. In either case, I haven't seen any form of declarative programming system that can handle the scale of realistic software development of today. The grand majority of developers have never heard of declarative programming, let alone use it in their practice.
+    </p>
+  </div>
+  <img src="1.png"></img>
+  <br>
+  <hd1>Constraint Solving in Sketchpad</hd1>
+  <div class="chapter">
+    <p>
+      An important innovation of Sketchpad was to employ an iterative numerical constraint solving approach called <a href="http://en.wikipedia.org/wiki/Relaxation_%28iterative_method%29">relaxation</a>. Sketchpad system uses it along with a linear approximation method as a relatively light-weight scheme to solve for a given system of numeric constraints, including non-linear ones. The goal of the iterativive relaxation method is to gradually converge to a solution to a system of (maybe nonlinear) equations. Another aspec of relaxation technique is that an <i>error value</i> is used as an indicator for how far each constraint is from a solution. Once all constraints have a miniscule error value, the system is assumed to have converged to an acceptable global solution.
+    </p>
+      <p>
+      Because the system can, in many situations, smoothly and quickly converge to an acceptable solution, this form of constraint solving can be suitable for interactiveness and animation, as shown by Sketchpad and Borning's ThingLab. Sketchpad's relaxation method did not employ any domain specific knowledge in solving a system of constraints: only a general iterative linear approximation method.
+    </p>
+  </div>
+  <img src="1.png"></img>
+  <br>
+  <hd1>Thirty Years Later...</hd1>
+  <div class="chapter">
+    <p>
+      In his paper published in the 90s "<a href="http://oai.cwi.nl/oai/asset/18243/18243A.pdf">30 Years After Sketchpad: Relaxation of Geometric Constraints Revisited</a>," C.W.A.M. van Overveld reworked Sketchpad's original relaxation solving model for a small set of geometric constraints, e.g., one to maintain a fixed distance from two points.
+      </p>
+    <p>Rather than using a general linear-approximation based numeric method to solve constraints, Overveld proposed to let each type of constraint to define its own <i>algorithm</i> to solve itself, in isolation. Once the solutions from all individual constraints are collected, they are <i>averaged</i> together and applied to the variables. In a solution-converging situation, the system moves closer to a solution by this pass and therefore by iteratively repeating this process an acceptable global solution (miniscule error values) can be reached. 
+    <p>
+      From one point of view Overveld's approach is inferior to Sketchpad's: the system has no real smarts in solving problems; the user has to define constraint types beforehand and also provide an algorithm that solves it.
+    </p>
+    <p>
+      What we noticed, however, is that from the standpoint of a programming language, Overveld's approach and way of organizing a program as a selection of constraints from a set of predefined constraint types is incredibly suitable for applying to general programming. It's nice that Sketchpad's general numeric relaxation technique doesn't require providing an algorithm to solve constraints, but it is also limited in being applable to most software engineering scenarios, e.g. non-numeric constraints. Another advatnage of Overveld's way is that it gives the user the power her own experties and knowledge to solve constraints whichever is most suitable.
+    </p>
+    </p>
+  </div>
+  <img src="1.png"></img>
+  <br>
+  <hd1>54 Years Later: Sketchpad<small>14</small></hd1>
+  <div class="chapter">
   </div>
 </body>
 </html>
