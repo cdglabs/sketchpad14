@@ -1,0 +1,109 @@
+<html>
+  <title>Blog on Sketchpad14: Part II</title>
+  <head>
+    <link href="index.css" rel="stylesheet"></link>
+    <link rel="stylesheet" href="../3rdparty/codemirror/codemirror.css">
+  </head>
+  </style>
+<body>
+  <script src="../3rdparty/codemirror/codemirror.js"></script>
+  <hd>Half-Century Later:
+    <br>
+    "From Sketchpad<small>61</small> to Sketchpad<small>14</small>"
+    <br>
+    <small>
+      Part II: Sketchpad<small>14</small>
+    </small>
+  </hd>
+  <br><br>
+  <small><a href="http://www.hesam.us">Hesam Samimi</a>, <a href="http://www.tinlizzie.org/~awarth">Alex Warth</a><br><a href="http://www.cdglabs.org">Communication Design Group</a></small>
+  <br><br>
+  <img src="1.png"></img>
+  <br>
+  <hd1>54 Years Later: Sketchpad<small>14</small></hd1>
+  <div class="chapter">
+    <p>
+      Overveld's alternative relaxation constraint solving approach for the geometric constraints a la Sketchpad inspired us to build a fully general programming model around it. We call it Sketchpad<small>14</small>. Our intention was to go back and honor and implement most of the cool things about Sutherland's Sketchpad, yet build a realistic system to build interactive web applications. 
+    </p>
+    <p>
+      As in Sketchpad and Overveld's geometric constraints, the way to define and modify the behavior of a program is to add/remove constraints, rather than the common imperative programming practice of "writing code." We take Overveld's approach, however, and require that constraint types be defined beforehand. This means we let the user define constraint types as well as how to solve them in isolation. This is what's empowering about the approach as the user is put in the driver seat to use the programming language of the program itself to define the constraint and also provide an "algorithm" to solve it.
+    </p>
+    <p>
+      Another aspect of Sketchpad<small>14</small> is that it gives a principled mechanism for the user to define the <i>reactive</i> part of an interactive program. The next section explains a semi-formal programming model implemented by the tool that we call <i>Constraint Reactive Programming</i>.
+    </p>
+  </div>
+  <img src="1.png"></img>
+  <br>
+  <hd1>Constraint Reactive Programming</hd1>
+  <div class="chapter">
+    <p>
+      Sketchpad<small>14</small> is hosted in JavaScript, so we will explain the Constraint Reactive Programming (CRP) model in the context of the JS language.
+    </p>
+    In this language, primitive types as well as functions and objects serve as values. Objects can be instantiated and referenced, as usual. However, imperative style programming, e.g. assignments for computation, isn't done.
+    <p>
+      Constructing a program in the CRP model involves describing four parts:
+      <ul>
+      <li>
+      (1) data and constraint class definitions
+      </li>
+      <li>
+      (2) data, as instances of data classes
+      </li>
+      <li>
+	(3) continuous behaviors given in terms of constraints operating over the data, as instances of constraint classes
+      </li>
+      <li>
+	(4) discrete behaviors, that is, the definition of events.
+      </li>
+      </ul>
+    </p>
+    <p>
+      An <i>event</i> is defined by:
+      <ul>
+      <li>
+	(a) a trigger, e.g. a IO event or a predicate over the state
+      </li>
+      <li>
+	(b) a handler method describing the changes that need to occur anytime the event is triggered
+      </li>
+    </p>
+      <p>
+      The model restricts what can be done in a handler, and it will be primarily used to add/remove data or continuous constraints to/from the store. Another thing that can occur in the event handler is a <i>discrete constraint</i>, i.e. one that is only solved once at the time even is triggered, but it doesn't get added to the store unlike the continuous constraints.
+    </p>
+    <p>
+Therefore, the execution model is unlike the imperative style, i.e., statement by statement. The program is assumed to be <i>reactive</i>. All present constraints are assumed to be continuously operating over the data, affecting them any time they are left unsatisfied. The events are always assumed to be ready to be triggered.
+    </p>
+    <p>
+      OK, enought talking! Let's jump to our first example.
+    </p>
+  </div>
+  <img src="1.png"></img>
+  <br>
+  <hd1>First Example: CDG Logo</hd1>
+  <div class="chapter">
+    <img src="2.gif"></img>
+    <p>
+      Consider the program above that displays our group (CDG)'s interim logo, which consists of three points and two line sections. This is a reactive application. The user can drag one of these objects around, however, the structure of the logo needs to be maintained.
+    </p>
+    <p>
+      Sketchpad<small>14</small> allows the user to define new data or constraint types. However, it does come with a set of standard shapes and constraint types, which we will make use of here. To capture this program, we instantiate three <mono>Point</mono>s and two <mono>Line</mono>s with the correct radius, text, color, etc. to match the figure below. 
+    </p>
+    <textarea id="code-inspector" name="code-inspector"></textarea>
+    <script>
+      var code1 = CodeMirror.fromTextArea(document.getElementById('code-inspector'), {lineWrapping: true})
+      code1.setValue('      p1 := new Point(..., ...); l1 := new Line(p1, p2); l2 := new Line(p2, p3)')
+    </script>
+    <code>
+      p1 := new Point(..., ...);<br>
+      l1 := new Line(p1, p2);<br>
+      l2 := new Line(p2, p3);<br>
+      </code>
+    <p>
+      The next step is to add the continuous behaviors, i.e., constraints. 
+      </p>
+  </div>
+  <p>
+    Back to <a href="1.html">Part I: Background</a>
+  </p>
+</body>
+</html>

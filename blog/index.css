@@ -1,7 +1,6 @@
-body{
-
+body {
     margin: 50px 50px;
-    background: #FFFFCC;
+    /*background: #FFFFCC;*/
     font-family: 'Avenir';
     font-size: 20px;
     font-weight: lighter;
@@ -9,12 +8,26 @@ body{
     text-align: center;   
     min-width:1040px;
     background-repeat: no-repeat;    
-    overflow-x:hidden;
-    
+    overflow-x:hidden;    
+}
+
+mono,code {
+    font-family: 'Courier New';
+    color: #8904B1;
+}
+
+code {
+    margin: 300px auto;
+    margin-left: 30%;
 }
 
 hd,hd1,hd2,hd4 {
 align: center;
+}
+
+img {
+    margin-left: 10%;
+
 }
 
 hd{
