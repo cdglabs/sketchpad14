@@ -1,3 +1,8 @@
+.CodeMirror {
+    top: 200px;
+    left: 30%;
+}
+
 body, button, label {
     font-family: "Avenir", Arial, Helvetica, sans-serif;
     background-color: black;
