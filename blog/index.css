@@ -11,14 +11,9 @@ body {
     overflow-x:hidden;    
 }
 
-mono,code {
+mono {
     font-family: 'Courier New';
     color: #8904B1;
-}
-
-code {
-    margin: 300px auto;
-    margin-left: 30%;
 }
 
 hd,hd1,hd2,hd4 {

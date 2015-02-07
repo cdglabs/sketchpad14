@@ -1,12 +1,12 @@
 <html>
   <title>Blog on Sketchpad14: Part II</title>
   <head>
+    <link href="./lib/prism.css" rel="stylesheet" />
     <link href="index.css" rel="stylesheet"></link>
-    <link rel="stylesheet" href="../3rdparty/codemirror/codemirror.css">
   </head>
   </style>
 <body>
-  <script src="../3rdparty/codemirror/codemirror.js"></script>
+  <script src="./lib/prism.js"></script>
   <hd>Half-Century Later:
     <br>
     "From Sketchpad<small>61</small> to Sketchpad<small>14</small>"
@@ -88,19 +88,60 @@ Therefore, the execution model is unlike the imperative style, i.e., statement b
     <p>
       Sketchpad<small>14</small> allows the user to define new data or constraint types. However, it does come with a set of standard shapes and constraint types, which we will make use of here. To capture this program, we instantiate three <mono>Point</mono>s and two <mono>Line</mono>s with the correct radius, text, color, etc. to match the figure below. 
     </p>
-    <textarea id="code-inspector" name="code-inspector"></textarea>
-    <script>
-      var code1 = CodeMirror.fromTextArea(document.getElementById('code-inspector'), {lineWrapping: true})
-      code1.setValue('      p1 := new Point(..., ...); l1 := new Line(p1, p2); l2 := new Line(p2, p3)')
-    </script>
-    <code>
-      p1 := new Point(..., ...);<br>
-      l1 := new Line(p1, p2);<br>
-      l2 := new Line(p2, p3);<br>
-      </code>
+    <pre><code class="language-javascript">
+
+	p1 := new Point(...); //C
+	p2 := new Point(...); //D
+	p3 := new Point(...); //G
+	l1 := new Line(p1, p2);
+	l2 := new Line(p2, p3);
+    </code></pre>
     <p>
-      The next step is to add the continuous behaviors, i.e., constraints. 
-      </p>
+      The next step is to add the continuous behaviors, i.e., constraints. We will add two <mono>LengthConstraint</mono>s to keep the lengths of lines fixed at 100px and one <mono>OrientationConstraint</mono> to keep the angle between them at 90 degrees, at all times:
+    </p>
+    <pre><code class="language-javascript">
+
+	addConstraint(new LengthConstraint(p1, p2, 100))
+	addConstraint(new LengthConstraint(p2, p3, 100))
+	addConstraint(new OrientationConstraint(p2, p1, p2, 3,  Math.PI / 2))
+    </code></pre>
+    <p>
+      Finally, we need to define the reactive aspect of the program: if the user has the mouse clicked on an object, we'd want to add a <mono>CoordinateConstraint</mono> to also require that it follows the mouse dragging:
+    </p>
+    <pre><code class="language-javascript">
+
+    registerEvent('mousedown', function(e) {
+    if (typeof e.pointedObject = Point)
+        dragConstraint = addConstraint(
+            new CoordinateConstraint(e.pointedObject, e.mousePosition))
+})
+    </code></pre>
+        <p>
+      And the <mono>CoordinateConstraint</mono> needs to be updated during the dragging:
+    </p>
+    <pre><code class="language-javascript">
+
+    registerEvent('mousemove', function(e) {
+    if (dragConstraint !== undefined)
+        dragConstraint.c = e.mousePosition
+})
+    </code></pre>
+        <p>
+      And finally the drag constraint is removed when the user releases the mouse. 
+    </p>
+    <pre><code class="language-javascript">
+
+    registerEvent('mouseup', function(e) {
+    if (dragConstraint !== undefined) {
+        removeConstraint(dragConstraint)
+        dragConstraint = undefined
+    }
+})
+    </code></pre>
+        <p>
+	  In the demo figure above, the set of active constraints are shown at the top right of the screen. Notice that the one <mono>CoordinateConstraint</mono> temporarily appears during the user dragging event.
+    </p>
+
   </div>
   <p>
     Back to <a href="1.html">Part I: Background</a>
