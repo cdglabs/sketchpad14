@@ -25,6 +25,7 @@ function SketchpadCanvas(sketchpad, canvas) {
     this.temps = []
     this.selection = undefined
     this.secondarySelections = []
+    this.highlightThisThingDifferently = undefined
     this.selectionChoiceIdx = 0
     this.selectionPoints = []
     this.__origin = new Point(0, 0)
@@ -478,6 +479,7 @@ SketchpadCanvas.prototype.pointerdown = function(e) {
 		this.selection._isSelected = false	
 	    thing._isSelected = true
 	    this.secondarySelections = []
+	    this.highlightThisThingDifferently = undefined
 	    this.setSelection(thing)
 	    if (this.currentInputElement && !thing.__isTemp) {
 		this.mergeInputElementValueWithSelection(this.currentInputElement, thing, true)
@@ -657,7 +659,7 @@ SketchpadCanvas.prototype.redraw = function() {
     if (this.selection && this.selection.border) {
 	drawBorderOf(this.selection, 'orange', this)
     }
-    this.secondarySelections.forEach(function(t) { if (t.border) drawBorderOf(t, 'green', self) })
+    this.secondarySelections.forEach(function(t) { if (t.border) { var color = (self.highlightThisThingDifferently && self.highlightThisThingDifferently === t) ? 'red' : 'green'; drawBorderOf(t, color, self) } })
     if (this.inDragSelectMode)
 	draw(this.selectionBox, self, {color: 'green'})
     this.ctxt.restore()
@@ -951,6 +953,7 @@ SketchpadCanvas.prototype.clear = function() {
     this.lastIterationError = undefined
     this.selection = undefined
     this.secondarySelections = []
+    this.highlightThisThingDifferently = undefined
     this.selectionChoiceIdx = 0
     this.showConstraints = false
     this.listConstraints = true
@@ -973,6 +976,7 @@ SketchpadCanvas.prototype.clearSelections = function(andRedraw) {
     if (!this.haveDragSelectionsMode) {	
 	//this.secondarySelections.forEach(function(t) { if (t._selectionIndices) {  t._selectionIndices = [] }})
 	this.secondarySelections = []
+	this.highlightThisThingDifferently = undefined
     }
     if (andRedraw)
 	this.redraw()
@@ -1089,8 +1093,10 @@ SketchpadCanvas.prototype.highlightPropertyThingsOf = function(thing) {
     this.redraw()
 }
 
-SketchpadCanvas.prototype.highlightThingsOfType = function(type) {  
+SketchpadCanvas.prototype.highlightThingsOfType = function(type, highlightThisThingDifferently) {  
     this.secondarySelections = this.getThingsOfType(type)
+    if (highlightThisThingDifferently)
+	this.highlightThisThingDifferently = highlightThisThingDifferently
     this.redraw()
 }
 
@@ -1260,7 +1266,7 @@ function SketchpadTile(name, inputs, ownRun, buttonsInfo, inspectorOfObj, fixedI
 	    borderRadius: 3,
 	    boxShadow: '1px 1px 0px #fff',
 	    innerShadow: '0px 0px 5px rgba(0, 0, 0, 0.5)',
-	    onfocus: function(i) { if (rc.temps.indexOf(this.hasOwner) >= 0) {  if (isThing) rc.highlightThingsOfType(inputType);  rc.currentInputElement = i } },
+	    onfocus: function(i) { if (rc.temps.indexOf(this.hasOwner) >= 0) {  if (isThing) rc.highlightThingsOfType(inputType, inputValue);  rc.currentInputElement = i } },
 	    onblur: function(i) { 
 		if (i._hasFocus && i.representsProperty && i.value) {
 		    var iv = i.value()
