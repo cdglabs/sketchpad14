@@ -12,7 +12,7 @@
     "From Sketchpad<small>61</small> to Sketchpad<small>14</small>"
     <br>
     <small>
-      Part II: Sketchpad<small>14</small>
+      Part II: Using Sketchpad<small>14</small> with Predefined Types
     </small>
   </hd>
   <br><br>
@@ -81,7 +81,12 @@ Therefore, the execution model is unlike the imperative style, i.e., statement b
   <br>
   <hd1>First Example: CDG Logo</hd1>
   <div class="chapter">
-    <img src="2.gif"></img>
+    <table>
+      <tr>
+	<td><img src="2.gif"></img></td>
+	<td><p class="side">CDG Logo Demo</p></td>
+      </tr>
+    </table>
     <p>
       Consider the program above that displays our group (CDG)'s interim logo, which consists of three points and two line sections. This is a reactive application. The user can drag one of these objects around, however, the structure of the logo needs to be maintained.
     </p>
@@ -116,7 +121,10 @@ Therefore, the execution model is unlike the imperative style, i.e., statement b
             new CoordinateConstraint(e.pointedObject, e.mousePosition))
 })
     </code></pre>
-        <p>
+    <p>
+      The <mono>registerEvent</mono> call internally installs a JavaScript event listener, yet ensures the callback is invoked at appropriate times (not during solving of constraints) rather than haphazardly. We'll get to details later.
+    </p>
+    <p>
       And the <mono>CoordinateConstraint</mono> needs to be updated during the dragging:
     </p>
     <pre><code class="language-javascript">
@@ -138,13 +146,85 @@ Therefore, the execution model is unlike the imperative style, i.e., statement b
     }
 })
     </code></pre>
-        <p>
-	  In the demo figure above, the set of active constraints are shown at the top right of the screen. Notice that the one <mono>CoordinateConstraint</mono> temporarily appears during the user dragging event.
+  </div>
+  <img src="1.png"></img>
+  <br>
+  <hd1>Exploring A Program's Behavior</hd1>
+  <div class="chapter">
+    <p>
+      In the demo figure above we saw the a feature that helps understanding a program: the set of active constraints are shown at the top right of the screen. Notice that the one <mono>CoordinateConstraint</mono> temporarily appears during the user dragging event. The number of instances of each constraint type is also shown.
     </p>
-
+    <table>
+      <tr>
+	<td><img src="2.gif"></img></td>
+	<td><p class="side">Seeing the set of active constraints</p></td>
+      </tr>
+    </table>
+    <p>
+      To quickly explore each constraint, we can click on the number of instances to get a list of individual constraints. Hovering over each individual constraint will highlight the objects involved in the constraint:
+    </p>
+    <table>
+      <tr>
+	<td><img src="3.gif"></img></td>
+	<td><p class="side" style="margin-left: 40%">Viewing involved objects in a constraint</p></td>
+      </tr>
+    </table>
+    <p>
+      To explore each constraint in more detail, we can click on the individual constraint to get an <i>inspector</i> on it:
+    </p>
+    <table>
+      <tr>
+	<td><img src="4.gif" style="margin-left: -25%"></img></td>
+	<td><p class="side" style="margin-left: -30%">Inspecting a constraint + constraint summary</p></td>
+      </tr>
+    </table>
+    <p>
+      The inspector has several features. The properties belonging to the object (in this case the constraint) are listed. For those properties which are objects (in this case <mono>Point</mono>s p1 and p2), pointer arrows are drawn to the objects in the scene. Note that properties of objects are typed.
+    </p>
+    <p>
+      Another feature is an English sentence summarizing the constraint. In the figure above it reads <i>"points p1 & p2 always maintain a distance of 110."</i> We'll get into how these are generated later. 
+    </p>
+    <p>
+      Inspector can be used to modify the properties of the inspected object (here the constraint). For example, in the animated figure below we modify one of the required angle between the two lines sections:
+    </p>
+    <table>
+      <tr>
+	<td><img src="5.gif" style="margin-left: -25%"></img></td>
+	<td><p class="side"  style="margin-left: -35%">Modifying a primitive value in a constraint using the inspector</p></td>
+      </tr>
+    </table>
+    <p>
+      We can also modify the object properties of the inspected constraint or object. For example, in the animated figure below we modify one of the length constraints by changing one of the points it operates on. Notice that when each listed property is clicked on, all compatible values (of same type) in the scene are highlighted. By clicking on one of them we can change the property to point to the clicked object (this is done using a concept in Sketchpad called <i>merging</i>, we'll visit it later):
+    </p>
+    <table>
+      <tr>
+	<td><img src="6.gif" style="margin-left: -30%"></img></td>
+	<td><p class="side"  style="margin-left: -60%">Modifying an object property in a constraint using the inspector</p></td>
+      </tr>
+    </table>
+    <p>
+      To explore and understand a program and its behaviors, we may wish to turn on and off constraints to see the change in behavior:
+    </p>
+    <table>
+      <tr>
+	<td><img src="7.gif" style="margin-left: -0%"></img></td>
+	<td><p class="side"  style="margin-left: 15%">Mix-n-matching behaviors</p></td>
+      </tr>
+    </table>
+    <p>
+      Sketchpad<small>14</small> can generate a whole English summary of the program. This involves giving a parameterized description of each involved constraint type, as well as a summary of individual active constraints as we showed before, along with a listing of existing objects and their states, and finally the set of active events. The figure below shows the constraints portion of the summary:
+    </p>
+    <table>
+      <tr>
+	<td><img src="8.gif" style="margin-left: -10%"></img></td>
+	<td><p class="side"  style="margin-left: -25%">Viewing a program summary</p></td>
+      </tr>
+    </table>
   </div>
   <p>
-    Back to <a href="1.html">Part I: Background</a>
-  </p>
+    Read <a href="3.html">Part III: Using Sketchpad<small>14</small> with Custom Types</a><br>
+    Back to <a href="index.html">Table of Contents</a><br>
+    Try <a href="../index.html">Sketchpad<small>14</small></a>
+ </p>
 </body>
 </html>

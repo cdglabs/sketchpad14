@@ -16,6 +16,14 @@ mono {
     color: #8904B1;
 }
 
+.side {
+    font-style: italic;
+    color: green;
+    text-align: center;
+    margin: -50px 200px;
+    width: 200px;
+}
+
 hd,hd1,hd2,hd4 {
 align: center;
 }
