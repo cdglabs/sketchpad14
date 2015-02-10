@@ -1682,7 +1682,7 @@ function codeToString(thing) {
 	if (p.charAt(0) !== '_') {
 	    var v = thing[p]
 	    var t = typeof v
-	    var expr = t === 'function' ? v : JSON.stringify(v)
+	    var expr = t === 'function' ? ((v + '').replace(/\s+\}$/, "\n}")) : JSON.stringify(v)
 	    res += p + ': ' + expr +  ",\n\n"
 	}
     }

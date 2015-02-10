@@ -29,8 +29,12 @@ align: center;
 }
 
 img {
-    margin-left: 10%;
+    margin-left: 0%;
+}
 
+/* Click-to-play GIFs */
+img.clicktoplay {
+  cursor: pointer;
 }
 
 hd{

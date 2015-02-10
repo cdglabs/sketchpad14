@@ -20,14 +20,39 @@
   <br><br>
   <img src="1.png"></img>
   <br>
-  <hd1>54 Years Later: Sketchpad<small>14</small></hd1>
+  <hd1>Viewing and Editing Existing Classes</hd1>
   <div class="chapter">
     <p>
+      So far we've been using a predefined set of data and constraint classes.  It is possible to view and edit the class definitions using the class <i>browser</i>. For example, in the figure below we click on the constraint type <mono>LengthConstraint</mono> to get its listing of method definitions:
+    </p>
+    <table>
+      <tr>
+	<td><img src="9.gif" class="clicktoplay" data-staticSrc="9s.png" style="margin-left: -15%"></img></td>
+	<td><p class="side" style="margin-left: -65%">Viewing and Editing the constraint type definition</p></td>
+      </tr>
+    </table>
+    <p>
+      All the predefined constraints have a defined a few methods implemented and if the user wants to define a new constraint type they must be implemented as well. For constraint types the most important variables and methods are shown on the top:
+    </p>
+    <ul>
+      <li>
+	<mono>propertyTypes</mono>: gives a type to the properties, enabling type-checking UI features.	
+      </li>
+      <li>
+	<mono>computeError</mono>: is a function that given the current <i>pseudo-time</i> of the system (some constraints are temporal) as well as the state of the properties of the constraints, returns a numeric <i>error</i> value as an indicator for how close the state is from a solution (depends on <mono>epsilon</mono>, a parameter that sets this threshold).
+      </li>
+      <li>
+	<mono>solve</mono>: which the system calls once it deems the error too high (thus constraint unsatisfied). This function returns a dictionary object as a solution to the constraint. This solution is essentially interpreted as a set of <i>patches<i> to the current state, indicating the set of variables that need to be changed and the values they need to be changed to. The set of patches are organized as a dictionary where the keys are the names of the property objects belonging to the constraint (e.g., in the <mono>LengthConstraint</mono> they are called <mono>p1</mono>  and  <mono>p2</mono>) and the values are themselves dictionaries, mapping the name of a property beloning to an object to a new value. 
+      </li>
+    </ul>
+    <p>
+      The same thing goes for object (data) classes. There are a set of mandatory methods that the class must define.
     </p>
   </div>
   <p>
     Back to <a href="index.html">Table of Contents</a><br>
     Try <a href="../index.html">Sketchpad<small>14</small></a>
- </p>
+  </p>
+  <script src="./lib/click-to-play-gif.js"></script>
 </body>
 </html>

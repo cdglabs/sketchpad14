@@ -20,7 +20,7 @@
   <br><br>
   <img src="1.png"></img>
   <br>
-  <hd1>54 Years Later: Sketchpad<small>14</small></hd1>
+  <hd1>53 Years Later: Sketchpad<small>14</small></hd1>
   <div class="chapter">
     <p>
       Overveld's alternative relaxation constraint solving approach for the geometric constraints a la Sketchpad inspired us to build a fully general programming model around it. We call it Sketchpad<small>14</small>. Our intention was to go back and honor and implement most of the cool things about Sutherland's Sketchpad, yet build a realistic system to build interactive web applications. 
@@ -83,7 +83,7 @@ Therefore, the execution model is unlike the imperative style, i.e., statement b
   <div class="chapter">
     <table>
       <tr>
-	<td><img src="2.gif"></img></td>
+	<td><img src="2.gif" class="clicktoplay" data-staticSrc="2s.png"></img></td>
 	<td><p class="side">CDG Logo Demo</p></td>
       </tr>
     </table>
@@ -116,9 +116,10 @@ Therefore, the execution model is unlike the imperative style, i.e., statement b
     <pre><code class="language-javascript">
 
     registerEvent('mousedown', function(e) {
-    if (typeof e.pointedObject = Point)
+    if (e.pointedObject !== undefined)
         dragConstraint = addConstraint(
-            new CoordinateConstraint(e.pointedObject, e.mousePosition))
+            new CoordinateConstraint(e.pointedObject.position,
+                                     e.mousePosition))
 })
     </code></pre>
     <p>
@@ -156,7 +157,7 @@ Therefore, the execution model is unlike the imperative style, i.e., statement b
     </p>
     <table>
       <tr>
-	<td><img src="2.gif"></img></td>
+	<td><img src="2.gif" class="clicktoplay" data-staticSrc="2s.png"></img></td>
 	<td><p class="side">Seeing the set of active constraints</p></td>
       </tr>
     </table>
@@ -165,7 +166,7 @@ Therefore, the execution model is unlike the imperative style, i.e., statement b
     </p>
     <table>
       <tr>
-	<td><img src="3.gif"></img></td>
+	<td><img src="3.gif" class="clicktoplay" data-staticSrc="3s.png"></img></td>
 	<td><p class="side" style="margin-left: 40%">Viewing involved objects in a constraint</p></td>
       </tr>
     </table>
@@ -174,7 +175,7 @@ Therefore, the execution model is unlike the imperative style, i.e., statement b
     </p>
     <table>
       <tr>
-	<td><img src="4.gif" style="margin-left: -25%"></img></td>
+	<td><img src="4.gif" class="clicktoplay" data-staticSrc="4s.png" style="margin-left: -25%"></img></td>
 	<td><p class="side" style="margin-left: -30%">Inspecting a constraint + constraint summary</p></td>
       </tr>
     </table>
@@ -189,7 +190,7 @@ Therefore, the execution model is unlike the imperative style, i.e., statement b
     </p>
     <table>
       <tr>
-	<td><img src="5.gif" style="margin-left: -25%"></img></td>
+	<td><img src="5.gif" class="clicktoplay" data-staticSrc="5s.png" style="margin-left: -25%"></img></td>
 	<td><p class="side"  style="margin-left: -35%">Modifying a primitive value in a constraint using the inspector</p></td>
       </tr>
     </table>
@@ -198,7 +199,7 @@ Therefore, the execution model is unlike the imperative style, i.e., statement b
     </p>
     <table>
       <tr>
-	<td><img src="6.gif" style="margin-left: -30%"></img></td>
+	<td><img src="6.gif" class="clicktoplay" data-staticSrc="6s.png" style="margin-left: -30%"></img></td>
 	<td><p class="side"  style="margin-left: -60%">Modifying an object property in a constraint using the inspector</p></td>
       </tr>
     </table>
@@ -207,7 +208,7 @@ Therefore, the execution model is unlike the imperative style, i.e., statement b
     </p>
     <table>
       <tr>
-	<td><img src="7.gif" style="margin-left: -0%"></img></td>
+	<td><img src="7.gif" class="clicktoplay" data-staticSrc="7s.png" style="margin-left: -0%"></img></td>
 	<td><p class="side"  style="margin-left: 15%">Mix-n-matching behaviors</p></td>
       </tr>
     </table>
@@ -216,7 +217,7 @@ Therefore, the execution model is unlike the imperative style, i.e., statement b
     </p>
     <table>
       <tr>
-	<td><img src="8.gif" style="margin-left: -10%"></img></td>
+	<td><img src="8.gif" class="clicktoplay" data-staticSrc="8s.png" style="margin-left: -10%"></img></td>
 	<td><p class="side"  style="margin-left: -25%">Viewing a program summary</p></td>
       </tr>
     </table>
@@ -225,6 +226,7 @@ Therefore, the execution model is unlike the imperative style, i.e., statement b
     Read <a href="3.html">Part III: Using Sketchpad<small>14</small> with Custom Types</a><br>
     Back to <a href="index.html">Table of Contents</a><br>
     Try <a href="../index.html">Sketchpad<small>14</small></a>
- </p>
+  </p>
+  <script src="./lib/click-to-play-gif.js"></script>
 </body>
 </html>
