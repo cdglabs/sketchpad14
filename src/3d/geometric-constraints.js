@@ -119,15 +119,7 @@ function install3DGeometricConstraints(Sketchpad) {
 
     sketchpad.addClass(Sketchpad.geom3d.CoordinateConstraint, true)
 
-    Sketchpad.geom3d.CoordinateConstraint.description = function() { return  "Sketchpad.geom3d.CoordinateConstraint(Point P, Number X, Number Y, Number Z) states that point P should stay at coordinate (X, Y, Z)." }
-
-    Sketchpad.geom3d.CoordinateConstraint.prototype.description = function() { return  "point " + this.p.__toString + " should stay at coordinate (" + this.c.x + ", " + this.c.y + ", " + this.c.z + ")." }
-
     Sketchpad.geom3d.CoordinateConstraint.prototype.propertyTypes = {p: 'Point3D', c: 'Point3D'}
-
-    Sketchpad.geom3d.CoordinateConstraint.prototype.effects = function() {
-	return [{obj: this.p, props: ['x', 'y', 'z']}]
-    }
 
     Sketchpad.geom3d.CoordinateConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
 	return magnitude(minus(this.c, this.p))
@@ -135,6 +127,14 @@ function install3DGeometricConstraints(Sketchpad) {
 
     Sketchpad.geom3d.CoordinateConstraint.prototype.solve = function(pseudoTime, prevPseudoTime) {
 	return {p: {x: this.c.x, y: this.c.y, z: this.c.z}}
+    }
+
+    Sketchpad.geom3d.CoordinateConstraint.description = function() { return  "Sketchpad.geom3d.CoordinateConstraint(Point P, Number X, Number Y, Number Z) states that point P should stay at coordinate (X, Y, Z)." }
+
+    Sketchpad.geom3d.CoordinateConstraint.prototype.description = function() { return  "point " + this.p.__toString + " should stay at coordinate (" + this.c.x + ", " + this.c.y + ", " + this.c.z + ")." }
+
+    Sketchpad.geom3d.CoordinateConstraint.prototype.effects = function() {
+	return [{obj: this.p, props: ['x', 'y', 'z']}]
     }
 
     // Length constraint - maintains distance between P1 and P2 at L.
@@ -147,16 +147,8 @@ function install3DGeometricConstraints(Sketchpad) {
 
     sketchpad.addClass(Sketchpad.geom3d.LengthConstraint, true)
 
-    Sketchpad.geom3d.LengthConstraint.description = function() { return  "Sketchpad.geom3d.LengthConstraint(Point3D P1, Point3D P2, Number L) says points P1 and P2 always maintain a distance of L." }
-
-    Sketchpad.geom3d.LengthConstraint.prototype.description = function() { return  "points " + this.p1.__toString + " and " + this.p2.__toString + " always maintain a distance of " + this.l + "." }
-
     Sketchpad.geom3d.LengthConstraint.prototype.propertyTypes = {p1: 'Point3D', p2: 'Point3D', l: 'Number'}
-
-    Sketchpad.geom3d.LengthConstraint.prototype.effects = function() {
-	return [{obj: this.p1, props: ['x', 'y', 'z']}, {obj: this.p2, props: ['x', 'y', 'z']}]
-    }
-
+    
     Sketchpad.geom3d.LengthConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
 	var l12 = magnitude(minus(this.p1, this.p2))
 	return l12 - this.l
@@ -174,6 +166,15 @@ function install3DGeometricConstraints(Sketchpad) {
 	return {p1: plus(this.p1, e12), p2: plus(this.p2, scaledBy(e12, -1))}
     }
 
+    Sketchpad.geom3d.LengthConstraint.description = function() { return  "Sketchpad.geom3d.LengthConstraint(Point3D P1, Point3D P2, Number L) says points P1 and P2 always maintain a distance of L." }
+
+    Sketchpad.geom3d.LengthConstraint.prototype.description = function() { return  "points " + this.p1.__toString + " and " + this.p2.__toString + " always maintain a distance of " + this.l + "." }
+
+    Sketchpad.geom3d.LengthConstraint.prototype.effects = function() {
+	return [{obj: this.p1, props: ['x', 'y', 'z']}, {obj: this.p2, props: ['x', 'y', 'z']}]
+    }
+
+
     // Motor constraint - causes P1 and P2 to orbit their midpoint at the given rate.
     // w is in units of Hz - whole rotations per second.
 
@@ -185,10 +186,6 @@ function install3DGeometricConstraints(Sketchpad) {
 
     sketchpad.addClass(Sketchpad.geom3d.MotorConstraint, true)
 
-    Sketchpad.geom3d.MotorConstraint.description = function() { return  "Sketchpad.geom3d.MotorConstraint(Point P1, Point P2, Number W) causes P1 and P2 to orbit their midpoint at the given rate of w, in units of Hz: whole rotations per second." } 
-
-    Sketchpad.geom3d.MotorConstraint.prototype.description = function() { return  "" + this.p1.__toString + " and " + this.p2.__toString + " to orbit their midpoint at the given rate of " + this.w + ", in units of Hz: whole rotations per second." }
-    
     Sketchpad.geom3d.MotorConstraint.prototype.propertyTypes = {p1: 'Point', p2: 'Point', w: 'Number'}
     
     Sketchpad.geom3d.MotorConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
@@ -202,7 +199,11 @@ function install3DGeometricConstraints(Sketchpad) {
 	return {p1: rotatedAround(this.p1, dTheta, m12),
 		p2: rotatedAround(this.p2, dTheta, m12)}
     }
-        
+
+    Sketchpad.geom3d.MotorConstraint.description = function() { return  "Sketchpad.geom3d.MotorConstraint(Point P1, Point P2, Number W) causes P1 and P2 to orbit their midpoint at the given rate of w, in units of Hz: whole rotations per second." } 
+
+    Sketchpad.geom3d.MotorConstraint.prototype.description = function() { return  "" + this.p1.__toString + " and " + this.p2.__toString + " to orbit their midpoint at the given rate of " + this.w + ", in units of Hz: whole rotations per second." }
+            
 }
 
 ///////////////////////////////////////////////////////////////////////////

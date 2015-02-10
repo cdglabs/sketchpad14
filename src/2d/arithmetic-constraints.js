@@ -44,6 +44,14 @@ function installArithmeticConstraints(Sketchpad) {
     }
 
     sketchpad.addClass(Sketchpad.arith.ValueConstraint, true)
+    
+    Sketchpad.arith.ValueConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
+	return this.value - ref(this, 'v')
+    }
+
+    Sketchpad.arith.ValueConstraint.prototype.solve = function(pseudoTime, prevPseudoTime) {
+	return patch(this, 'v', this.value)
+    }
 
     Sketchpad.arith.ValueConstraint.description = function() { return  "Sketchpad.arith.ValueConstraint({obj: O, prop: p}, Value) states that O.p = Value." }
 
@@ -51,14 +59,6 @@ function installArithmeticConstraints(Sketchpad) {
 
     Sketchpad.arith.ValueConstraint.dummy = function(x, y) {
 	return new Sketchpad.arith.ValueConstraint({obj: new Point(1,1), prop: 'x'}, 42) 
-    }
-
-    Sketchpad.arith.ValueConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
-	return this.value - ref(this, 'v')
-    }
-
-    Sketchpad.arith.ValueConstraint.prototype.solve = function(pseudoTime, prevPseudoTime) {
-	return patch(this, 'v', this.value)
     }
 
     // Equality Constraint, i.e., k1 * o1.p1 = k2 * o2.p2
@@ -71,18 +71,6 @@ function installArithmeticConstraints(Sketchpad) {
     }
 
     sketchpad.addClass(Sketchpad.arith.EqualityConstraint, true)
-
-    Sketchpad.arith.EqualityConstraint.description = function() { return  "Sketchpad.arith.EqualityConstraint({obj: O1, prop: p1}, {obj: O2, prop: p2}, WritableIdxs, Number K1, Number K2) states that K1 * O1.p1 = K2 * O2.p2 . Constants K1-2 default to 1. Optional WritableIdxs gives a list of indices (elements 1,and/or 2) the constraint is allowed to change," }
-
-    Sketchpad.arith.EqualityConstraint.prototype.description = function() { return  this.k1 + " * " + this.v1_obj.__toString + "." + this.v1_prop + " = " + this.k2 + " * " + this.v2_obj.__toString + "." + this.v2_prop + " ." }
-
-    Sketchpad.arith.EqualityConstraint.prototype.effects = function() {
-	return [{obj: this.v1_obj, props: [this.v1_prop]}, {obj: this.v2_obj, props: [this.v2_prop]}]
-    }
-
-    Sketchpad.arith.EqualityConstraint.dummy = function(x, y) {
-	return new Sketchpad.arith.EqualityConstraint({obj: new Point(1,1), prop: 'x'}, {obj: new Point(1,1), prop: 'x'}) 
-    }
 
     Sketchpad.arith.EqualityConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
 	var diff = (this.k1 * ref(this, 'v1')) - (this.k2 * ref(this, 'v2'))
@@ -102,6 +90,19 @@ function installArithmeticConstraints(Sketchpad) {
 	return res //patch(this, 'v1', v1 - (diff / 2), 'v2', v2 + diff / 2)
     }
 
+    
+    Sketchpad.arith.EqualityConstraint.description = function() { return  "Sketchpad.arith.EqualityConstraint({obj: O1, prop: p1}, {obj: O2, prop: p2}, WritableIdxs, Number K1, Number K2) states that K1 * O1.p1 = K2 * O2.p2 . Constants K1-2 default to 1. Optional WritableIdxs gives a list of indices (elements 1,and/or 2) the constraint is allowed to change," }
+
+    Sketchpad.arith.EqualityConstraint.prototype.description = function() { return  this.k1 + " * " + this.v1_obj.__toString + "." + this.v1_prop + " = " + this.k2 + " * " + this.v2_obj.__toString + "." + this.v2_prop + " ." }
+
+    Sketchpad.arith.EqualityConstraint.prototype.effects = function() {
+	return [{obj: this.v1_obj, props: [this.v1_prop]}, {obj: this.v2_obj, props: [this.v2_prop]}]
+    }
+
+    Sketchpad.arith.EqualityConstraint.dummy = function(x, y) {
+	return new Sketchpad.arith.EqualityConstraint({obj: new Point(1,1), prop: 'x'}, {obj: new Point(1,1), prop: 'x'}) 
+    }
+
     // OnWayEquality Constraint, i.e., o1.p1 = o2.p2
 
     Sketchpad.arith.OneWayEqualityConstraint = function Sketchpad__arith__OneWayEqualityConstraint(ref1, ref2, optSecondPropIsFn) {
@@ -112,6 +113,17 @@ function installArithmeticConstraints(Sketchpad) {
 
     sketchpad.addClass(Sketchpad.arith.OneWayEqualityConstraint, true)
 
+    Sketchpad.arith.OneWayEqualityConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
+	var v2 = this.secondPropIsFn ? fnRef(this, 'v2') : ref(this, 'v2')
+	var e = ref(this, 'v1') == v2 ? 0 : 1
+	return e
+    }
+
+    Sketchpad.arith.OneWayEqualityConstraint.prototype.solve = function(pseudoTime, prevPseudoTime) {
+	var v2 = this.secondPropIsFn ? fnRef(this, 'v2') : ref(this, 'v2')
+	return patch(this, 'v1', v2)
+    }
+    
     Sketchpad.arith.OneWayEqualityConstraint.description = function() { return  "Sketchpad.arith.OneWayEqualityConstraint({obj: O1, prop: p1}, {obj: O2, prop: p2}, Boolean secondPropIsFn) states that O1.p1 = O2.p2 (right hand-side is  read-only). If secondPropIsFn = true then O2.p2() is invoked instead." }
     
     Sketchpad.arith.OneWayEqualityConstraint.prototype.description = function() {  var r1 = ref(this, 'v1'), r2 = ref(this, 'v2'); return  this.v1_obj.__toString + "." + this.v1_prop + " = " + this.v2_obj.__toString + "." + this.v2_prop + " and right hand-side is read-only." }
@@ -122,17 +134,6 @@ function installArithmeticConstraints(Sketchpad) {
 
     Sketchpad.arith.OneWayEqualityConstraint.dummy = function(x, y) {
 	return new Sketchpad.arith.OneWayEqualityConstraint({obj: new Point(1,1), prop: 'x'}, {obj: new Point(1,1), prop: 'x'}) 
-    }
-
-    Sketchpad.arith.OneWayEqualityConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
-	var v2 = this.secondPropIsFn ? fnRef(this, 'v2') : ref(this, 'v2')
-	var e = ref(this, 'v1') == v2 ? 0 : 1
-	return e
-    }
-
-    Sketchpad.arith.OneWayEqualityConstraint.prototype.solve = function(pseudoTime, prevPseudoTime) {
-	var v2 = this.secondPropIsFn ? fnRef(this, 'v2') : ref(this, 'v2')
-	return patch(this, 'v1', v2)
     }
 
     // Inequality Constraint, i.e., k1 * o1.p1 >= k2 * o2.p2 + k3 or k1 * o1.p1 <= k2 * o2.p2 + k3
@@ -146,6 +147,17 @@ function installArithmeticConstraints(Sketchpad) {
 
     sketchpad.addClass(Sketchpad.arith.InequalityConstraint, true)
 
+    Sketchpad.arith.InequalityConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
+	var v1 = this.k1 * ref(this, 'v1') , v2 = (this.k2 * ref(this, 'v2')) + this.k3, cond = this.isGeq ? v1 >= v2 : v1 <= v2, e = cond ? 0 : v2 - v1
+	return e
+    }
+
+    Sketchpad.arith.InequalityConstraint.prototype.solve = function(pseudoTime, prevPseudoTime) {
+	var v2 = (this.k2 * ref(this, 'v2')) + this.k3
+	res = patch(this, 'v1', v2 / this.k1)
+	return res
+    }
+
     Sketchpad.arith.InequalityConstraint.description = function() { return  "Sketchpad.arith.InequalityConstraint({obj: O1, prop: p1}, {obj: O2, prop: p2}, isGeq, Number K1, Number K2, Number K3) states that K1 * O1.p1 >= K2 * O2.p2 + K3 (when isGeq=true) or K1 * O1.p1 <= K2 * O2.p2 + K3 (when isGeq=false). Constants K1-2 default to 1 and K3 to 0" }
 
     Sketchpad.arith.InequalityConstraint.prototype.description = function() { var r1 = ref(this, 'v1'), r2 = ref(this, 'v2'); return this.k1 + " * " + this.v1_obj.__toString + "." + this.v1_prop + " " + (this.isGeq ? ">" : "<") + "= " + this.k2 + " * " + this.v2_obj.__toString + "." + this.v2_prop + " + " + this.k3 + " ." }
@@ -156,17 +168,6 @@ function installArithmeticConstraints(Sketchpad) {
 
     Sketchpad.arith.InequalityConstraint.dummy = function(x, y) {
 	return new Sketchpad.arith.InequalityConstraint({obj: new Point(1,1), prop: 'x'}, {obj: new Point(1,1), prop: 'x'}, true) 
-    }
-
-    Sketchpad.arith.InequalityConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
-	var v1 = this.k1 * ref(this, 'v1') , v2 = (this.k2 * ref(this, 'v2')) + this.k3, cond = this.isGeq ? v1 >= v2 : v1 <= v2, e = cond ? 0 : v2 - v1
-	return e
-    }
-
-    Sketchpad.arith.InequalityConstraint.prototype.solve = function(pseudoTime, prevPseudoTime) {
-	var v2 = (this.k2 * ref(this, 'v2')) + this.k3
-	res = patch(this, 'v1', v2 / this.k1)
-	return res
     }
 
     // Sum Constraint, i.e., k1 * o1.p1 + k2 * o2.p2 = k3 * o3.p3 + k4
@@ -180,18 +181,6 @@ function installArithmeticConstraints(Sketchpad) {
     }
 
     sketchpad.addClass(Sketchpad.arith.SumConstraint, true)
-
-    Sketchpad.arith.SumConstraint.description = function() { return  "Sketchpad.arith.SumConstraint({obj: O1, prop: p1}, {obj: O2, prop: p2}, {obj: O3, prop: p3}, WritableIdxs, Number K1, Number K2, Number K3, Number K4) states that K1 * O1.p1 + K2 * O2.p2 = K3 * O3.p3 + K4 . Constants K1-3 default to 1 and K4 to 0. Optional WritableIdxs gives a list of indices (1, 2, or, 3) the constraint is allowed to change." } 
-
-    Sketchpad.arith.SumConstraint.prototype.description = function() { var r1 = ref(this, 'v1'), r2 = ref(this, 'v2'), r3 = ref(this, 'v3'); return this.k1 + " * " + this.v1_obj.__toString + "." + this.v1_prop + " + " + this.k2 + " * " + this.v2_obj.__toString  + "." + this.v2_prop + " = " + this.k3 + " * " + this.v3_obj.__toString + "." + this.v3_prop + " + " + this.k4 + " ." }
-
-    Sketchpad.arith.SumConstraint.prototype.effects = function() {
-	return [{obj: this.v1_obj, props: [this.v1_prop]}, {obj: this.v2_obj, props: [this.v2_prop]}, {obj: this.v3_obj, props: [this.v3_prop]}]
-    }
-
-    Sketchpad.arith.SumConstraint.dummy = function(x, y) {
-	return new Sketchpad.arith.SumConstraint({obj: new Point(1,1), prop: 'x'}, {obj: new Point(1,1), prop: 'x'}, {obj: new Point(1,1), prop: 'x'}) 
-    }
 
     Sketchpad.arith.SumConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
 	var diff = this.k3 * ref(this, 'v3') + this.k4 - ((this.k1 * ref(this, 'v1')) + (this.k2 * ref(this, 'v2')))
@@ -212,6 +201,18 @@ function installArithmeticConstraints(Sketchpad) {
 	return res
     }
 
+    Sketchpad.arith.SumConstraint.description = function() { return  "Sketchpad.arith.SumConstraint({obj: O1, prop: p1}, {obj: O2, prop: p2}, {obj: O3, prop: p3}, WritableIdxs, Number K1, Number K2, Number K3, Number K4) states that K1 * O1.p1 + K2 * O2.p2 = K3 * O3.p3 + K4 . Constants K1-3 default to 1 and K4 to 0. Optional WritableIdxs gives a list of indices (1, 2, or, 3) the constraint is allowed to change." } 
+
+    Sketchpad.arith.SumConstraint.prototype.description = function() { var r1 = ref(this, 'v1'), r2 = ref(this, 'v2'), r3 = ref(this, 'v3'); return this.k1 + " * " + this.v1_obj.__toString + "." + this.v1_prop + " + " + this.k2 + " * " + this.v2_obj.__toString  + "." + this.v2_prop + " = " + this.k3 + " * " + this.v3_obj.__toString + "." + this.v3_prop + " + " + this.k4 + " ." }
+
+    Sketchpad.arith.SumConstraint.prototype.effects = function() {
+	return [{obj: this.v1_obj, props: [this.v1_prop]}, {obj: this.v2_obj, props: [this.v2_prop]}, {obj: this.v3_obj, props: [this.v3_prop]}]
+    }
+
+    Sketchpad.arith.SumConstraint.dummy = function(x, y) {
+	return new Sketchpad.arith.SumConstraint({obj: new Point(1,1), prop: 'x'}, {obj: new Point(1,1), prop: 'x'}, {obj: new Point(1,1), prop: 'x'}) 
+    }
+
     // SumInequality Constraint, i.e., k1 * o1.p1 >= k2 * o2.p2 + k3 * o3.p3 + k4 or k1 * o1.p1 >= k2 * o2.p2 + k3 * o3.p3 + k4
 
     Sketchpad.arith.SumInequalityConstraint = function Sketchpad__arith__SumInequalityConstraint(ref1, ref2, ref3, isGeq, k1, k2, k3, k4) {
@@ -224,6 +225,17 @@ function installArithmeticConstraints(Sketchpad) {
 
     sketchpad.addClass(Sketchpad.arith.SumInequalityConstraint, true)
 
+    Sketchpad.arith.SumInequalityConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
+	var v1 = this.k1 * ref(this, 'v1'), v2 = this.k2 * ref(this, 'v2'), v3 = this.k3 * ref(this, 'v3'), sum = v2 + v3 + this.k4, cond = this.isGeq ? v1 >= sum : v1 <= sum, e = cond ? 0 : sum - v1
+	return e
+    }
+
+    Sketchpad.arith.SumInequalityConstraint.prototype.solve = function(pseudoTime, prevPseudoTime) {
+	v2 = this.k2 * ref(this, 'v2'), v3 = this.k3 * ref(this, 'v3'), sum = v2 + v3 + this.k4
+	res = patch(this, 'v1', sum / this.k1)
+	return res
+    }
+
     Sketchpad.arith.SumInequalityConstraint.prototype.effects = function() {
 	return [{obj: this.v1_obj, props: [this.v1_prop]}]
     }
@@ -234,17 +246,6 @@ function installArithmeticConstraints(Sketchpad) {
 
     Sketchpad.arith.SumInequalityConstraint.dummy = function(x, y) {
 	return new Sketchpad.arith.SumInequalityConstraint({obj: new Point(1,1), prop: 'x'}, {obj: new Point(1,1), prop: 'x'}, {obj: new Point(1,1), prop: 'x'}, true) 
-    }
-
-    Sketchpad.arith.SumInequalityConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
-	var v1 = this.k1 * ref(this, 'v1'), v2 = this.k2 * ref(this, 'v2'), v3 = this.k3 * ref(this, 'v3'), sum = v2 + v3 + this.k4, cond = this.isGeq ? v1 >= sum : v1 <= sum, e = cond ? 0 : sum - v1
-	return e
-    }
-
-    Sketchpad.arith.SumInequalityConstraint.prototype.solve = function(pseudoTime, prevPseudoTime) {
-	v2 = this.k2 * ref(this, 'v2'), v3 = this.k3 * ref(this, 'v3'), sum = v2 + v3 + this.k4
-	res = patch(this, 'v1', sum / this.k1)
-	return res
     }
 
 }
