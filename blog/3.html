@@ -16,9 +16,9 @@
     </small>
   </hd>
   <br><br>
-  <small><a href="http://www.hesam.us">Hesam Samimi</a>, <a href="http://www.tinlizzie.org/~awarth">Alex Warth</a><br><a href="http://www.cdglabs.org">Communication Design Group</a></small>
+  <small><a href="http://www.hesam.us">Hesam Samimi</a>, <a href="http://www.tinlizzie.org/~awarth">Alex Warth</a>, <a href="http://www.cs.washington.edu/people/faculty/borning">Alan Borning</a><br><a href="http://www.cdglabs.org">Communication Design Group</a></small>
   <br><br>
-  <img src="1.png"></img>
+  <img src="img/1.png"></img>
   <br>
   <hd1>Viewing and Editing Existing Classes</hd1>
   <div class="chapter">
@@ -27,7 +27,7 @@
     </p>
     <table>
       <tr>
-	<td><img src="9.gif" class="clicktoplay" data-staticSrc="9s.png" style="margin-left: -15%"></img></td>
+	<td><img src="img/9.gif" class="clicktoplay" data-staticSrc="img/9s.png" style="margin-left: -15%"></img></td>
 	<td><p class="side" style="margin-left: -65%">Viewing and Editing the constraint type definition</p></td>
       </tr>
     </table>
@@ -46,7 +46,37 @@
       </li>
     </ul>
     <p>
-      The same thing goes for object (data) classes. There are a set of mandatory methods that the class must define.
+      Here is how these properties of defined for an instance of <mono>LengthConstraint</mono>:
+    </p>
+    <pre><code class="language-javascript">
+	// propertyTypes:
+	LengthConstraint.prototype.propertyTypes =
+	    {p1: 'Point', p2: 'Point', l: 'Number'}
+
+	// computeError:
+	LengthConstraint.prototype.computeError = function(pseudoTime) {
+	    return distance(this.p1, this.p2) - this.l
+	}
+
+	// solve:
+	LengthConstraint.prototype.solve = function(pseudoTime) {
+	    var p1 = this.p1, p2 = this.p2
+	    var delta = (distance(p1, p2) - this.l) / 2
+	    var e12 = scaledBy(normalized(minus(p2, p1)), delta)
+	    var res = {p1: plus(p1, e12), p2: plus(p2, scaledBy(e12, -1))}
+	    return res
+	}	
+    </code></pre>
+    <p>
+      The same thing goes for object (data) classes. There are a set of mandatory methods that the class must define. But before getting to those, let's see how constraint solving is done in the CRP model as implemented in this tool.
+    </p>
+  </div>
+  <img src="img/1.png"></img>
+  <br>
+  <hd1>Constraint Solving in Sketchpad<small>14</small></hd1>
+  <div class="chapter">
+    <p>
+      As we saw above, each individual constraint has provided the appropriate methods to measure the current error based on the current state and a method that says how it wants to change the state in order to be satisfied. But in the model of Constraint Reactive Programming, how are individual solutions consolidated in the presence of multiple constraints? CRP employs the approach of Overveld (see <a href="1.html">Part I</a>) to collect the solutions from unsatisfied constraints and <i>join</i> them in order to come up with a <i>single consolidated solution</i>. Unlike the Overveld approach, however, where the joining is always simply <i>averaging</i> numeric values per variable, CRP generalizes this and allows the user to define a <mono>solutionJoin</mono> function per class property that decides how multiple solutions are combined.
     </p>
   </div>
   <p>

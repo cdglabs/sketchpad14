@@ -14,9 +14,9 @@
     </small>
   </hd>
   <br><br>
-  <small><a href="http://www.hesam.us">Hesam Samimi</a>, <a href="http://www.tinlizzie.org/~awarth">Alex Warth</a><br><a href="http://www.cdglabs.org">Communication Design Group</a></small>
+  <small><a href="http://www.hesam.us">Hesam Samimi</a>, <a href="http://www.tinlizzie.org/~awarth">Alex Warth</a>, <a href="http://www.cs.washington.edu/people/faculty/borning">Alan Borning</a><br><a href="http://www.cdglabs.org">Communication Design Group</a></small>
   <br><br>
-  <img src="1.png"></img>
+  <img src="img/1.png"></img>
   <br>
   <hd1>Intro to Sketchpad</hd1>
   <div class="chapter">
@@ -32,18 +32,38 @@
       Other forms of declarative programming and constraint-based programming came about in later years. Language researchers have also tried various forms of mixing declarative, constraint-based programming with the common imperative style programming. In either case, I haven't seen any form of declarative programming system that can handle the scale of realistic software development of today. The grand majority of developers have never heard of declarative programming, let alone use it in their practice.
     </p>
   </div>
-  <img src="1.png"></img>
+  <img src="img/1.png"></img>
   <br>
   <hd1>Constraint Solving in Sketchpad</hd1>
   <div class="chapter">
     <p>
-      An important innovation of Sketchpad was to employ an iterative numerical constraint solving approach called <a href="http://en.wikipedia.org/wiki/Relaxation_%28iterative_method%29">relaxation</a>. Sketchpad system uses it along with a linear approximation method as a relatively light-weight scheme to solve for a given system of numeric constraints, including non-linear ones. The goal of the iterativive relaxation method is to gradually converge to a solution to a system of (maybe nonlinear) equations. Another aspec of relaxation technique is that an <i>error value</i> is used as an indicator for how far each constraint is from a solution. Once all constraints have a miniscule error value, the system is assumed to have converged to an acceptable global solution.
+      An important innovation of Sketchpad was to employ an iterative numerical constraint solving approach called <a href="http://en.wikipedia.org/wiki/Relaxation_%28iterative_method%29">relaxation</a> to let the system automatically maintain the constraints required by the user (making it a declarative programming system).  Sketchpad uses it along with a linear approximation method as a relatively light-weight scheme to solve for a given system of numeric constraints, including non-linear ones. 
     </p>
-      <p>
-      Because the system can, in many situations, smoothly and quickly converge to an acceptable solution, this form of constraint solving can be suitable for interactiveness and animation, as shown by Sketchpad and Borning's ThingLab. Sketchpad's relaxation method did not employ any domain specific knowledge in solving a system of constraints: only a general iterative linear approximation method.
+    <p>
+      Relaxation in Sketchpad involves considering each variable in turn and changing its value to better satisfy the constraints. Sketchpad continues to iterate until the system converges. Each constraint is represented in terms of one or more error functions that return a number indicating how nearly the constraint is satisfied, with an error of 0 meaning it was satisfied completely. To update a variable, each of the constraints on it is approximated as a linear equation, and a least-squares fit is done. To approximate the constraint as a linear equation, the variable is changed by some small delta, and the new error is computed; the coefficient in the linear equation is then given by the ratio of the change in the error over the delta.
     </p>
+    <p>
+	Because the system can, in many situations, smoothly and quickly converge to an acceptable solution, this form of constraint solving can be suitable for interactiveness and animation, as shown by Sketchpad and Borning's ThingLab. Sketchpad's relaxation method did not employ any domain specific knowledge in solving a system of constraints: only a general iterative linear approximation method.
+    </p>
+    <p>
+      To illustrate the approach, consider the single constraint that the distance between two points <i>p(x1,y1)</i> and <i>q(x2,y2)</i> must be maintained at <i>1</i>. Also assume the current values are <i>p(1,1)</i> and <i>q(2,2)</i>. Thus the error value (<i>e</i>) is given as:
+    </p>
+    <img src="img/10.gif" style="margin-left: 22%"></img>
+    <p>
+      Now if we plot error value for the current values of the points <i>e<small>0</small></i>, tweak the first variable, say <i>x1</i> by a small amount, say <i>sigma = 0.01</i> and obtain the new error <i>e<small>1</small></i>, we obtain a plot such as this:
+    </p>    
+    <img src="img/11.png" style="margin-left: 20%"></img>
+    <p>
+      The purple line is a linear approximation of the error value as a function of the variable <i>x1</i>, so we can use <i>x1</i>'s value where the line crosses the x-axis (zero error) as an approximation for what should <i>x1</i> be changed to in order to minimize the error associated with this constraint. We then repeat this process by moving on to the other three variables (<i>y1</i>, <i>x2</i>, and <i>x2</i>) involved in the constraint and then wrapping around back to the first variable.
+    </p>    
+    <p>
+      Often, however, multiple constraints refer to variables, not just one. Sketchpad's relaxation method simply uses the <i>sum of squares</i> for the error values of all constraints involving each variable, instead of the single error function as in our example above. 
+    </p>    
+    <p>
+      Because, doing all this makes the approximation less and less accurate, almost always a single iteration of the process above doesn't move the system to a satisfactory (small overall error) state. However, the hope is that the system has moved a little closer to a final solution, and thus repeating this process over and over ("relaxation") will eventually lead to a place where all constraints are satisfied enough.
+    </p>    
   </div>
-  <img src="1.png"></img>
+  <img src="img/1.png"></img>
   <br>
   <hd1>Thirty Years Later...</hd1>
   <div class="chapter">
