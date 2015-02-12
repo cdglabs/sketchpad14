@@ -40,6 +40,12 @@
     <showEachIterationButton id="sii"></showEachIterationButton>
     <script>
 
+      var urlParams = decodeURIComponent(document.location.search)
+      var params = {}
+      if (urlParams) {
+      urlParams = urlParams.substr(1).split('&')
+      urlParams.forEach(function(p) { var kv = p.split('='); params[kv[0]] = kv[1] })
+      }
 var demos = document.getElementById('demos')
 var constraints = document.getElementById('constraints')
 var classes = document.getElementById('classes')
@@ -55,7 +61,7 @@ var canvas = document.getElementById('canvas')
 canvas.width = window.innerWidth
 canvas.height = window.innerHeight
 
-var rc = new SketchpadCanvas(sketchpad, canvas)
+var rc = new SketchpadCanvas(sketchpad, canvas, params.dontstart)
 var lastBinKindArg = undefined
 var clearRButtons = function() { rc.removeTempDOMElements(); lists.forEach(function(i) { while (i.firstChild) { i.removeChild(i.firstChild) } }) }
 
@@ -158,15 +164,13 @@ for (var idx = 0; idx < bins.length; idx++) {
     <script src="example-rod.js"></script>
     <script src="example-test.js"></script>
     <script>
-var ipf = document.getElementById('ipf')
-setInterval(function() { ipf.innerHTML = rc.iterationsPerFrame }, 100)
-rc.updateSIILabel()
-var requestExample = decodeURIComponent(document.location.search)
-if (requestExample) {
-    var requestExampleName = requestExample.substr(1 + requestExample.lastIndexOf('='))
-    requestExample = examples[requestExampleName]
-    if (requestExample) showFns.demo(requestExampleName)
-}
+      rc.updateIPFLabel()
+      rc.updateSIILabel()
+      var requestExampleName = params.example
+      if (requestExampleName) {
+      requestExample = examples[requestExampleName]
+      if (requestExample) showFns.demo(requestExampleName)
+      }
     </script>
   </body>
 </html>

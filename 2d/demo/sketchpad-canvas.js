@@ -5,7 +5,7 @@ log2 = function() { var args = []; for (var i = 0; i < arguments.length; i++) ar
 
 // --- Canvas -------------------------------------------------------------
 
-function SketchpadCanvas(sketchpad, canvas) {
+function SketchpadCanvas(sketchpad, canvas, dontStart) {
     this.sketchpad = sketchpad
     this.optionsRequiringSIILableUpdate = ['renderMode', 'millisecondsPerFrame',  'onlyRenderOnConvergence', 'onlyRenderOnNoError', 'showEachIteration']
     this.renderMode = 0
@@ -69,7 +69,8 @@ function SketchpadCanvas(sketchpad, canvas) {
     this.resetOptions()    
     var self = this
     this.stepFn = this.step.bind(this)
-    this.step()
+    if (!dontStart)
+	this.step()
 }
 
 SketchpadCanvas.prototype.initPlatformId = function() {
@@ -608,6 +609,7 @@ SketchpadCanvas.prototype.step = function() {
 	    this.iterationsPerFrame = iterations.count
 	    totalError = iterations.error
 	}
+	this.updateIPFLabel()
 	if (this.renderEvenOnConvergence || this.lastIterationError != totalError) {
 	    didSomething = true
 	    this.alreadyRenderedConvergence = false
@@ -1459,6 +1461,11 @@ SketchpadCanvas.prototype.updateSIILabel = function() {
 	(this.showEachIteration ? ' rendering each iteration'
 	 : (this.onlyRenderOnConvergence ? (' rendering only on convergence' + (this.onlyRenderOnNoError ? ' and no error' : '')) :	    
 	    ' rendering every ' + Math.floor(this.millisecondsPerFrame) + ' ms.' + (this.renderEvenOnConvergence ? '' : ' until convergence')))
+}
+
+SketchpadCanvas.prototype.updateIPFLabel = function() {
+    var ipf = document.getElementById('ipf')
+    ipf.innerHTML = this.iterationsPerFrame
 }
 
 SketchpadCanvas.prototype.setOption = function(opt, val) {

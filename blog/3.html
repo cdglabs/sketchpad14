@@ -1,5 +1,5 @@
 <html>
-  <title>Blog on Sketchpad14: Part III</title>
+  <title>Blog on Sketchpad14: Part II</title>
   <head>
     <link href="./lib/prism.css" rel="stylesheet" />
     <link href="index.css" rel="stylesheet"></link>
@@ -7,12 +7,22 @@
   </style>
 <body>
   <script src="./lib/prism.js"></script>
+  <script>
+    function startSketchpadPlayground() {
+    var iframe = document.createElement('iframe');
+    iframe.id = "sketchpad-playground"    
+    iframe.src = "../2d/demo/demos.html?example=cdg"
+    var div = document.getElementById("sketchpad-playground-div")
+    div.removeChild(div.firstChild)
+    div.appendChild(iframe)
+    }
+  </script>
   <hd>Half-Century Later:
     <br>
     "From Sketchpad<small>61</small> to Sketchpad<small>14</small>"
     <br>
     <small>
-      Part III: Using Sketchpad<small>14</small> with Custom Types
+      Part III: Using Sketchpad<small>14</small> with Predefined Types
     </small>
   </hd>
   <br><br>
@@ -20,69 +30,165 @@
   <br><br>
   <img src="img/1.png"></img>
   <br>
-  <hd1>Viewing and Editing Existing Classes</hd1>
+  <hd1>First Example: CDG Logo</hd1>
   <div class="chapter">
     <p>
-      So far we've been using a predefined set of data and constraint classes.  It is possible to view and edit the class definitions using the class <i>browser</i>. For example, in the figure below we click on the constraint type <mono>LengthConstraint</mono> to get its listing of method definitions:
+      Now it's time to see our first example in Sketchpad<small>14</small>.
     </p>
     <table>
       <tr>
-	<td><img src="img/9.gif" class="clicktoplay" data-staticSrc="img/9s.png" style="margin-left: -15%"></img></td>
-	<td><p class="side" style="margin-left: -65%">Viewing and Editing the constraint type definition</p></td>
+	<td><img src="img/2.gif" class="clicktoplay" data-staticSrc="img/2s.png"></img></td>
+	<td><p class="side">CDG Logo Demo</p></td>
       </tr>
     </table>
     <p>
-      All the predefined constraints have a defined a few methods implemented and if the user wants to define a new constraint type they must be implemented as well. For constraint types the most important variables and methods are shown on the top:
+      Consider the program above that displays our group (CDG)'s interim logo, which consists of three points and two line sections. This is a reactive application. The user can drag one of these objects around, however, the structure of the logo needs to be maintained.
     </p>
-    <ul>
-      <li>
-	<mono>propertyTypes</mono>: gives a type to the properties, enabling type-checking UI features.	
-      </li>
-      <li>
-	<mono>computeError</mono>: is a function that given the current <i>pseudo-time</i> of the system (some constraints are temporal) as well as the state of the properties of the constraints, returns a numeric <i>error</i> value as an indicator for how close the state is from a solution (depends on <mono>epsilon</mono>, a parameter that sets this threshold).
-      </li>
-      <li>
-	<mono>solve</mono>: which the system calls once it deems the error too high (thus constraint unsatisfied). This function returns a dictionary object as a solution to the constraint. This solution is essentially interpreted as a set of <i>patches<i> to the current state, indicating the set of variables that need to be changed and the values they need to be changed to. The set of patches are organized as a dictionary where the keys are the names of the property objects belonging to the constraint (e.g., in the <mono>LengthConstraint</mono> they are called <mono>p1</mono>  and  <mono>p2</mono>) and the values are themselves dictionaries, mapping the name of a property beloning to an object to a new value. 
-      </li>
-    </ul>
     <p>
-      Here is how these properties of defined for an instance of <mono>LengthConstraint</mono>:
+      Sketchpad<small>14</small> allows the user to define new data or constraint types. However, it does come with a set of standard shapes and constraint types, which we will make use of here. To capture this program, we instantiate three <mono>Point</mono>s and two <mono>Line</mono>s with the correct radius, text, color, etc. to match the figure below. 
     </p>
     <pre><code class="language-javascript">
-	// propertyTypes:
-	LengthConstraint.prototype.propertyTypes =
-	    {p1: 'Point', p2: 'Point', l: 'Number'}
 
-	// computeError:
-	LengthConstraint.prototype.computeError = function(pseudoTime) {
-	    return distance(this.p1, this.p2) - this.l
-	}
-
-	// solve:
-	LengthConstraint.prototype.solve = function(pseudoTime) {
-	    var p1 = this.p1, p2 = this.p2
-	    var delta = (distance(p1, p2) - this.l) / 2
-	    var e12 = scaledBy(normalized(minus(p2, p1)), delta)
-	    var res = {p1: plus(p1, e12), p2: plus(p2, scaledBy(e12, -1))}
-	    return res
-	}	
+	p1 := new Point(...); //C
+	p2 := new Point(...); //D
+	p3 := new Point(...); //G
+	l1 := new Line(p1, p2);
+	l2 := new Line(p2, p3);
     </code></pre>
     <p>
-      The same thing goes for object (data) classes. There are a set of mandatory methods that the class must define. But before getting to those, let's see how constraint solving is done in the CRP model as implemented in this tool.
+      The next step is to add the continuous behaviors, i.e., constraints. We will add two <mono>LengthConstraint</mono>s to keep the lengths of lines fixed at 100px and one <mono>OrientationConstraint</mono> to keep the angle between them at 90 degrees, at all times:
     </p>
+    <pre><code class="language-javascript">
+
+	addConstraint(new LengthConstraint(p1, p2, 100))
+	addConstraint(new LengthConstraint(p2, p3, 100))
+	addConstraint(new OrientationConstraint(p2, p1, p2, 3,  Math.PI / 2))
+    </code></pre>
+    <p>
+      Finally, we need to define the reactive aspect of the program: if the user has the mouse clicked on an object, we'd want to add a <mono>CoordinateConstraint</mono> to also require that it follows the mouse dragging:
+    </p>
+    <pre><code class="language-javascript">
+
+    registerEvent('mousedown', function(e) {
+    if (e.pointedObject !== undefined)
+        dragConstraint = addConstraint(
+            new CoordinateConstraint(e.pointedObject.position,
+                                     e.mousePosition))
+})
+    </code></pre>
+    <p>
+      The <mono>registerEvent</mono> call internally installs a JavaScript event listener, yet ensures the callback is invoked at appropriate times (not during solving of constraints) rather than haphazardly. We'll get to details later.
+    </p>
+    <p>
+      And the <mono>CoordinateConstraint</mono> needs to be updated during the dragging:
+    </p>
+    <pre><code class="language-javascript">
+
+    registerEvent('mousemove', function(e) {
+    if (dragConstraint !== undefined)
+        dragConstraint.c = e.mousePosition
+})
+    </code></pre>
+        <p>
+      And finally the drag constraint is removed when the user releases the mouse. 
+    </p>
+    <pre><code class="language-javascript">
+
+    registerEvent('mouseup', function(e) {
+    if (dragConstraint !== undefined) {
+        removeConstraint(dragConstraint)
+        dragConstraint = undefined
+    }
+})
+    </code></pre>
   </div>
   <img src="img/1.png"></img>
   <br>
-  <hd1>Constraint Solving in Sketchpad<small>14</small></hd1>
+  <hd1>Exploring A Program's Behavior</hd1>
   <div class="chapter">
     <p>
-      As we saw above, each individual constraint has provided the appropriate methods to measure the current error based on the current state and a method that says how it wants to change the state in order to be satisfied. But in the model of Constraint Reactive Programming, how are individual solutions consolidated in the presence of multiple constraints? CRP employs the approach of Overveld (see <a href="1.html">Part I</a>) to collect the solutions from unsatisfied constraints and <i>join</i> them in order to come up with a <i>single consolidated solution</i>. Unlike the Overveld approach, however, where the joining is always simply <i>averaging</i> numeric values per variable, CRP generalizes this and allows the user to define a <mono>solutionJoin</mono> function per class property that decides how multiple solutions are combined.
+      In the demo figure above we saw the a feature that helps understanding a program: the set of active constraints are shown at the top right of the screen. Notice that the one <mono>CoordinateConstraint</mono> temporarily appears during the user dragging event. The number of instances of each constraint type is also shown.
     </p>
+    <table>
+      <tr>
+	<td><img src="img/2.gif" class="clicktoplay" data-staticSrc="img/2s.png"></img></td>
+	<td><p class="side">Seeing the set of active constraints</p></td>
+      </tr>
+    </table>
+    <p>
+      To quickly explore each constraint, we can click on the number of instances to get a list of individual constraints. Hovering over each individual constraint will highlight the objects involved in the constraint:
+    </p>
+    <table>
+      <tr>
+	<td><img src="img/3.gif" class="clicktoplay" data-staticSrc="img/3s.png"></img></td>
+	<td><p class="side" style="margin-left: 40%">Viewing involved objects in a constraint</p></td>
+      </tr>
+    </table>
+    <p>
+      To explore each constraint in more detail, we can click on the individual constraint to get an <i>inspector</i> on it:
+    </p>
+    <table>
+      <tr>
+	<td><img src="img/4.gif" class="clicktoplay" data-staticSrc="img/4s.png" style="margin-left: -25%"></img></td>
+	<td><p class="side" style="margin-left: -30%">Inspecting a constraint + constraint summary</p></td>
+      </tr>
+    </table>
+    <p>
+      The inspector has several features. The properties belonging to the object (in this case the constraint) are listed. For those properties which are objects (in this case <mono>Point</mono>s p1 and p2), pointer arrows are drawn to the objects in the scene. Note that properties of objects are typed.
+    </p>
+    <p>
+      Another feature is an English sentence summarizing the constraint. In the figure above it reads <i>"points p1 & p2 always maintain a distance of 110."</i> We'll get into how these are generated later. 
+    </p>
+    <p>
+      Inspector can be used to modify the properties of the inspected object (here the constraint). For example, in the animated figure below we modify one of the required angle between the two lines sections:
+    </p>
+    <table>
+      <tr>
+	<td><img src="img/5.gif" class="clicktoplay" data-staticSrc="img/5s.png" style="margin-left: -25%"></img></td>
+	<td><p class="side"  style="margin-left: -35%">Modifying a primitive value in a constraint using the inspector</p></td>
+      </tr>
+    </table>
+    <p>
+      We can also modify the object properties of the inspected constraint or object. For example, in the animated figure below we modify one of the length constraints by changing one of the points it operates on. Notice that when each listed property is clicked on, all compatible values (of same type) in the scene are highlighted. By clicking on one of them we can change the property to point to the clicked object (this is done using a concept in Sketchpad called <i>merging</i>, we'll visit it later):
+    </p>
+    <table>
+      <tr>
+	<td><img src="img/6.gif" class="clicktoplay" data-staticSrc="img/6s.png" style="margin-left: -30%"></img></td>
+	<td><p class="side"  style="margin-left: -60%">Modifying an object property in a constraint using the inspector</p></td>
+      </tr>
+    </table>
+    <p>
+      To explore and understand a program and its behaviors, we may wish to turn on and off constraints to see the change in behavior:
+    </p>
+    <table>
+      <tr>
+	<td><img src="img/7.gif" class="clicktoplay" data-staticSrc="img/7s.png" style="margin-left: -0%"></img></td>
+	<td><p class="side"  style="margin-left: 15%">Mix-n-matching behaviors</p></td>
+      </tr>
+    </table>
+    <p>
+      Sketchpad<small>14</small> can generate a whole English summary of the program. This involves giving a parameterized description of each involved constraint type, as well as a summary of individual active constraints as we showed before, along with a listing of existing objects and their states, and finally the set of active events. The figure below shows the constraints portion of the summary:
+    </p>
+    <table>
+      <tr>
+	<td><img src="img/8.gif" class="clicktoplay" data-staticSrc="img/8s.png" style="margin-left: -10%"></img></td>
+	<td><p class="side"  style="margin-left: -25%">Viewing a program summary</p></td>
+      </tr>
+    </table>
   </div>
-  <p>
+  <img src="img/1.png"></img>
+  <br>  
+  <p>    
+    Read <a href="4.html">Part IV: Execution Model in CRP</a><br>
     Back to <a href="index.html">Table of Contents</a><br>
     Try <a href="../index.html">Sketchpad<small>14</small></a>
-  </p>
+  </p>  
+  <img src="img/1.png"></img>
+  <br>
+  <hd1>Click below to start playing!</hd1>
+  <br>
+  <br>
+  <div id="sketchpad-playground-div"><img src="img/12.png" onclick="startSketchpadPlayground()"></img></div>
   <script src="./lib/click-to-play-gif.js"></script>
 </body>
 </html>

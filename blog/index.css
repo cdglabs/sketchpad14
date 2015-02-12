@@ -1,4 +1,4 @@
-body {
+body,button {
     margin: 50px 50px;
     /*background: #FFFFCC;*/
     font-family: 'Avenir';
@@ -12,7 +12,8 @@ body {
 }
 
 mono {
-    font-family: 'Courier New';
+    font-family: 'Monaco';
+    font-size: 16px;
     color: #8904B1;
 }
 
@@ -45,11 +46,17 @@ hd1{
     font-size: 32px;
 }
 
-a{
+a {
     color: #666699;
 }
-a:hover{
+
+a:hover {
     color: #B2B2CC;
+}
+
+.lefty {
+    text-align: left;   
+    margin-left: 30%;
 }
 
 .chapter{
@@ -58,9 +65,15 @@ a:hover{
     text-align: left;   
 }
 
-iframe {
+.video {
     margin-left: 25%;
     align: middle;
     width: 420;
     height: 315;
+}
+
+iframe {
+    margin-left: -50px;
+    width: 1440;
+    height: 778;
 }

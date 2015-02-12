@@ -1,0 +1,107 @@
+<html>
+  <title>Blog on Sketchpad14: Part V</title>
+  <head>
+    <link href="./lib/prism.css" rel="stylesheet" />
+    <link href="index.css" rel="stylesheet"></link>
+  </head>
+  </style>
+<body>
+  <script src="./lib/prism.js"></script>
+  <script>
+    function startSketchpadPlayground() {
+    var iframe = document.createElement('iframe');
+    iframe.id = "sketchpad-playground"    
+    iframe.src = "../2d/demo/demos.html?example=cdg"
+    var div = document.getElementById("sketchpad-playground-div")
+    div.removeChild(div.firstChild)
+    div.appendChild(iframe)
+    }
+  </script>
+  <hd>Half-Century Later:
+    <br>
+    "From Sketchpad<small>61</small> to Sketchpad<small>14</small>"
+    <br>
+    <small>
+      Part V: Using Sketchpad<small>14</small> with Custom Types
+    </small>
+  </hd>
+  <br><br>
+  <small><a href="http://www.hesam.us">Hesam Samimi</a>, <a href="http://www.tinlizzie.org/~awarth">Alex Warth</a>, <a href="http://www.cs.washington.edu/people/faculty/borning">Alan Borning</a><br><a href="http://www.cdglabs.org">Communication Design Group</a></small>
+  <br><br>
+  <img src="img/1.png"></img>
+  <br>
+  <hd1>Viewing and Editing Existing Classes</hd1>
+  <div class="chapter">
+    <p>
+      So far we've been using a predefined set of data and constraint classes.  It is possible to view and edit the class definitions using the class <i>browser</i>. For example, in the figure below we click on the constraint type <mono>LengthConstraint</mono> to get its listing of method definitions:
+    </p>
+    <table>
+      <tr>
+	<td><img src="img/9.gif" class="clicktoplay" data-staticSrc="img/9s.png" style="margin-left: -15%"></img></td>
+	<td><p class="side" style="margin-left: -65%">Viewing and Editing the constraint type definition</p></td>
+      </tr>
+    </table>
+    <p>
+      All the predefined constraints have a defined a few methods implemented and if the user wants to define a new constraint type they must be implemented as well. For constraint types the most important variables and methods are shown on the top:
+    </p>
+    <ul>
+      <li>
+	<mono>propertyTypes</mono>: gives a type to the properties, enabling type-checking UI features.	
+      </li>
+      <li>
+	<mono>computeError</mono>: is a function that given the current <i>pseudo-time</i> of the system (some constraints are temporal) as well as the state of the properties of the constraints, returns a numeric <i>error</i> value as an indicator for how close the state is from a solution (depends on <mono>epsilon</mono>, a parameter that sets this threshold).
+      </li>
+      <li>
+	<mono>solve</mono>: which the system calls once it deems the error too high (thus constraint unsatisfied). This function returns a dictionary object as a solution to the constraint. This solution is essentially interpreted as a set of <i>patches<i> to the current state, indicating the set of variables that need to be changed and the values they need to be changed to. The set of patches are organized as a dictionary where the keys are the names of the property objects belonging to the constraint (e.g., in the <mono>LengthConstraint</mono> they are called <mono>p1</mono>  and  <mono>p2</mono>) and the values are themselves dictionaries, mapping the name of a property beloning to an object to a new value. 
+      </li>
+    </ul>
+    <p>
+      Here is how these properties of defined for an instance of <mono>LengthConstraint</mono>:
+    </p>
+    <pre><code class="language-javascript">
+	// propertyTypes:
+	LengthConstraint.prototype.propertyTypes =
+	    {p1: 'Point', p2: 'Point', l: 'Number'}
+
+	// computeError:
+	LengthConstraint.prototype.computeError = function(pseudoTime) {
+	    return distance(this.p1, this.p2) - this.l
+	}
+
+	// solve:
+	LengthConstraint.prototype.solve = function(pseudoTime) {
+	    var p1 = this.p1, p2 = this.p2
+	    var delta = (distance(p1, p2) - this.l) / 2
+	    var e12 = scaledBy(normalized(minus(p2, p1)), delta)
+	    var res = {p1: plus(p1, e12), p2: plus(p2, scaledBy(e12, -1))}
+	    return res
+	}	
+    </code></pre>
+    <p>
+      The same thing goes for object (data) classes. There are a set of mandatory methods that the class must define. But before getting to those, let's see how constraint solving is done in the CRP model as implemented in this tool.
+    </p>
+  </div>
+  <img src="img/1.png"></img>
+  <br>
+  <hd1>Constraint Solving in Sketchpad<small>14</small></hd1>
+  <div class="chapter">
+    <p>
+      As we saw above, each individual constraint has provided the appropriate methods to measure the current error based on the current state and a method that says how it wants to change the state in order to be satisfied. But in the model of Constraint Reactive Programming, how are individual solutions consolidated in the presence of multiple constraints? CRP employs the approach of Overveld (see <a href="1.html">Part I</a>) to collect the solutions from unsatisfied constraints and <i>join</i> them in order to come up with a <i>single consolidated solution</i>. Unlike the Overveld approach, however, where the joining is always simply <i>averaging</i> numeric values per variable, CRP generalizes this and allows the user to define a <mono>solutionJoin</mono> function per class property that decides how multiple solutions are combined.
+    </p>
+  </div>
+  <img src="img/1.png"></img>
+  <br>
+  <p>
+    Read <a href="6.html">Part VI: Creating Applications from Scratch in CRP</a><br>
+    Back to <a href="index.html">Table of Contents</a><br>
+    Try <a href="../index.html">Sketchpad<small>14</small></a>
+  </p>
+  <img src="img/1.png"></img>
+  <br>
+  <hd1>Click below to start playing!</hd1>
+  <br>
+  <br>
+  <div id="sketchpad-playground-div"><img src="img/12.png" onclick="startSketchpadPlayground()"></img></div>
+  <script src="./lib/click-to-play-gif.js"></script>
+</body>
+</html>
