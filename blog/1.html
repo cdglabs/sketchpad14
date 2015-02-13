@@ -79,14 +79,76 @@
     </p>
     <pre><code class="language-javascript">
 // delta fn for LengthConstraint:	
-function computeDeltas(p, q, l) {
-    var delta = (distance(p, q) - l) / 2
-    var deltaVector = scaledBy(normalized(minus(p2, p1)), delta)
-    return {p: plus(p1, deltaVector), q: plus(p2, scaledBy(deltaVector, -1))}
+function computeDeltas() {
+    var deltaMagnitude = (distance(this.p, this.q) - this.l) / 2
+    var delta = scaledBy(normalized(minus(this.q, this.p)), deltaMagnitude)
+    return {p: delta, q: scaledBy(delta, -1)}
+}
+    </code></pre>    
+    <p>
+      To make things interesting let us assume there is a second constraint acting on <i>p(x1,y1)</i>, which says it should be fixed at the origin coordinates <i>o(0,0)</i>. The <mono>computeDeltas</mono> function for the <mono>CoordinateConstraint</mono> type is even simpler:      
+    </p>
+    <pre><code class="language-javascript">
+// delta fn for CoordinateConstraint:	
+function computeDeltas() {
+    var delta = minus(this.c, this.p)
+    return {p: delta}
+}
+    </code></pre>    
+    <p>
+      Once the deltas from all individual constraints, in this case the two above, are collected, they are <i>averaged</i> (actually Overveld's approach uses the less sensical choice of summing) together, the average is damped (divided by a constant) for better convergance chances, and then applied to the variables. In a solution-converging situation, the system moves closer to a solution by this pass and therefore by iteratively repeating this process an acceptable global solution (miniscule error values) can be reached. 
+    </p>
+    <p>
+      To be concrete, given the variables in our example <i>p(x1,y1)</i> and <i>q(x2,y2)</i> and the current state of
+      <i>x1 = 1</i>, <i>y1 = 1</i>, <i>x2 = 2</i>, <i>x1 = 2</i>, deltas obtained from the two constraints are:
+    </p>
+    <pre><code class="language-javascript">
+	// deltas from LengthConstraint:
+	p = (1, 1)
+	q = (2, 2)
+	l = 1
+	deltaMagnitude = (distance((1, 1), (2, 2) - 1)) / 2 = 0.20710678118654757
+	delta = scaledBy(normalized(minus((2, 2), (1,1))), 0.20710678118654757)
+	    = scaledBy((0.7071067811865475, 0.7071067811865475), 0.20710678118654757)
+	    = (0.14644660940672627, 0.14644660940672627)
+	
+	delta.x1 = 0.14644660940672627
+	delta.y1 = 0.14644660940672627
+	delta.x2 = -0.14644660940672627
+	delta.x2 = -0.14644660940672627
+
+	// deltas from CoordinateConstraint:
+	p = (1, 1)
+	c = (0, 0)
+	delta = minus((0, 0), (1, 1)) = (-1, -1)
+
+	delta.x1 = -1
+	delta.y1 = -1
+
+	// averaging and damping (1/4 scaling) deltas per variable:
+	delta.x1 = -0.10669417382
+	delta.y1 = -0.10669417382
+	delta.x2 = -0.03661165235
+	delta.x2 = -0.03661165235
+
+	// applying the deltas to current values:
+	x1 = 1 + delta.x1 = 0.89330582618
+	y1 = 1 + delta.y1 = 0.89330582618
+	x2 = 2 + delta.x2 = 1.96338834765
+	y2 = 2 + delta.y2 = 1.96338834765
 }
     </code></pre>
     <p>
-      Once the solutions from all individual constraints, like above, are collected, they are <i>averaged</i> together and applied to the variables. In a solution-converging situation, the system moves closer to a solution by this pass and therefore by iteratively repeating this process an acceptable global solution (miniscule error values) can be reached. 
+      We compute the new error values from the two constraints and verify that the total error has been reduced. If the process above is repeated numerious times, eventually both constraints will get to a place of negligible error and the system is considered to have converged to a solution. Here is a visualization of the iterative process:
+    </p>
+    <table>
+      <tr>
+	<td><img src="img/14.gif" class="clicktoplay" data-staticSrc="img/14s.png"></img></td>
+	<td><p class="side" style="margin-left: 20%">Overveld relaxation approach</p></td>
+      </tr>
+    </table>
+    <p>
+      Notice that one difference between Sketchpad and Overveld approaches is that Sketchpad iterates the process variable by variable, thus different constraints see different states, whereas in Overveld all constraints see the same start state to compute the deltas. The latter setting seems more sane.
     </p>
     <p>
       From one point of view Overveld's approach is inferior to Sketchpad's: the system has no real smarts in solving problems; the user has to provide an algorithm that solves each constraint type beforehand.
@@ -104,5 +166,6 @@ function computeDeltas(p, q, l) {
     Read <a href="2.html">Part II: Constraint Reactive Programming (CRP) in Sketchpad<small>14</small></a><br>
     Back to <a href="index.html">Table of Contents</a>
   </p>
+  <script src="./lib/click-to-play-gif.js"></script>
 </body>
 </html>

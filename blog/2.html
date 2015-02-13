@@ -23,18 +23,18 @@
   <hd1>53 Years Later: Sketchpad<small>14</small></hd1>
   <div class="chapter">
     <p>
-      Overveld's alternative relaxation constraint solving approach for the geometric constraints a la Sketchpad inspired us to build a fully general programming model around it. We call it Sketchpad<small>14</small>. Our intention was to go back and honor and implement most of the cool things about Sutherland's Sketchpad, yet build a realistic system to build interactive web applications. Our main observations are:
+      Overveld's alternative relaxation constraint solving approach for the geometric constraints a la Sketchpad inspired us to build a fully general programming model around it. We call it Sketchpad<small>14</small>. Our intention was to go back and honor and implement most of the cool things about Sutherland's Sketchpad, yet build a realistic system to build interactive web applications, declaratively. Our main observations were:
     </p>
     <ul>
       <li>
-	Sketchpad, as well as Overveld's tweak on its solving strategy seem to be a great way to design, explain, and modify a program. Each program is organized as a set of individual constraints declaratively specified. It's the job of the system to combine the result of all constraints, rather than asking the user to make out the aggregate behavior. Modifying and extending a program means simply removing and adding constraints. Based on our experiments, this way of programming makes the whole process quite <i>linear</i> and gistible for the human mind.
+	Sketchpad, as well as Overveld's tweak on its solving strategy, were quite limited on the set of constraint types handled and only are suited for real valued arithmetic constraints. Nonetheless, they paint a beautiful picture for how beautiful can design, explaination, and modification of a computer program can be. Each program is organized as a set of individual constraints declaratively specified. It's the job of the system to combine the result of all constraints, rather than leaving the user the often much more complicated task of defining what the aggregate behavior will be. Modifying and extending a program means simply removing and adding constraints. Based on our experiments, this way of programming makes the whole process quite <i>linear</i> and gistible for the human mind.
       </li>
       <li>
-	Overveld's approach of deligating the responsibility for solving the individual constraint types from the system to the constraints themselves has a much higher chance of being extended to general programming. In its model the user is in charge and can employ domain specific knowledge and own data structures and abstractions to describe and efficiently solve a particular constraint. For example, if the user has access to a Fast Fourier Transform library function, she can invoke it as part of solving a given problem that requires it, rather than leaving it at the mercy of relaxation and linear approximation. 
+	Overveld's approach of deligating the responsibility for solving the individual constraint types from the system to the constraints themselves has a much higher chance of being extended to general programming. In its model the user is in charge and can employ domain specific knowledge and own data structures and abstractions to describe and efficiently solve a particular constraint. For example, almost always building applications from scratch means needing new behaviors (constraint types) which haven't been defined yet, and it is fequently the case that the needed behavior wouldn't be something expressible or solvable by the system without help. Say, the user has access to a Fast Fourier Transform library function. Then she can invoke it as part of solving a given problem that requires it, rather than leaving it at the mercy of what solving capabilities is built into the system.
       </li>
     </ul>
     <p>
-      As in Sketchpad and Overveld's geometric constraints, the way to define and modify the behavior of a program is to add/remove constraints, rather than the common imperative programming practice of "writing code." We take Overveld's approach, however, and require that constraint types be defined beforehand. This means we let the user define constraint types as well as how to solve them in isolation. This is what's empowering about the approach as the user is put in the driver seat to use the programming language of the program itself to define the constraint and also provide an "algorithm" to solve it.
+      As in Sketchpad and Overveld's geometric constraints, the way to define and modify the behavior of a program is to add/remove constraints, rather than the common imperative programming practice of "writing code." We take Overveld's approach, however, and require that the condition and solution to individual constraint types be defined beforehand. This means we let the user define constraint types as well as how to solve them in isolation. This is what's empowering about the approach as the user is put in the driver seat to use the programming language of the program itself to define the constraint and also provide an "algorithm" to solve it.
     </p>
     <p>
       Another aspect of Sketchpad<small>14</small> is that it gives a principled mechanism for the user to define the <i>reactive</i> part of an interactive program. The next section explains a semi-formal programming model implemented by the tool that we call <i>Constraint Reactive Programming</i>.
@@ -61,7 +61,7 @@
 	(3) <b>continuous behaviors</b> given in terms of constraints operating over the data, as instances of constraint classes
       </li>
       <li>
-	(4) <b>discrete behaviors</b>, that is, the definition of events.
+	(4) <b>discrete behaviors</b>, that is, the definition of events
       </li>
       </ul>
     </p>
@@ -82,7 +82,7 @@
 Therefore, the execution model is unlike the imperative style, i.e., statement by statement. The program is assumed to be <i>reactive</i>. All present constraints are assumed to be continuously operating over the data, affecting them any time they are left unsatisfied. The events are always assumed to be ready to be triggered.
     </p>
     <p>
-      OK, enough talking! We'll come back to CRP later. Let's jump to examples in the <a href="3.html">next part</a>.
+      OK, enough talking! We'll come back to CRP later. Let's jump to some Sketchpad<small>14</small> examples in the <a href="3.html">next part</a>.
     </p>
   </div>
   <img src="img/1.png"></img>
