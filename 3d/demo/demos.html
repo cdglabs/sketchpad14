@@ -69,11 +69,13 @@ function(name) {
       clearRButtons(); lastBinKindArg = undefined; rc.clear(); rc.pause(); examples[name](); rc.makeConstraintListView(); rc.redraw(); rc.unpause();
     },
   constraint: 
-    function(name) { 
+function(name) {
+      rc.rightButtonsBusy = true
       rc.newInstantiationTile(name, true)
     },
   class: 
     function(name) {
+      rc.rightButtonsBusy = true
       rc.newInstantiationTile(name, false)
     },
   tile: 
@@ -123,7 +125,8 @@ for (var idx = 0; idx < bins.length; idx++) {
   (function(itemDOMNodesArg, itemNamesArg, binKindArg) {  
 	bin.onclick = function() {
 	clearRButtons()
-			if (lastBinKindArg === binKindArg) {			
+			if (lastBinKindArg === binKindArg) {
+			rc.rightButtonsBusy = false
 			lastBinKindArg = undefined
 			rc.makeConstraintListView()
 	} else {
