@@ -13,20 +13,11 @@ canvas {
     left: 0;
 }
 
-demos, constraints, classes, tiles, shortcuts {
+demos, constraints, classes, tiles, shortcuts ,buttons {
     position: fixed;
-    top: 20px;
+    top: 10px;
     right: 20px;
     z-index: 2000;
-    height: 680px;
-    overflow-y: scroll;
-}
-
-buttons {
-    position: fixed;
-    z-index: 2000;
-    left: 1100px;
-    top: 10px;
     height: 680px;
     overflow-y: scroll;
 }

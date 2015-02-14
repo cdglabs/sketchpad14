@@ -298,6 +298,8 @@ SketchpadCanvas.prototype.makeConstraintListViewInstanceList = function(alist, w
 }
 
 SketchpadCanvas.prototype.makeConstraintListView = function() {
+    if (this.rightButtonsBusy)
+	return;
     var self = this
     this.removeTempDOMElements()
     if (this.listConstraints) {
@@ -970,6 +972,7 @@ SketchpadCanvas.prototype.clear = function() {
     this.disableDefaultKeyEvents = false
     this.constraintInstancesViewElements = []
     this.constraintInstancesViewSelected = undefined
+    this.rightButtonsBusy = false
 }
 
 SketchpadCanvas.prototype.clearSelections = function(andRedraw) {    

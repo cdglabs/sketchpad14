@@ -1,5 +1,5 @@
 <html>
-  <title>Blog on Sketchpad14: Part V</title>
+  <title>Blog on Sketchpad14: Part VI</title>
   <head>
     <link href="./lib/prism.css" rel="stylesheet" />
     <link href="index.css" rel="stylesheet"></link>
@@ -10,8 +10,8 @@
   <script>
     function startSketchpadPlayground() {
     var iframe = document.createElement('iframe');
-    iframe.id = "sketchpad-playground"   
-    iframe.src = "../2d/demo/demos.html?example=slider"
+    iframe.id = "sketchpad-playground"    
+    iframe.src = "../2d/demo/demos.html?example=polygons"
     var div = document.getElementById("sketchpad-playground-div")
     div.removeChild(div.firstChild)
     div.appendChild(iframe)
@@ -22,39 +22,242 @@
     "From Sketchpad<small>61</small> to Sketchpad<small>14</small>"
     <br>
     <small>
-      Part V: Using Sketchpad<small>14</small> with Custom Types
+      Part V: Creating Applications from Scratch in CRP, <br>(Remaking the "Parables of the Polygons" Demo)
     </small>
   </hd>
   <br><br>
-  <small><a href="http://www.hesam.us">Hesam Samimi</a>, <a href="http://www.tinlizzie.org/~awarth">Alex Warth</a>, <a href="http://www.cs.washington.edu/people/faculty/borning">Alan Borning</a><br><a href="http://www.cdglabs.org">Communication Design Group</a></small>
+  <small><a href="http://www.hesam.us">Hesam Samimi</a>, <a href="http://www.tinlizzie.org/~awarth">Alex Warth</a><br><a href="http://www.cdglabs.org">Communication Design Group</a></small>
   <br><br>
   <img src="img/1.png"></img>
   <br>
-  <hd1>Viewing and Editing Existing Classes</hd1>
+  <hd1>Parable of the Polygons</hd1>
   <div class="chapter">
     <p>
-      So far we've been using a predefined set of data and constraint classes.  It is possible to view and edit the class definitions using the class <i>browser</i>. For example, in the figure below we click on the constraint type <mono>LengthConstraint</mono> to get its listing of method definitions:
+      Recently, CDG's <a href="http://vihart.com/">Vi Hart</a> and web programmer <a href="http://www.patreon.com/ncase">Niky Case</a> relased a highly cited and praised web page called <a href="http://ncase.me/polygons/">Parables of the Polygons</a>. Not only beautifully designed, the page explains a mathematics concept in an explorable way and leads to conveying a positive social lesson for tolerance of all. We took the task of remaking the web page in Sketchpad<small>14</small> and the CRP model to understand the advantages and limitations of our approach. This chapter summarizes what it took to make the demo.
     </p>
-    <table>
-      <tr>
-	<td><img src="img/9.gif" class="clicktoplay" data-staticSrc="img/9s.png" style="margin-left: -15%"></img></td>
-	<td><p class="side" style="margin-left: -65%">Viewing and Editing the constraint type definition</p></td>
-      </tr>
-    </table>
+    <img src="img/18.png" width="150%" style="margin-left: -30%"></img>
+    <p>
+      Figure above is a snapshot of the demo done in Sketchpad<small>14</small>. Though this demo does not fully implement the original page, most interesting and interactive behaviors are present. Surprisingly, only three new constraint types had to be defined, two of which can be seen in the constraint list view in the figure above. The other five type of constraints were already part of our predefined set of constraints.
+    </p>
+  </div>
+  <img src="img/1.png"></img>
+  <br>
+  <hd1>What's it take to program in CRP/Sketchpad<small>14</small>?</hd1>
+  <div class="chapter">
+    <p>
+      You could find the source code for this demo at <small>"<a href="../2d/demo/polygons/example-polygons.js">../2d/demo/polygons/example-polygons.js</a>"</small> or play it at the <a href="#sketchpad-playground-div">bottom</a> of this page. Let's examine it. (It should be possible to develop it all within the tool itself, but at the moment the UI just isn't usable yet.)
+    </p>
+    <p>
+      All CRP programs are organized in the same way. <b>Data classes</b> are defined first, then <b>constraint classes</b>. Afterwards <b>data</b> objects are created and then <b>constraints</b> are instantiated to operate on them. Finally, should this be an interactive program (all Sketchpad<small>14</small> are because objects are draggable), <b>events</b> are registered, whose job is to modify the data and constraint stores.
+    </p>
+  </div>
+  <img src="img/1.png"></img>
+  <br>
+  <hd1>Data Classes</hd1>
+  <div class="chapter">
+    <img src="../2d/demo/polygons/img/yay_triangle.png" onmouseover="this.src='../2d/demo/polygons/img/yay_triangle_blink.png'" onmouseout="this.src='../2d/demo/polygons/img/yay_triangle.png'" style="margin-left: 45%"></img>
+    <ul>
+      <li>
+	<mono>Shape (Position position, Number kind, Number mood, Image image, Board board, Vector boardPos)</mono>
+	  <p>
+	    denotes each polygon shape in the page. <mono>kind</mono> is 1 for <i>squares</i> and 2 for <i>triangles</i>. <mono>mood</mono> is -1 for <i>sad</i>, 0 for <i>meh</i>, and 1 for <i>yay</i>. When shape is part of a board, properties <mono>board</mono> and <mono>boardPos</mono> are set. The latter tells the board coordinates at which the shape is placed.
+	  </p>
+	  <p>
+	    Note that each data class, such as this one, has defined a <mono>draw</mono> method that is responsible for drawing the object on the shared canvas.
+	  </p>
+	</li>
+      </ul>
+    <ul>
+      <li>
+	<mono>Board (Position position, Number cols, Number rows, Number cellLength, Shape[] cells, Number kindPercentage)</mono>
+	  <p>
+	    denotes each board in the page. <mono>cells</mono> is an array representing what's on it, whose elements may be <mono>Shape</mono>s or none. Board elements will be indexed by <i>(row# * cols + col#)</i> encoding. <mono>kindPercentage</mono> is the ratio of the count of sorrounding kind shapes to all sourrounding shapes, which is the threshold below which the shape will feel <i>sad</i> and inclined to move.
+	  </p>
+	  <p>
+	    We will see later than one the constraint types will be affecting the <mono>cells</mono> array property of a board. Clearly the default solution join function (<mono>dampedAverageJoin</mono> seens in the <a href="4.html">previous part</a>) does not work on non-real values and hence unsuitable here. Instead, the class uses a different join function called <mono>dictionaryAddJoin</mono>:
+	  </p>
+	  <pre><code class="language-javascript">
+// Dictionary add join fn:
+dictionaryAddJoin = function(curr, solutions) {
+    solutions.forEach(function(v) { for (var k in v) curr[k] = v[k] })
+    return curr
+}
+	  </code></pre>
+	<p>
+	  where each solution is a dictionary of key/value pairs that include keys (in this case indices in an array) that it wants to change. So, here is how the class defines its <mono>solutionJoins</mono> function:
+	</p>
+	  <pre><code class="language-javascript">
+Board.prototype.solutionJoins = function() { 
+    return {cells: dictionaryAddJoinSolutions}
+}
+	</code></pre>
+	  <p>
+	    This class also has a few important functions related to the logic of the game, implemented in JS code:
+	  </p>
+	    <ul>
+	      <li>
+		<mono>fits(Vector pos)</mono> returns whether or not the board based on its current placements can fit a new piece in coordinates <mono>pos</mono>.
+	      </li>
+	      <li>
+		<mono>getCoord(Point position)</mono> determines whether or not a <mono>position</mono> on the canvas falls in one of the cells of the board, and if so it computes the associated coordinates.
+	      </li>
+	      <li>
+		<mono>getEmptyCoord()</mono> returns a random empty cell coodinate, should there one exist.
+	      </li>
+	      <li>
+		<mono>getMood(Shape shape)</mono> returns the mood of a shape (i.e., -1, 0, or 1) depending on its sourrounding cells.  
+	      </li>
+	      <li>
+		<mono>firstSadShape()</mono> returns the first sad shape (moving from top-left to botton-right corner) on the board.
+	      </li>
+	    </ul>
+	</li>
+      </ul>
+  </div>
+  </div>
+  <img src="img/1.png"></img>
+  <br>
+  <hd1>Constraint Classes</hd1>
+  <div class="chapter">
+    <img src="../2d/demo/polygons/img/yay_triangle.png" onmouseover="this.src='../2d/demo/polygons/img/yay_triangle_blink.png'" onmouseout="this.src='../2d/demo/polygons/img/yay_triangle.png'" style="margin-left: 45%"></img>
+    <ul>
+      <li>
+	<mono>ImageSwingConstraint (Shape shape, Number swingSpeed)</mono>
+	  <p>
+	    states that <mono>shape</mono> must swing back and forth over a span of 36 degrees, at a rate of <mono>swingSpeed</mono>.
+	  </p>
+	<p>
+	  So let's go over the functions that must be defined for a constraint type:
+	</p>
+	<ul>
+	  <li>
+	    <p>Definitions related to property type checking and summary generation:</p>
+	    <pre style="margin-left: -100px;"><code class="language-javascript">
+// property types:
+ImageSwingConstraint.prototype.propertyTypes =
+    {shape: 'Shape', swingSpeed: 'Number'}
+
+// class summary:
+ImageSwingConstraint.description = function() {
+    return "ImageSwingConstraint(Shape S, Number R) causes image of S to swing at rate R."
+} 
+
+// instance-specific summary:
+ImageSwingConstraint.prototype.description = function() {
+    return  "image of shape" + this.shape
+        + " should swing at a rate of " + this.swingSpeed
+}
+	    </code></pre>
+	  </li>
+	  <li>
+	    <p>And now things related to constraint solving:</p>
+	    <pre style="margin-left: -100px;"><code class="language-javascript">
+ImageSwingConstraint.prototype.computeError = function(pseudoTime) {
+    this.targetRotation = this.image.origRotation
+        + (Math.sin(this.image.swingSpeed * pseudoTime + this.rotationOffset)
+               * Math.PI / 10)
+    return this.targetRotation - this.image.rotation
+}
+
+ImageSwingConstraint.prototype.solve = function(pseudoTime) {
+    return {image: {rotation: this.targetRotation}}
+}
+	    </code></pre>
+	  </li>	  
+	  <br>  
+      <li>
+	<mono>ShapeMoodConstraint (Shape shape)</mono>
+	  <p>
+	    states that the URL of the image belonging to the <mono>shape</mono> must reflect its <mono>mood</mono> property, which must be set based on the sorrounding shapes.
+	  </p>
+	<p>
+	  We'll skip the functions related to type checking and summary generation, as they are similar to the previous constraint. So let's go over the constraint solving parts:
+	</p>
+	<ul>
+	  <li>
+	    <p><mono>computeError</mono> function:</p>
+	    <pre style="margin-left: -100px;"><code class="language-javascript">
+ShapeMoodConstraint.prototype.computeError = function(pseudoTime) {
+    this.targetMood = this.shape.getMood()
+    return (shape.mood ==  this.targetMood
+      && this.shapeImage.url === this.shape.getUrl(this.targetMood)) ? 0 : 1
+}
+	    </code></pre>
+	  </li>
+	  <li>
+	    <p><mono>solve</mono> function: </p>
+	    <pre style="margin-left: -100px;"><code class="language-javascript">
+ShapeMoodConstraint.prototype.solve = function(pseudoTime) {
+    return {shape: {mood: this.targetMood},
+            shapeImage: {url: this.shape.getUrl(this.targetMood)}}
+}
+	    </code></pre>
+	  </li>	  
+	  <br>  
+	  <li>
+	<mono>ShapePlacementConstraint (Shape shape)</mono>
+	  <p>
+	    states if <mono>shape</mono> is moved inside the its board and it fits in the dropped coordinate, it should snap in place in the center and its board should add it in in the right index of its <mono>cells</mono> array. Otherwise it should snap back in its original position. As we will see, we only add this constraint when a shaped is picked up to be dragged. Once another shape is picked up, this constraint is no longer necessary (must have already snapped in the right place) and we'll remove the constraint.
+	  </p>
+	<p>
+	  So let's go over the functions that must be defined for a constraint type:
+	</p>
+	<ul>
+	  <li>
+	    <p><mono>computeError</mono>: We check if the position of shape is within the board and if the board coordinate closest to the shape's position is free. If so, we compute the position where the shape should be snaped into. Otherwise, it should snap back at its original place on the board (<mono>this.shapeOrigPos</mono>). We store the target position in <mono>this.targetPos</mono> to avoid recomputation in the <mono>solve<mono> function. The error value is the distance between the current position of the shape and its computed target position:</p>
+	    <pre style="margin-left: -100px;"><code class="language-javascript">
+ShapePlacementConstraint.prototype.computeError = function(pseudoTime) {
+    var shapeCurrPos = this.shapePos, board = this.board
+    this.shapeCoord = board.getCoord(shapeCurrPos)
+    var inside = board.containsPoint(shapeCurrPos)
+    if (inside && board.fits(shapeCoord)) {
+        this.placing = true
+        this.targetPos = plus(board.position,
+            {x: shapeCoord.j * board.cellLength,
+             y: shapeCoord.i * board.cellLength})
+    } else {
+        this.placing = false
+        this.targetPos = this.shapeOrigPos
+    }
+    return magnitude(minus(this.targetPos, shapeCurrPos))
+}
+	    </code></pre>
+	    </li>
+	  <li>
+	    <p><mono>solve</mono>: We have already computed where the position of shape must be updated to and stored it in <mono>this.targetPos</mono>. If we the shape is being placed on the board (captured by boolean value <mono>this.placing</mono>) then the solution wants to free up the previous cell location and set the content of the new cell coordinates to this shape. This is done by setting the respecitve location in the <mono>cells</mono> array to 0 or the <mono>shape</mono>, respectively:
+	    <pre style="margin-left: -100px;"><code class="language-javascript">
+ShapePlacementConstraint.prototype.solve = function(pseudoTime) {
+    var board = this.board, shape = this.shape
+    var sol = {shapePos: {x: this.targetPos.x, y: this.targetPos.y}}
+    if (this.placing) {
+        var shapeOldCoord = shape.boardPos
+        var dict = {}
+        dict[(shapeOldCoord.i * board.width) + shapeOldCoord.j] = 0
+        dict[(this.shapeCoord.i * board.width) + this.shapeCoord.j] = shape
+        sol.board = {cells: dict}
+        sol.shapeBoardPos = {i: this.shapeCoord.i , j: this.shapeCoord.j}
+    }
+    return sol
+}
+	    </code></pre>
+	  </li>	  
+	<ul>
+	
+      </li>
+    </ul>
   </div>
   <img src="img/1.png"></img>
   <br>
   <p>
-    Read <a href="6.html">Part VI: Creating Applications from Scratch in CRP</a><br>
+    Read <a href="6.html">Part VI: Comparison of CRP and Imperative Programming</a><br>
     Back to <a href="index.html">Table of Contents</a><br>
-    Try <a href="../index.html">Sketchpad<small>14</small></a> (or just play below)
   </p>
   <img src="img/1.png"></img>
   <br>
-  <hd1>Click to start playing!</hd1>
+  <hd1>Click to view this demo!</hd1>
   <br>
   <br>
-  <div id="sketchpad-playground-div"><img src="img/12.png" onclick="startSketchpadPlayground()"></img></div>
+  <div id="sketchpad-playground-div"><img src="img/19.png" onclick="startSketchpadPlayground()" style="margin-left: -5%"></img></div>    
   <script src="./lib/click-to-play-gif.js"></script>
 </body>
 </html>

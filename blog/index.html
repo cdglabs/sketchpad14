@@ -5,13 +5,23 @@
   </head>
   </style>
 <body>
+  <script>
+    function startSketchpadPlayground() {
+    var iframe = document.createElement('iframe');
+    iframe.id = "sketchpad-playground"   
+    iframe.src = "../2d/demo/demos.html?example=cdg"
+    var div = document.getElementById("sketchpad-playground-div")
+    div.removeChild(div.firstChild)
+    div.appendChild(iframe)
+    }
+  </script>
   <hd>Half-Century Later:
     <br>
     "From Sketchpad<small>61</small> to Sketchpad<small>14</small>"
     <br>
   </hd>
   <br><br>
-  <small><a href="http://www.hesam.us">Hesam Samimi</a>, <a href="http://www.tinlizzie.org/~awarth">Alex Warth</a>, <a href="http://www.cs.washington.edu/people/faculty/borning">Alan Borning</a><br><a href="http://www.cdglabs.org">Communication Design Group</a></small>
+  <small><a href="http://www.hesam.us">Hesam Samimi</a>, <a href="http://www.tinlizzie.org/~awarth">Alex Warth</a><br><a href="http://www.cdglabs.org">Communication Design Group</a></small>
   <br><br>
   <img src="img/1.png"></img>
   <br>
@@ -24,13 +34,23 @@
   <br>
   <a href="4.html">Part IV: Execution Model in CRP</a>
   <br>
-  <a href="5.html">Part V: Using Sketchpad<small>14</small> with Custom Types</a>
+  <a href="5.html">Part V: Creating Applications from Scratch in CRP (Remaking the "Parables of the Polygons" Demo)</a>
   <br>
-  <a href="6.html">Part VI: Creating Applications from Scratch in CRP (Remaking the "Parables of Polygons" Demo)</a>
-  <br>
-  <a href="7.html">Part VII: Comparison of CRP and Imperative Programming</a>
+  <a href="6.html">Part VI: Comparison of CRP and Imperative Programming</a>
   </div>
   <br>
-  Try <a href="../index.html">Sketchpad<small>14</small></a>
+  <img src="img/1.png"></img>
+  <br>
+  Go to <a href="../index.html">Sketchpad<small>14</small></a>
+  <br>
+or
+  <br>
+  Click below to play!
+  <br>
+  <hd1></hd1>
+  <br>
+  <br>
+  <div id="sketchpad-playground-div"><img src="img/12.png" onclick="startSketchpadPlayground()"></img></div>
+  <script src="./lib/click-to-play-gif.js"></script>
 </body>
 </html>

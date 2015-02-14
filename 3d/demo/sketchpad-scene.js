@@ -304,6 +304,8 @@ SketchpadScene.prototype.makeConstraintListViewInstanceList = function(alist, wi
 }
 
 SketchpadScene.prototype.makeConstraintListView = function() {
+    if (this.rightButtonsBusy)
+	return;
     var self = this
     this.removeTempDOMElements()
     if (this.listConstraints) {
@@ -934,6 +936,7 @@ SketchpadScene.prototype.clear = function() {
     this.resetScene()
     this.constraintInstancesViewElements = []
     this.constraintInstancesViewSelected = undefined
+    this.rightButtonsBusy = false
 }
 
 SketchpadScene.prototype.resetScene = function() {
