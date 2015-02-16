@@ -92,6 +92,9 @@ Board.prototype.solutionJoins = function() {
 }
 	</code></pre>
 	  <p>
+	    Now the reason the above works is that we happen to know there will be exactly one solution and no chance of conflicts, because there will be exactly one constraint that will want to set the <mono>cells</mono> property of a board at a given time. This will become obvious later when we see how constraints are set up.
+	  </p>
+	  <p>
 	    This class also has a few important functions related to the logic of the game, implemented in JS code:
 	  </p>
 	    <ul>
@@ -114,17 +117,16 @@ Board.prototype.solutionJoins = function() {
 	</li>
       </ul>
   </div>
-  </div>
   <img src="img/1.png"></img>
   <br>
   <hd1>Constraint Classes</hd1>
   <div class="chapter">
-    <img src="../2d/demo/polygons/img/yay_triangle.png" onmouseover="this.src='../2d/demo/polygons/img/yay_triangle_blink.png'" onmouseout="this.src='../2d/demo/polygons/img/yay_triangle.png'" style="margin-left: 45%"></img>
+    <img src="img/20.png" style="margin-left: 45%"></img>
     <ul>
       <li>
-	<mono>ImageSwingConstraint (Shape shape, Number swingSpeed)</mono>
+	<mono>ShapeSwingConstraint (Shape shape, Number swingSpeed, Boolean dangling)</mono>
 	  <p>
-	    states that <mono>shape</mono> must swing back and forth over a span of 36 degrees, at a rate of <mono>swingSpeed</mono>.
+	    states that <mono>shape</mono> must swing back and forth over a span of 36 degrees, at a rate of <mono>swingSpeed</mono>. We will see later how <mono>dangling</mono> boolean flag is used.
 	  </p>
 	<p>
 	  So let's go over the functions that must be defined for a constraint type:
@@ -134,37 +136,44 @@ Board.prototype.solutionJoins = function() {
 	    <p>Definitions related to property type checking and summary generation:</p>
 	    <pre style="margin-left: -100px;"><code class="language-javascript">
 // property types:
-ImageSwingConstraint.prototype.propertyTypes =
-    {shape: 'Shape', swingSpeed: 'Number'}
+ShapeSwingConstraint.prototype.propertyTypes =
+    {shape: 'Shape', swingSpeed: 'Number', dangling: 'Boolean'}
 
 // class summary:
-ImageSwingConstraint.description = function() {
-    return "ImageSwingConstraint(Shape S, Number R) causes image of S to swing at rate R."
+ShapeSwingConstraint.description = function() {
+    return "ShapeSwingConstraint(Shape S, Number R, Boolean D) causes image of S to swing at rate R. When D is true this is simulating dangling and will gadually subside."
 } 
 
 // instance-specific summary:
-ImageSwingConstraint.prototype.description = function() {
+ShapeSwingConstraint.prototype.description = function() {
     return  "image of shape" + this.shape
-        + " should swing at a rate of " + this.swingSpeed
+        + " should " + (this.dangle ? "dangle" : "swing") + " at an initial rate of " + this.swingSpeed
 }
 	    </code></pre>
 	  </li>
 	  <li>
 	    <p>And now things related to constraint solving:</p>
 	    <pre style="margin-left: -100px;"><code class="language-javascript">
-ImageSwingConstraint.prototype.computeError = function(pseudoTime) {
+ShapeSwingConstraint.prototype.computeError = function(pseudoTime) {
     this.targetRotation = this.image.origRotation
         + (Math.sin(this.image.swingSpeed * pseudoTime + this.rotationOffset)
                * Math.PI / 10)
     return this.targetRotation - this.image.rotation
 }
 
-ImageSwingConstraint.prototype.solve = function(pseudoTime) {
+ShapeSwingConstraint.prototype.solve = function(pseudoTime) {
     return {image: {rotation: this.targetRotation}}
 }
 	    </code></pre>
 	  </li>	  
 	  <br>  
+      <li>
+	<mono>TimerConstraint (Timer timer)</mono>
+	<p>
+	  Note that the previous constraint was temporal, i.e., it's a function of time, or as we have here: <mono>pseudoTime</mono>. In order for the system pseudo time to advance, the user must add a <mono>TimerConstraint</mono>. It simply tells the system that it should update the <mono>pseudoTime</mono> to reflect the time passed since last evaluation cycle (see <a href="4.html">Part IV</a>).
+	  </p>
+      </li>	  
+      <br>  
       <li>
 	<mono>ShapeMoodConstraint (Shape shape)</mono>
 	  <p>
@@ -195,7 +204,13 @@ ShapeMoodConstraint.prototype.solve = function(pseudoTime) {
 	  </li>	  
 	  <br>  
 	  <li>
-	<mono>ShapePlacementConstraint (Shape shape)</mono>
+	    <mono>ShapePlacementConstraint (Shape shape)</mono>
+	    <table>
+	      <tr>
+		<td><img src="img/21.gif" class="clicktoplay" data-staticSrc="img/21s.png" style="margin-left: 60%"></img></td>
+		<td><p class="side" style="margin-left: 100%">Behavior of <mono>ShapePlacementConstraint</mono></p></td>
+	      </tr>
+	    </table>	    
 	  <p>
 	    states if <mono>shape</mono> is moved inside the its board and it fits in the dropped coordinate, it should snap in place in the center and its board should add it in in the right index of its <mono>cells</mono> array. Otherwise it should snap back in its original position. As we will see, we only add this constraint when a shaped is picked up to be dragged. Once another shape is picked up, this constraint is no longer necessary (must have already snapped in the right place) and we'll remove the constraint.
 	  </p>
@@ -235,16 +250,136 @@ ShapePlacementConstraint.prototype.solve = function(pseudoTime) {
         dict[(shapeOldCoord.i * board.width) + shapeOldCoord.j] = 0
         dict[(this.shapeCoord.i * board.width) + this.shapeCoord.j] = shape
         sol.board = {cells: dict}
-        sol.shapeBoardPos = {i: this.shapeCoord.i , j: this.shapeCoord.j}
+        sol.shapeBoardPos = {i: this.shapeCoord.i, j: this.shapeCoord.j}
     }
     return sol
 }
 	    </code></pre>
-	  </li>	  
-	<ul>
-	
+	  </li>
+	</ul>
+  </div>
+  <img src="img/1.png"></img>
+  <br>
+  <hd1>Reactive Parts</hd1>
+  <div class="chapter">
+  <img src="img/22.png" style="margin-left: 42%"></img>
+    <p>
+      Now that we have all the constraint types we need, we can worry about the interactive/reactive part of the demo.
+    </p>
+    <ul>
+      <li>
+	Dragging pieces (<mono>CoodinateConstraint</mono> on <mono>mouse</mono> events):
+	<p>
+	  As with all demos, the default dragging-related events allowing things to be moved are in place. We saw these in <a href="3.html">Part III</a>.
+	</p>
+      </li>
+      <li>
+	Placing pieces on a board (<mono>ShapePlacementConstraint</mono> on <mono>mouse</mono> events):
+	<p>
+	  We could have this constraint be a continuous requirement on all pieces that are part of a board. However, since it applies only when a piece that was picked up dropped by the user, it makes sense to only add this requirement then and remove it the next time another piece is picked up (since by that time that original piece is already placed nicely in place).
+	</p>
+	<pre><code class="language-javascript">
+
+registerEvent('mouseup', function(e) {
+    var thing = e.pointedObject
+    if (thing !== undefined && thing instanceof Shape
+           && thing.board !== undefined)
+        placementConstraint = addConstraint(
+            new ShapePlacementConstraint(thing))
+})
+    </code></pre>
+	<pre><code class="language-javascript">
+
+registerEvent('mousedown', function(e) {
+    if (placementConstraint !== undefined) {
+        removeConstraint(placementConstraint)
+        placementConstraint = undefined
+    }
+})
+    </code></pre>
+      </li>
+      <li>
+	Swinging faster on mouse hover (<mono>ShapeSwingConstraint</mono> on <mono>mouse</mono> events):
+	<p>
+	  The pieces on the header of the page (stored in the <mono>swingingShapes</mono> array) swing faster when mouse hovers over them. They all already have a <mono>ShapeSwingConstraint</mono> operating over them, so it's simply a matter of changing the property of that constraint to reflect the speeding or slowing of the swing rate:
+	</p>
+	<pre><code class="language-javascript">
+	    
+registerEvent('mousemove', function(e) {
+    swingingShapes.forEach(function(shape) {
+        var dist = distance(e.mousePosition, shape.position)
+        shape.swingConstraint.swingSpeed =
+            2 + (dist < 200 ?  ((200-dist)/200*10) : 0)
+    }
+})
+    </code></pre>
+      </li>
+      <li>
+	Pieces dangle when dragged (also using <mono>ShapeSwingConstraint</mono> on <mono>mouse</mono> events):
+	<table>
+	  <tr>
+	    <td><img src="img/23.gif" class="clicktoplay" data-staticSrc="img/23s.png" style="margin-left: 100%"></img></td>
+	    <td><p class="side" style="margin-left: 120%">Dangling effect</p></td>
+	  </tr>
+	</table>	    
+	<p>
+	  We'll add an instance of <mono>ShapeSwingConstraint</mono> to not only the happy swinging shapes on the page header, but also to a shape that is picked up by the user (to get a <i>dangling</i> effect). The difference is that the dangling kind's swing rate subsides with passage of time. 
+	</p>
+	<p>
+	  There is a feature we haven't talked about before, but we'll now disuccs and use it. Each class (be it a data or constraint type) can define a <mono>onEachTimeStep</mono> method, which will be run by the CRP execution model right before going to the <i>solving stage</i>, and is used to do any sort of housekeeping, propertying updating, etc.
+	</p>
+	<p>
+	  Thus we define a <mono>onEachTimeStep</mono> for each instance of the <mono>ShapeSwingConstraint</mono> which happens to be simulating dangling, to get the effect of gradually damping and turning off the dangling speed:
+	</p>
+	<pre><code class="language-javascript">
+ShapeSwingConstraint.prototype.onEachTimeStep = function(pseudoTime) {
+    if (this.dangle) {
+	var movement = this.shape.position.x - this.shap.lastPosition.x
+	if (Math.abs(movement) > 0)
+	      this.swingSpeed += (movement / 200)
+	else {
+	    this.swingSpeed /= 1.05
+	    if (this.image.swingSpeed < 0.001)
+		this.swingSpeed = 0
+	}
+	this.shape.lastPosition = this.shape.position.copy()
+    }
+}	    
+    </code></pre>
+	<p>
+	  Now all we need to do to get dangling working is to add a <mono>ShapeSwingConstraint</mono> when a shape is picked up:
+	</p>
+	<pre><code class="language-javascript">
+registerEvent('mousedown', function(e) {
+    var thing = e.pointedObject
+    if (thing !== undefined && thing instanceof Shape) {
+        danglingConstraint = addConstraint(
+            new ShapeSwingConstraint(thing, 2, true))
+    }
+})
+	</code></pre>
+	<p>Similarly, the constraint gets removed when a shape is dropped down.</p>
       </li>
     </ul>
+  </div>
+  <img src="img/1.png"></img>
+  <br>
+  <hd1>Final Step:<br>Laying out data and constraints</hd1>
+  <div class="chapter">
+    <p>
+      By now all kinds of data, and continuous and reactive behaviors have been defined. All that's left to do is layout the page and add constraints.
+    </p>
+    <p>
+      To get the temporal constraints going, don't forget to add a <mono>TimerConstraint</mono> so that the system's clock gets ticking:
+    </p>
+    <pre><code class="language-javascript">
+	addConstraint(new TimerConstraint(new Timer(1))) // steps pseudo-time by 1 unit at each frame
+    </code></pre>
+    <p>Now we'll instantiate as many <mono>Shape</mono>s, <mono>Board</mono>s, <mono>TextBox</mono>es, etc. as we need, and add constraints as appropriate.
+    </p>
+    <p>
+      That's all folks. We omitted some parts of the demo (e.g., In the tool see the <a href="../2d/demo/example-slider.js">slider</a> demo, which was implemented separately and reused here), but you should have gotten a good overview of things by now!
+    </p>
   </div>
   <img src="img/1.png"></img>
   <br>
