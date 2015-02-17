@@ -20,10 +20,47 @@
   <br><br>
   <img src="img/1.png"></img>
   <br>
-  <hd1>Title</hd1>
+  <hd1>Advantages</hd1>
   <div class="chapter">
     <p>
+      In this part we'll compare the imperative programming (IP) and constraint reactive programming (CRP) versions of a few programs, including the "Parable of the Polygons" discussed in the <a href="5.html">previous part</a>. Let's start with positives!
     </p>
+    <ul>
+      <li>
+	<i><b>In IP behavior can be buried in piles of code; not in CRP.</b></i>
+	<p>
+	  IP doesn't enforce any particular restraint on programmer's thought process or organization. He is free to write any code as long as it captures the wanted behaviors. Yet the resulting code, although functional, is often cryptic and mixes behaviors in a way that's hard to parse and organize to human mind. Moreover, there is no wasy way to explore and understand the program due to lack of any per-behavior organization.
+	</p>
+	<p>
+	  Take the <a href="http://ncase.me/polygons/play/automatic/automatic2.html">slider</a> in the <a href="http://ncase.me/polygons/">Parables of the Polygons</a> page, which is used to set the bias level of a shape. Where is the piece of code that's responsible for making such functionality?
+	</p>
+	<p>
+	After digging into this, we see that the part of the page that includes the slider actually is embedded as an <i>iframe</i>, which loads the html file "play/automatic/automatic2.html." There we can see that there is an <i>event listener</i> setting the associated global variable representing bias to the value of the slider:
+	</p>
+	  <pre><code class="language-javascript">	  
+	  onChange:function(values){	
+	      window.BIAS = values[0];
+	      // ...
+	      bias_text.innerHTML = Math.round(window.BIAS*100)+"%";
+	  }
+	  </code></pre>
+	<p>
+	  Now we have identified the code responsible for this behavior. But there was no indication anywhere. Afterall, these are just lines of code like many other thousands of lines of code in this application.
+	</p>
+	<p>
+	  The CRP model, however, would have forced the programmer to express this behavior as a constraint type. The slider behavior will indeed clearly show up in the list of constraints as an enabled behavior in the scene. In fact, as we have seen Sketchpad<small>14</small> allows to turn constraints on and off to explore the behaviors acting on the program. Here we clearly see the <mono>SliderValueConstraint</mono> in the list, can hover over the instance to see the objects it's applied to, and can temporarily disable the constraint to verify the behavior:
+	</p>
+	<table>
+	  <tr>
+	    <td><img src="img/24.gif" class="clicktoplay" data-staticSrc="img/24s.png" style="margin-left: 10%"></img></td>
+	    <td><p class="side" style="margin-left: 40%">Exploring the slider behavior</td>
+	  </tr>
+	</table>
+	<p>
+	  Also note that, despite being an elaborate demo, the set of behavior types are relatively short (7-8) as we see in the graphic above. This can be contrasted to many hundreds and thousands of <i>lines of code</i> which make an imperative program.
+	</p>
+      </li>
+    </ul>
   </div>
   <img src="img/1.png"></img>
   <br>
