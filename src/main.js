@@ -59,7 +59,7 @@ Object.defineProperty(Object.prototype, '__scratch', {
 function Sketchpad() {
     this.rho = 1
     this.epsilon = 0.01
-    this.numberOfSameErrorOcurrToBeConsideredConvergence = 5
+    this.numberOfSameErrorOcurrToBeConsideredConvergence = 20
     this.debug = false
     this.solveEvenWithoutError = false
     this.solveEvenWithoutErrorOnPriorityDifferences = false
@@ -468,7 +468,8 @@ Sketchpad.prototype.solveForUpToMillis = function(tMillis) {
 
 Sketchpad.prototype.doOneIterationAsEntirePhase = function(timeMillis) {
     var res = this.doOneIteration(timeMillis)
-    this.checkConvergence(res.iteration)
+    this.checkConvergence(res)
+    return res
 }
 
 Sketchpad.prototype.iterateForUpToMillis = function(tMillis) {
