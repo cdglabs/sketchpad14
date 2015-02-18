@@ -628,7 +628,7 @@ SketchpadCanvas.prototype.step = function() {
 	    } else
 		this.alreadyRenderedConvergence = false
 	} else
-	    doRedraw = this.renderEvenOnConvergence || !sketchpad.converged || this.inDragSelectMode
+	    doRedraw = this.renderEvenOnConvergence || this.showEachIteration || !sketchpad.converged || this.inDragSelectMode
 	if (doRedraw)
 	    this.redraw()
     }
