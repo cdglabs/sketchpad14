@@ -5,7 +5,7 @@ log2 = function() { var args = []; for (var i = 0; i < arguments.length; i++) ar
 
 // --- Canvas -------------------------------------------------------------
 
-function SketchpadScene(sketchpad, canvas) {
+function SketchpadScene(sketchpad, canvas, dontStart) {
     this.sketchpad = sketchpad
     this.millisecondsPerFrame = 1000 / 4 //65
     this.renderFrequencySlowdown = 5
@@ -58,7 +58,15 @@ function SketchpadScene(sketchpad, canvas) {
     var self = this
 
     this.stepFn = this.step.bind(this)
-    this.step()
+    this.defaultEvents = {
+	'keydown': function(e) { sketchpad.converged = false; this.keydown.call(this, e) }.bind(this),
+	'keyup': function(e) { sketchpad.converged = false; this.keyup.call(this, e) }.bind(this),
+	'pointerdown': function(e) { sketchpad.converged = false; this.pointerdown.call(this, e) }.bind(this),
+	'pointermove': function(e) { sketchpad.converged = false; this.pointermove.call(this, e) }.bind(this),
+	'pointerup': function(e) { sketchpad.converged = false; this.pointerup.call(this, e) }.bind(this)
+    }
+    if (!dontStart)
+	this.step()
 }
 
 SketchpadScene.prototype.initPlatformId = function() {
@@ -66,17 +74,25 @@ SketchpadScene.prototype.initPlatformId = function() {
         navigator.userAgent.match(/Android/i) !== undefined
 }
 
+SketchpadScene.prototype.registerEvent = function(name, callback, optDescription) {
+    var sketchpad = this.sketchpad
+    document.addEventListener(name, callback, false)
+}
+
+SketchpadScene.prototype.initEvents = function() {
+    var self = this
+    for (name in this.defaultEvents) {
+	var handler = this.defaultEvents[name]
+	document.removeEventListener(name, handler)
+	this.registerEvent(name, handler, false)	
+    }    
+}
+
 SketchpadScene.prototype.initCanvas = function(canvas) {
 
     this.canvas = canvas
 
     var self = this
-    document.addEventListener('keydown',     this.keydown.bind(this), false)
-    document.addEventListener('keyup',       this.keyup.bind(this), false)
-    document.addEventListener('pointerdown', this.pointerdown.bind(this), false)
-    document.addEventListener('pointermove', this.pointermove.bind(this), false)
-    document.addEventListener('pointerup',   this.pointerup.bind(this), false)
-
     this.ctxt = canvas.getContext('2d')
     this.ctxt.font = '12px Arial'
     this.ctxt.shadowOffsetX = 1
@@ -307,7 +323,7 @@ SketchpadScene.prototype.makeConstraintListView = function() {
     if (this.rightButtonsBusy)
 	return;
     var self = this
-    this.removeTempDOMElements()
+    clearRButtons()
     if (this.listConstraints) {
 	var tree = sketchpad.constraintTreeList
 	var width = 250, height = 35
@@ -515,40 +531,37 @@ SketchpadScene.prototype.forEachFinger = function(fn) {
 }
 
 SketchpadScene.prototype.step = function() {
-    if (!this.paused) {
-	var totalError = 0, didSomething = false
+    if (!(sketchpad.converged || this.paused)) {
+	if (this.dragFingersCount > 0)
+	    this.updateCoordinateConstraints()
 	if (this.showEachIteration) {
 	    var t0 = this.sketchpad.currentTime()
 	    this.sketchpad.doTasksOnEachTimeStep(t0)
-	    var iteration = this.sketchpad.doOneIteration(this.sketchpad.currentTime())
+	    var iteration = this.sketchpad.doOneIterationAsEntirePhase(this.sketchpad.currentTime())
 	    if (iteration > 0) {
 		this.iterationsPerFrame = 1
-		totalError = iteration
 	    } else {
 		this.iterationsPerFrame = 0
 	    }
-	    didSomething = true
 	    this.sketchpad.doTasksAfterEachTimeStep(t0)
 	} else {
 	    var iterations = this.sketchpad.solveForUpToMillis(this.millisecondsPerFrame)
 	    this.iterationsPerFrame = iterations.count
-	    totalError = iterations.error
 	}
-	if (this.renderEvenOnConvergence || this.lastIterationError != totalError) {
-	    didSomething = true
-	    this.alreadyRenderedConvergence = false
-	}
-	var redraw = false
+	this.updateIPFLabel()
+	var doRedraw
 	if (this.onlyRenderOnConvergence) {
-	    if (!didSomething && (!this.onlyRenderOnNoError || totalError <= this.sketchpad.epsilon) && !this.alreadyRenderedConvergence) {
-		this.alreadyRenderedConvergence = true
-		redraw = true
-	    }
+	    if (sketchpad.converged) {
+		if (!this.alreadyRenderedConvergence) {
+		    doRedraw = true
+		    this.alreadyRenderedConvergence = true
+		}
+	    } else
+		this.alreadyRenderedConvergence = false
 	} else
-	    redraw = didSomething
-	if (redraw || this.inDragSelectMode)
+	    doRedraw = this.renderEvenOnConvergence || !sketchpad.converged || this.inDragSelectMode
+	if (doRedraw)
 	    this.redraw()
-	this.lastIterationError = totalError
     }
     requestAnimationFrame(this.stepFn)
 }
@@ -911,6 +924,7 @@ SketchpadScene.prototype.resetOptions = function() {
 SketchpadScene.prototype.clear = function() {
     this.toggleCodeEditMode(false)
     this.sketchpad.clear()
+    this.initEvents()
     this.points = []
     this.things = []
     this.listConstraints = true
@@ -918,6 +932,7 @@ SketchpadScene.prototype.clear = function() {
     this.constraintGrabPoints = []
     this.nonTopLevelThings = []
     this.temps = []
+    this.lastIterationError = undefined
     this.sceneObjects = []
     this.lastIterationError = undefined
     this.selection = undefined
@@ -934,6 +949,7 @@ SketchpadScene.prototype.clear = function() {
     this.clearTemps()
     this.resetOptions()
     this.resetScene()
+    this.alreadyRenderedConvergence = false
     this.constraintInstancesViewElements = []
     this.constraintInstancesViewSelected = undefined
     this.rightButtonsBusy = false
@@ -1156,6 +1172,15 @@ function SketchpadTile(name, inputs, ownRun, buttonsInfo, inspectorOfObj, fixedI
     var y = top + 40
     if (inspectorOfObj) {
 	this.inspectorOfObj = inspectorOfObj
+		if (!inspectorOfObj.__isConstraint) {
+	    // draw a line connecting model to view
+	    var objPointerLinePt = self.position
+	    var objPointerLinePt2 = inspectorOfObj.center ? inspectorOfObj.center() : inspectorOfObj.grabPoint()
+	    var objPointerLine = new Line(objPointerLinePt, objPointerLinePt2, 'gray', 2, 4)
+	    self.parts.push(objPointerLine)
+	    if (inspectorOfObj.center)
+		self.isOwnerOf.push(rc.addConstraint(Sketchpad.arith.OneWayEqualityConstraint, undefined, {obj: objPointerLine, prop: 'p2'}, {obj: inspectorOfObj, prop: 'center'}, true))	    
+	}
 	if (inspectorOfObj.description) {
 	    var tb = new TextBox(new Point(20, y), '"' + inspectorOfObj.description.call(inspectorOfObj) + '"', true, 18, width - 100, undefined, undefined, undefined, 'black', true, undefined, true)
 	    y += 40 * (tb.lines.length)
@@ -1228,6 +1253,8 @@ function SketchpadTile(name, inputs, ownRun, buttonsInfo, inspectorOfObj, fixedI
 		self.parts.push(pointerLine)
 		self.isOwnerOf.push(rc.addConstraint(Sketchpad.arith.SumConstraint, undefined, {obj: self.position, prop: 'x'}, {obj: inputCoord, prop: 'x'}, {obj: pointerLinePt, prop: 'x'}, [3]))
 		self.isOwnerOf.push(rc.addConstraint(Sketchpad.arith.SumConstraint, undefined, {obj: self.position, prop: 'y'}, {obj: inputCoord, prop: 'y'}, {obj: pointerLinePt, prop: 'y'}, [3]))
+		if (inputValue.center)
+		    self.isOwnerOf.push(rc.addConstraint(Sketchpad.arith.OneWayEqualityConstraint, undefined, {obj: propPointerLine, prop: 'p2'}, {obj: inputValue, prop: 'center'}, true))
 	    }
 	}
     })
@@ -1391,6 +1418,11 @@ SketchpadScene.prototype.updateSIILabel = function() {
 	(this.showEachIteration ? ' rendering each iteration'
 	 : (this.onlyRenderOnConvergence ? (' rendering only on convergence' + (this.onlyRenderOnNoError ? ' and no error' : '')) :	    
 	    ' rendering every ' + Math.floor(this.millisecondsPerFrame) + ' ms.' + (this.renderEvenOnConvergence ? '' : ' until convergence')))
+}
+
+SketchpadScene.prototype.updateIPFLabel = function() {
+    var ipf = document.getElementById('ipf')
+    ipf.innerHTML = this.iterationsPerFrame
 }
 
 SketchpadScene.prototype.setOption = function(opt, val) {

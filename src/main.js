@@ -59,6 +59,7 @@ Object.defineProperty(Object.prototype, '__scratch', {
 function Sketchpad() {
     this.rho = 1
     this.epsilon = 0.01
+    this.numberOfSameErrorOcurrToBeConsideredConvergence = 5
     this.debug = false
     this.solveEvenWithoutError = false
     this.solveEvenWithoutErrorOnPriorityDifferences = false
@@ -177,13 +178,16 @@ Sketchpad.prototype.clear = function() {
     this.perThingPerPropEffectingConstraints = {}
     this.startTime = Date.now()
     this.pseudoTime = 0
-    this.prevPseudoTime = 0
+    this.prevPseudoTime = 0    
     this.scratch = {}
     // remove existing event handlers
     for (var name in this.eventHandlersInternal)
 	this.eventHandlersInternal[name].forEach(function(handler) { document.body.removeEventListener(name, handler) })
     this.eventHandlersInternal = {}
     this.eventDescriptions = {}
+    this.converged = false    
+    this.errorUnmovedCount = 0
+    this.lastIterationError = undefined
     this.onEachTimeStepHandlerDescriptions = {}
 }
 
@@ -356,8 +360,10 @@ Sketchpad.prototype.maybeStepPseudoTime = function() {
         if(t.proposeNextPseudoTime)
             proposals.push({proposer: t, time: t.proposeNextPseudoTime(pseudoTime)})
     })
-    if (proposals.length > 0)
-	this.pseudoTime = this.computeNextPseudoTimeFromProposals(pseudoTime, proposals)	
+    if (proposals.length > 0) {	
+	this.pseudoTime = this.computeNextPseudoTimeFromProposals(pseudoTime, proposals)
+	this.converged = false
+    }
 }
 
 Sketchpad.prototype.iterateSearchChoicesForUpToMillis = function(timeMillis) {
@@ -434,6 +440,20 @@ Sketchpad.prototype.revertPropValuesBasedOnArg = function(values) {
     }
 }
 
+Sketchpad.prototype.checkConvergence = function (currError) {
+    if (currError <= this.epsilon) {
+	this.converged = true
+    } else {
+	this.errorUnmovedCount = (this.lastIterationError == currError) ? (this.errorUnmovedCount + 1) : 0
+	if (this.errorUnmovedCount == this.numberOfSameErrorOcurrToBeConsideredConvergence) {
+	    this.converged = true
+	    this.errorUnmovedCount = 0
+	} else 
+	    this.converged = false
+    }
+    this.lastIterationError = currError
+}
+
 Sketchpad.prototype.solveForUpToMillis = function(tMillis) {
     this.doTasksOnEachTimeStep(this.pseudoTime, this.prevPseudoTime)
     var res
@@ -441,8 +461,14 @@ Sketchpad.prototype.solveForUpToMillis = function(tMillis) {
 	res = this.iterateSearchChoicesForUpToMillis(tMillis)
     else
 	res = this.iterateForUpToMillis(tMillis)
+    this.checkConvergence(res.error)
     this.doTasksAfterEachTimeStep(this.pseudoTime, this.prevPseudoTime)
     return res
+}
+
+Sketchpad.prototype.doOneIterationAsEntirePhase = function(timeMillis) {
+    var res = this.doOneIteration(timeMillis)
+    this.checkConvergence(res.iteration)
 }
 
 Sketchpad.prototype.iterateForUpToMillis = function(tMillis) {
@@ -528,6 +554,8 @@ Sketchpad.prototype.registerEvent = function(name, callback, optDescription) {
 }
 
 Sketchpad.prototype.handleEvents = function() {
+    if (this.events.length > 0)
+	this.converged = false
     this.events.forEach(function(nameAndE) { 
 	var id = nameAndE[0]; 
 	var e = nameAndE[1]; 
