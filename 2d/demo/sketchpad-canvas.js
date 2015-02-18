@@ -979,7 +979,6 @@ SketchpadCanvas.prototype.clearSelections = function(andRedraw) {
     this.selection = undefined
     this.selectionChoiceIdx = 0
     if (!this.haveDragSelectionsMode) {	
-	//this.secondarySelections.forEach(function(t) { if (t._selectionIndices) {  t._selectionIndices = [] }})
 	this.secondarySelections = []
 	this.highlightThisThingDifferently = undefined
     }
@@ -1526,7 +1525,7 @@ function drawBorderOf(thing, color, canvas) {
     border.___container = thing.__container
     var bgColor = border.bgColor
     border.bgColor = undefined
-    draw(border, canvas, {color: color})
+    draw(border, canvas, {color: color, lineWidth: 3})
     border.bgColor = bgColor
 }
 
