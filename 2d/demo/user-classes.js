@@ -136,6 +136,11 @@ Line.dummy = function(x, y) {
 
 sketchpad.addClass(Line)
 
+Line.prototype.solutionJoins = function() { 
+    var lastGuyWinsJoinFn = sketchpad.lastOneWinsJoinSolutions
+    return {p1: lastGuyWinsJoinFn, p2: lastGuyWinsJoinFn}
+}
+
 Line.prototype.draw = function(canvas, origin, options) {
     var ctxt = canvas.ctxt
     var p1 = this.p1, p2 = this.p2
