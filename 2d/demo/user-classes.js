@@ -235,13 +235,11 @@ Box.prototype.draw = function(canvas, origin, options) {
     if (this.opacity)
 	ctxt.globalAlpha = this.opacity
     ctxt.rect(this.position.x + origin.x, this.position.y + origin.y, this.width, this.height)
-    ctxt.lineWidth = 1
-    var color = options && options['color'] ? options['color'] : this.color
-    ctxt.strokeStyle = color
+    ctxt.strokeStyle = options && options['color'] ? options['color'] : this.color
+    ctxt.lineWidth = options && options['lineWidth'] ? options['lineWidth'] : 1
     if (this.hasBorder) {
-	if (this.lineDash) {
+	if (this.lineDash)
 	    ctxt.setLineDash([this.lineDash])
-	}
 	ctxt.stroke()
     }
     if (this.bgColor) {
