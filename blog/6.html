@@ -60,6 +60,48 @@
 	  Also note that, despite being an elaborate demo, the set of behavior types are relatively short (7-8) as we see in the graphic above. This can be contrasted to many hundreds and thousands of <i>lines of code</i> which make an imperative program.
 	</p>
       </li>
+      <li>
+	<i><b>CRP induces a "linear" thinking process in designing, implementing, and exploring programs; IP results in "ad hoc" way of doing those.</b></i>
+	<p>
+	  CRP model forces the programmer to think and design the program as a set of individual behaviors. Once the set of behaviors are defined (as constraint types), building a program is simply a matter applying a selection of them to the data. Again, the list of behaviors is clearly acknowledged and alternation of behaviors can be done by selecting mixing and matching.	  
+	</p>
+	<p>
+	  By contrast, in IP the process is quite ad-hoc. The programmer keeps a mental list of things that needs to be done for the program. She then proceeds to write the "code" that implements those things. In the lack of any organization or guidelines, this code often makes no attempt to keep the behaviors separatable and modularized. It may try to use the same "loop" construct to achieve goals A and B at the same time, etc. The lack of direction and organization can also confuse the thinking process itself, leading to bugs. Although the final outcome succeeds in achieving all desired behaviors, it too often fails to be amenable to extentions or fascialitating understanding. In CRP, extention and modifying is a matter of reshuffling set of constraints, whereas in IP often algorithms need to be reworked.
+	  </p>
+      </li>
+      <li>
+	<i><b>CRP model reduces the possibility of bugs.</b></i>
+	<p>
+	  In the CRP model, all constraints act on the same state in parallel, assuming each one is the only one trying to make a change. There is a separate later process that consolidates those changes into one final result. In IP, however, the same code is used to implement multiple behaviors. Therefore, each snippet of code that aims to achive a particular behavior sees a different state, as our programs run sequentially. This complicates human reasoning and increases the chance of introducing bugs.
+	</p>
+      </li>
+      <li>
+	<i><b>CRP frees the programmer from having to reason globally and computing or describing "emerging behaviors"</b></i>
+	<p>
+	  Have a look at the truss bridge demo shown below, an orginal Sketchpad and ThingLab demo and remade here using Sketchpad<small>14</small>. As you can see the resulting "emergant behavior" of the program is quite elaborate! There is not way to "code" the behavior of this bridge under the forces of gravity and wind imperatively. On the other hand, as you can see on the constraint listing on the right pane, the constraint types that make up this overall behavior are not complicated at all. We only had to define velocity and acceleration behaviors as well as the spring force (Hook's law). Thus the programmer only has to reason "locally" and "indivudally" about each constraint. Next, we simply had to instantiate these constraints for all the bodies and beams (springs) that make up the bridge. It is the job of the system to capture the "global" beahvior by combining the results of individual local constraints. 
+	</p>
+	<table>
+	  <tr>
+	    <td><img src="img/25.gif" class="clicktoplay" data-staticSrc="img/25s.png" style="margin-left: -25%"></img></td>
+	    <td><p class="side" style="margin-left: -65%">Emergent behavior</td>
+	  </tr>
+	</table>
+      </li>
+            <li>
+	<i><b>CRP enables "modular" behaviors; not IP</b></i>
+	<p>
+	  Have a look at the video demo below. Within the "parables" demo we have loaded another demo, called <mono>MidPoint</mono>, where a red dot always is maintained at the middle between two blue dots. You'll see that we <i>merge</i> their behavior into three of the shapes from the "parables" example. And viola! The shapes retain their previous behavior (swinging, etc.) yet also take on the new behavior of the <mono>MidPoint</mono> example. 
+	</p>
+	<table>
+	  <tr>
+	    <td><img src="img/26.gif" class="clicktoplay" data-staticSrc="img/26s.png" style="margin-left: -10%"></img></td>
+	    <td><p class="side" style="margin-left: -25%">Modular behaviors</td>
+	  </tr>
+	</table>
+	<p>
+	  Doing this in IP is by no means easy. Where do we add this new behavior? How do we make sure the previous behaviors still work?
+	</p>
+      </li>
     </ul>
   </div>
   <img src="img/1.png"></img>
