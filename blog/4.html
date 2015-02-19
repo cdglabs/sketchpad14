@@ -159,31 +159,62 @@ In order to support responsive interactive and animated programs, we adopt a two
     <p>
       At this point the system applies the consolidated values to each variable. However, since these values aren't exactly what each constraint had asked for, after this step all or some of the previously unhappy constraints are likely to remain unhappy (or even previously happy constraints may have now turned unhappy). This is were the <i>iterative relaxation</i>  approach comes in. As long as that is the case, the system repeats the process above, until either:
     </p>
-      <ul>
-	<li>
-	  (1) no unsatisfied constraints (computed error of larger than <i>epsilon</i>) remain
-	</li>
-	<li>
-	  (2) the sum total error from all constraints remains unchanged from the previous iteration(s) (reached a <i>fixed-point</i>)
-	</li>
-	<li>
-	  (3) phase <i>B</i> times out, that is, the system has remained in the solving phase for longer than the frame rate value.
-	</li>
-	</ul>
-    <p>
-	  At that point, the model cycles back to the reactive phase <i>A</i>, and this process repeats. 
-    </p>
-    <table>
-      <tr>
-	<td><img src="img/16.png" width="200%"></img></td>
-	<td><p class="side" style="margin-left: 100%">Solving phase</p></td>
-      </tr>
-    </table>    
-  </div>
-  <img src="img/1.png"></img>
-  <br>
+    <ul>
+      <li>
+	(1) no unsatisfied constraints (computed error of larger than <i>epsilon</i>) remain
+      </li>
+      <li>
+	(2) the sum total error from all constraints remains unchanged from the previous iteration(s) (reached a <i>fixed-point</i>)
+      </li>
+      <li>
+	(3) phase <i>B</i> times out, that is, the system has remained in the solving phase for longer than the frame rate value.
+      </li>
+    </ul>
+<p>
+  At that point, the model cycles back to the reactive phase <i>A</i>, and this process repeats. 
+</p>
+<table>
+  <tr>
+    <td><img src="img/16.png" width="200%"></img></td>
+    <td><p class="side" style="margin-left: 100%">Solving phase</p></td>
+  </tr>
+</table>	
+</div>
+<img src="img/1.png"></img>
+<br>
+<hd1>Enabling Backtracking Search</hd1>
+<div class="chapter">
   <p>
-    Read <a href="5.html">Part V: Creating Applications from Scratch in CRP (Remaking the "Parables of the Polygons" Demo)</a><br>
+    Classical <i>backtracking search</i> isn't accomodiated by the CRP model as described. However, we have made a modification that allows programmers to rely on search as part of a program (see the <i>Pentominoes</i> demo). 
+  </p>
+  <p>   
+    We let a constraint type to be marked as <i>searchable</i>. A searchable constraint's <mono>solve</mono> function returns a set of solutions rather than one. Thus a user can communicate to the system that it wants to try either one of the solutions and search for the right combination of solutions from all constraints that will result in a globally acceptable solution.
+  </p>
+  <p>
+    During the first iteration of the solving phase (<i>B</i>), the system collects the set of solutions from each searchable constraint, as well as the usual one solution from others. It then constructs a search tree that gives all possible combinations of choosing a single solution from each constraint. (When no searchable constraint exists this tree has a single branch as the only combination to explore.) At this point the system engages in a traditional backtracking search to find the combination that leads to a satisfiable place. For each combination choice, it does the usual relaxing-style iterative solving up to some timeout duration, except that searchable constraints do not participate during those iterations. Should a fixed-point be reached with all constraints satisfied, the solution is committed and the model cycles back to the reactive phase <i>A</i>. Otherwise, solutions in the last attempt are discarded and the search of all possible combinations continues on.
+  </p>
+  <p>
+    As a simple example, below we have defined a <mono>NumListSortConstraint</mono> that ensures a number list is sorted. Provided that a copy of the list is kept in <mono>scratch.oldList</mono>, the <mono>computeError</mono> function returns a 0 error only when list has been properly sorted. The <mono>solve</mono> function simply returns all possible permutations of the list, therefore hinting to the system to search for one that would make the constraint satisfied. 
+  </p>
+  <pre><code class="language-javascript">
+NumListSortConstraint.prototype.searchable = true
+
+NumListSortConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
+    return sorted(this.list) && isPermutationOf(this.list, scratch.oldList) ? 0 : 1
+}
+
+NumListSortConstraint.prototype.solve = function(pseudoTime, prevPseudoTime) {
+    return allPermutations(this.list).map(function (l) { return {list: l} })
+}
+</code></pre>
+  <p>
+    Note that the above scheme works well when the numeric constraints solved by relaxation and finite domain constraints solved by search are mixed together within the same program, provided that numeric constraints use searched-over values in a read-only manner. Roughly speaking, if the relaxation-style iterative approach is like <i>hill-climbing</i> in some neighborhood in the state space, our augmented search-model is akin to simultaneously running hill-climbing in different regions in space in order to have a better chance of finding a solution. We're unclear as to whether the mixing makes sense if both kinds of constraints are trying to affect the same variables.
+  </p>
+</div>
+<img src="img/1.png"></img>
+<br>
+<p>
+  Read <a href="5.html">Part V: Creating Applications from Scratch in CRP (Remaking the "Parables of the Polygons" Demo)</a><br>
     Back to <a href="index.html">Table of Contents</a><br>
   </p>
   <script src="./lib/click-to-play-gif.js"></script>

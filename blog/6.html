@@ -104,6 +104,63 @@
       </li>
     </ul>
   </div>
+    <img src="img/1.png"></img>
+  <br>
+  <hd1>Challenges</hd1>
+  <div class="chapter">
+    <p>
+      The major obstacle for adopting any new programming model is often psychological rathen than technical. Us programmers don't like change too much! We cannot try to convince you to use CRP, yet we can report that we've had quite a positive experience redoing existing demos in this framework (see the "<i>Example bin</i>" inside Sketchpad<small>14</small>).
+    </p>
+    <ul>
+      <li>
+	<i><b>Performance</b></i>
+	<p>
+	  CRP enforces a particualar way of organizing a program and its execution model follows a specific routine. With each change, the tool evaluates each constraint to compute current errors, solves the ones unsatisfied, combines the solutions, applies the final solution, and repeats the process until convergence occurs. All this machinery can be a huge overhead over a hand-coded imperative code that just performs the necessary instructions to accomplish a certain task. For seamless animations, the overhead of computation is exacerbated by the fact that we might repeat the above process at a rate of 60 times per second!
+	</p>
+	<p>
+	  Nonetheless, fortunately easy optimization opportunities were leverged in the tool. By simply keeping track of the <i>total error</i> of the system and detecting reaching convergence (whether with acceptable or non-acceptable error value), the system draws the scene a final time and then goes idle, until the next time there is a change caused by an event, including advancement of time in temporal examples.
+	</p>
+	<p>
+	  There is also a efficency issues when solving problems iteratively such as relaxation, hill climbing, etc.
+	</p>
+      </li>
+      <li>
+	<i><b>Choosing the appropriate granularity level for constraints</b></i>
+	<p>
+	  It hasn't quite come up in our short list of examples here, but the choice of how large or fine-grained constraints are organized is very important. Consider the example of solving a system of artihmetic linear equations.
+	</p>
+	<p>
+	Clearly, setting up a separate constraint for each equation and then relying on iterative relaxation to converge the solutions from each equation is not the way to go! In that case, we have a very efficient solving tool, e.g. <i>simplex</i> method to simultaneously solve all the equations at once. What's nice is that the CRP model gives us the power to just use that: we simply create one constraint type that represents the system of equations, whose <mono>solve</mono> function will invoke a simplex solver to compute the answer.
+	</p>
+	<p>
+	  We use this rule of thumb when designing the constraint types to be used in a program:	  
+	</p>
+	<center>
+	  <i>Break a program into a set of logically orthogonal, <br>or only loosely related, behaviors.</i>
+	</center>
+	<p>
+	  The objective is to reason about solving each constraint separately, and then in the  <mono>solutionJoin</mono> function worry about how conflicting solutions can be consolidated.
+	</p>
+      </li>
+      <li>
+	<i><b>Finite-domain constraints</b></i>
+	<p>
+	  As we have seen earlier, when dealing with finite-domain or integer constraints the Sketchpad/Overveld approach of <i>averaging</i> solutions to consolidate does not make sense. In our experience so far, combining solutions in these cases is not difficult. Often, the programmer has the knowledge that for a fact only one constraint will be updating a particular variable. In the case of arrays or dictionaries, we simply could combine the solutions after verifying multiple updates pertain to different indices/keys and therefore compatible.
+	</p>
+	<p>
+	  In brief, more experience is needed to evaluate if the model holds up well in general.
+	  </p>
+      </li>
+      <li>
+	<i><b>There is more! </b></i>
+	<p>
+	  We're blanking out here, but we're sure there are more issues. Can you point out some? 
+	</p>
+      </li>
+      
+    </ul>
+    
+</div>
   <img src="img/1.png"></img>
   <br>
   <p>
