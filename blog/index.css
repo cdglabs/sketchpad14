@@ -11,10 +11,23 @@ body,button {
     overflow-x:hidden;    
 }
 
+table.centered {
+    margin-left: 8%;
+    text-align: center;   
+}
+
 mono {
     font-family: 'Monaco';
     font-size: 16px;
     color: #8904B1;
+}
+
+i {
+    color: #086A87;
+}
+
+b {
+    color: #990000;
 }
 
 .side {
@@ -23,6 +36,11 @@ mono {
     text-align: center;
     margin: -50px 200px;
     width: 200px;
+}
+
+.rounded {
+    border: 0px solid;
+    border-radius: 25px;
 }
 
 hd,hd1,hd2,hd4 {
@@ -66,10 +84,10 @@ a:hover {
 }
 
 .video {
-    margin-left: 25%;
+    margin-left: 10%;
     align: middle;
-    width: 420;
-    height: 315;
+    width: 630;
+    height: 473;
 }
 
 iframe {

@@ -9,7 +9,7 @@
   <script src="./lib/prism.js"></script>
   <hd>Half-Century Later:
     <br>
-    "From Sketchpad<small>61</small> to Sketchpad<small>14</small>"
+    "From Sketchpad<small><u>61</u></small> to Sketchpad<small><u>14</u></small>"
     <br>
     <small>
       Part I: Background
@@ -23,15 +23,16 @@
   <hd1>Intro to Sketchpad</hd1>
   <div class="chapter">
     <p>
-      In 1961, before personal computers existed, <a href="http://en.wikipedia.org/wiki/Ivan_Sutherland">Ivan Sutherland</a> built a computer program called <a href="http://en.wikipedia.org/wiki/Sketchpad">Sketchpad</a>. It was the first in many things: first graphical user interface (GUI), first time an oscilloscope was modified to be used as a computer monitor as we know it now, first gesture UI using a light pen, first computer drawing system. Still, to a casual observer it appears to be a CAD drawing tool, something like the great-great grandpa of AutoCAD. But programming languages pioneer <a href="http://en.wikipedia.org/wiki/Alan_Kay">Alan Kay</a> points out some other important categories it is a first in, not commonly known. It happens to be really the first object oriented system, as well as first fully declarative programming system. That is, the user simply expresses the <i>constraints</i> (requirements) of the drawing (e.g. two line sections must be parallel) and the system will automatically and continually <i>solves</i> the system of constraints to ensure they are maintained at all times. Listen to Kay's video commentary here to get a better idea:
+      In 1961, before personal computers existed, <a href="http://en.wikipedia.org/wiki/Ivan_Sutherland">Ivan Sutherland</a> built a computer program called <a href="http://en.wikipedia.org/wiki/Sketchpad">Sketchpad</a>. It was the first in many things: first graphical user interface (GUI), first time an oscilloscope was modified to be used as a computer monitor as we know it now, first gesture UI using a light pen, first computer drawing system, and so on. Still, to a casual observer it appears to be a CAD drawing tool, something like the great-great grandpa of AutoCAD. But programming languages pioneer <a href="http://en.wikipedia.org/wiki/Alan_Kay">Alan Kay</a> points out some other important categories it is a first in, not commonly recognized. It happens to be really the first object oriented system, as well as first fully declarative programming system. That is, the user defines behavior for a drawing by simply expressing its <i>constraints</i> (requirements) (e.g. two line sections must be parallel) and the system will automatically and continually <i>solves</i> the system of constraints to ensure they are maintained at all times. Listen to Kay's video commentary here to get a better idea:
     </p>
     <iframe class="video" src="https://www.youtube.com/embed/495nCzxM9PI" frameborder="0" allowfullscreen></iframe>
   </div>
   <div class="chapter">
     <p>
-      Sadly, from what I've seen 1961 Sketchpad happens to be not only the first truely declarative programming system (albeit a limited and not really extensible one), but also one of the last ones! <a href="http://en.wikipedia.org/wiki/Alan_H._Borning">Alan Borning</a>'s <a href="http://en.wikipedia.org/wiki/ThingLab">ThingLab</a> of late 70s generalized it by packagaing it as a constraint-based "kit building kit," programmable within the <a href="http://en.wikipedia.org/wiki/Smalltalk">Smalltalk</a> environment.
-
-      Other forms of declarative programming and constraint-based programming came about in later years. Language researchers have also tried various forms of mixing declarative, constraint-based programming with the common imperative style programming. In either case, I haven't seen any form of declarative programming system that can handle the scale of realistic software development of today. The grand majority of developers have never heard of declarative programming, let alone use it in their practice.
+      Sadly, from what I've seen 1961 Sketchpad happens to be not only the first truly declarative programming system (albeit a limited and not really extensible one), but also one of the last ones! <a href="http://en.wikipedia.org/wiki/Alan_H._Borning">Alan Borning</a>'s <a href="http://en.wikipedia.org/wiki/ThingLab">ThingLab</a> of late 70s generalized it by packaging it as a constraint-based "kit building kit," programmable within the <a href="http://en.wikipedia.org/wiki/Smalltalk">Smalltalk</a> environment. (<i>By the way, check out this cool revival of <a href="https://github.com/cdglabs/thinglab">ThingLab</a> in the browser.</i>)
+    </p>
+    <p>
+      Yet serious projects seem to have stopped there, although other forms of declarative programming and constraint-based programming came about in later years. Language researchers have also tried various forms of mixing declarative, constraint-based programming with the common imperative style programming. In either case, I haven't seen any form of declarative programming system that can handle the realm of software development of today. The majority of developers have never heard of declarative programming, let alone use it in their practice.
     </p>
   </div>
   <img src="img/1.png"></img>
@@ -39,10 +40,15 @@
   <hd1>Constraint Solving in Sketchpad</hd1>
   <div class="chapter">
     <p>
-      An important innovation of Sketchpad was to employ an iterative numerical constraint solving approach called <a href="http://en.wikipedia.org/wiki/Relaxation_%28iterative_method%29">relaxation</a> to let the system automatically maintain the constraints required by the user (making it a declarative programming system).  Sketchpad uses it along with a linear approximation method as a relatively light-weight scheme to solve for a given system of numeric constraints, including non-linear ones. 
+      An important innovation of Sketchpad was to employ an iterative numerical constraint solving approach called <a href="http://en.wikipedia.org/wiki/Relaxation_%28iterative_method%29">relaxation</a> to let the system automatically maintain the constraints required by the user (thus making it a declarative programming system).  Sketchpad uses it along with a linear approximation method as a relatively light-weight scheme to solve for a given system of numeric constraints, including non-linear ones. 
     </p>
     <p>
-      Relaxation in Sketchpad involves considering each variable in turn and changing its value to better satisfy the constraints. Sketchpad continues to iterate until the system converges. Each constraint is represented in terms of one or more error functions that return a number indicating how nearly the constraint is satisfied, with an error of 0 meaning it was satisfied completely. To update a variable, each of the constraints on it is approximated as a linear equation, and a least-squares fit is done. To approximate the constraint as a linear equation, the variable is changed by some small delta, and the new error is computed; the coefficient in the linear equation is then given by the ratio of the change in the error over the delta.
+      Relaxation in Sketchpad involves considering each variable in turn and changing its value to better satisfy the constraints. The process continues to iterate until the system converges. Here is how <a href="http://www.cs.washington.edu/people/faculty/borning">Alan Borning</a> explained the process:
+    </p>
+    <p>
+      <i>
+	"Constraints are expressed in terms of error functions returning a number indicating how far the state is from satisfying the constraint. For each variable, all constraints acting on it are approximated as linear equations. A least-squares fit is performed. To approximate the constraint as a linear equation, the variable is changed by some small delta, and the new error is computed; the coefficient in the linear equation is then given by the ratio of the change in the error over the delta."
+	</i>
     </p>
     <p>
 	Because the system can, in many situations, smoothly and quickly converge to an acceptable solution, this form of constraint solving can be suitable for interactiveness and animation, as shown by Sketchpad and Borning's ThingLab. Sketchpad's relaxation method did not employ any domain specific knowledge in solving a system of constraints: only a general iterative linear approximation method.
@@ -52,7 +58,7 @@
     </p>
     <img src="img/10.gif" style="margin-left: 22%"></img>
     <p>
-      Now if we plot this error as a function of the first variable, say <i>x1</i> where all other variables are fixed at their current values, we obtain the red graph in the figure below. We get the current error value <i>e<small>0</small></i> based on the current value of <i>x1</i>, i.e., <i>1</i>. As the linear approximation of the red graph, we tweak <i>x1</i> by a small amount, say <i>0.01</i> and obtain the new error <i>e<small>1</small></i>. The two points give us the linear approximate blue line below:
+      Now if we plot this error as a function of the first variable, say <i>x1</i>, where all other variables are fixed at their current values, we obtain the red graph in the figure below. We get the current error value <i>e<small>0</small></i> based on the current value of <i>x1</i>, i.e., <i>1</i>. As the linear approximation of the red graph, we tweak <i>x1</i> by a small amount, say <i>0.01</i> and obtain the new error <i>e<small>1</small></i>. The two points give us the linear approximate blue line below:
     </p>    
     <img src="img/11.png" style="margin-left: -5%"></img>
     <p>
@@ -70,12 +76,12 @@
   <hd1>Thirty Years Later...</hd1>
   <div class="chapter">
     <p>
-      In his paper published in the 90s "<a href="http://oai.cwi.nl/oai/asset/18243/18243A.pdf">30 Years After Sketchpad: Relaxation of Geometric Constraints Revisited</a>," C.W.A.M. van Overveld reworked Sketchpad's original relaxation solving model for a small set of geometric constraints, e.g., one to maintain a fixed distance from two points.
+      In his paper published in the 90s "<a href="http://oai.cwi.nl/oai/asset/18243/18243A.pdf">30 Years After Sketchpad: Relaxation of Geometric Constraints Revisited</a>," C.W.A.M. van Overveld reworked Sketchpad's original relaxation solving model for a small set of geometric constraints, e.g., one that maintains the distance between two points constant.
       </p>
-    <p>Rather than using a general linear-approximation based numeric method to solve constraints, Overveld proposed to let each type of constraint to define its own <i>algorithm</i> to solve itself, in isolation. The algorithm is a function that returns a set of <i>deltas</i> (the amount to change) for the variables it needs to update. For a better chance of convergance, the solution needs to be one that minimizes the sum of squares for the error functions of all constraints. Differentiation is done to find a solution that is minimizing. The difference here, in contrast to Sketchpad, is that the user must perform this to come up with such <i>algorithm</i> separately for each constraint type.
+    <p>Rather than using a general linear-approximation based numeric method to solve constraints, Overveld proposed to let each type of constraint to define its own <i>algorithm</i> to solve itself, in isolation. The algorithm is a function that returns a set of <i>deltas</i> (the amount to change) for the variables it needs to update. For a better chance of convergence, the solution needs to be one that minimizes the sum of squares for the error functions of all constraints. Differentiation is done to find a solution that is minimizing. The difference here, in contrast to Sketchpad, is that the user must perform this to come up with such <i>algorithm</i> separately for each constraint type.
     </p>
     <p>
-      Take our previous example constraint that maintains the length between two points <i>p(x1,y1)</i> and <i>q(x2,y2)</i>. Here is the algorithm to solve the <mono>LengthConstraint</mono> given points <mono>p</mono>and <mono>q</mono> for which the distance between is to be maintained at length <mono>l</mono>, written as a JavaScript function:
+      Take our previous example constraint that maintains the length between two points <i>p(x1,y1)</i> and <i>q(x2,y2)</i> fixed at 1. Here is the algorithm to solve the <mono>LengthConstraint</mono> given points <mono>p</mono> and <mono>q</mono> for which the distance between is to be maintained at length <mono>l</mono>, written as a JavaScript function:
     </p>
     <pre><code class="language-javascript">
 // delta fn for LengthConstraint:	
@@ -85,6 +91,9 @@ function computeDeltas() {
     return {p: delta, q: scaledBy(delta, -1)}
 }
     </code></pre>    
+    <p>
+      Note how the function chooses to split the delta evenly between the two points (move them equally in opposite directions) as a solution that minimizes the squared sums. 
+    </p>
     <p>
       To make things interesting let us assume there is a second constraint acting on <i>p(x1,y1)</i>, which says it should be fixed at the origin coordinates <i>o(0,0)</i>. The <mono>computeDeltas</mono> function for the <mono>CoordinateConstraint</mono> type is even simpler:      
     </p>
@@ -96,7 +105,10 @@ function computeDeltas() {
 }
     </code></pre>    
     <p>
-      Once the deltas from all individual constraints, in this case the two above, are collected, they are <i>averaged</i> (actually Overveld's approach uses the less sensical choice of summing) together, the average is damped (divided by a constant) for better convergance chances, and then applied to the variables. In a solution-converging situation, the system moves closer to a solution by this pass and therefore by iteratively repeating this process an acceptable global solution (miniscule error values) can be reached. 
+      That is, the delta is simply the vector obtained from subtracting the target position from the current position of the point.
+    <p>
+    </p>
+      Once the deltas from all individual constraints, in this case the two above, are collected, they are <i>averaged</i> (actually Overveld's approach uses the less sensible choice of summing) together, the average is damped (divided by a constant) for better convergence chances, and then applied to the variables. In a solution-converging situation, the system moves closer to a solution by this pass and therefore by iteratively repeating this process an acceptable global solution (minuscule overall error value) can be reached quite quickly on modern computers.
     </p>
     <p>
       To be concrete, given the variables in our example <i>p(x1,y1)</i> and <i>q(x2,y2)</i> and the current state of
@@ -139,7 +151,7 @@ function computeDeltas() {
 }
     </code></pre>
     <p>
-      We compute the new error values from the two constraints and verify that the total error has been reduced. If the process above is repeated numerious times, eventually both constraints will get to a place of negligible error and the system is considered to have converged to a solution. Here is a visualization of the iterative process:
+      We compute the new error values from the two constraints and verify that the total error has been reduced. If the process above is repeated numerous times, eventually both constraints will get to a place of negligible error and the system is considered to have converged to a solution. Here is a visualization of the iterative process:
     </p>
     <table>
       <tr>
@@ -148,7 +160,7 @@ function computeDeltas() {
       </tr>
     </table>
     <p>
-      Notice that one difference between Sketchpad and Overveld approaches is that Sketchpad iterates the process variable by variable, thus different constraints see different states, whereas in Overveld all constraints see the same start state to compute the deltas. The latter setting seems more sane.
+      Notice that one difference between Sketchpad and Overveld approaches is that Sketchpad iterates the process variable by variable, thus different constraints see different states, whereas in Overveld all constraints see the same start state to compute the deltas. The latter setup seems more sane.
     </p>
     <p>
       From one point of view Overveld's approach is inferior to Sketchpad's: the system has no real smarts in solving problems; the user has to provide an algorithm that solves each constraint type beforehand.
@@ -157,7 +169,7 @@ function computeDeltas() {
       What we noticed, however, is that from the standpoint of a programming language, Overveld's approach and way of organizing a program as a selection of constraints from a set of predefined constraint types is incredibly suitable for applying to general programming. It's nice that Sketchpad's general numeric relaxation technique doesn't require providing an algorithm to solve constraints, but it is also limited in being applable to most software engineering scenarios, e.g. non-numeric constraints. Another advatnage of Overveld's way is that it gives the user the power her own experties and knowledge to solve constraints whichever is most suitable.
     </p-->
     <p>
-      What we noticed, however, is that Overveld's approach of deligating the responsibility for solving the individual constraint types from the system to the constraints themselves has a much higher chance of being extended to general programming. In the <a href="2.html">next part</a> we will introduce the new declarative programming model inspired from Overveld's approach.
+      What we noticed, however, is that Overveld's approach of delegating the responsibility for solving the individual constraint types from the system to the constraints themselves has a much higher chance of being extended to general programming. In the <a href="2.html">next part</a> we will introduce our new declarative programming model inspired from Overveld's approach.
     </p>
   </div>
   <img src="img/1.png"></img>

@@ -19,7 +19,7 @@
   </script>
   <hd>Half-Century Later:
     <br>
-    "From Sketchpad<small>61</small> to Sketchpad<small>14</small>"
+    "From Sketchpad<small><u>61</u></small> to Sketchpad<small><u>14</u></small>"
     <br>
     <small>
       Part III: Using Sketchpad<small>14</small> with Predefined Types
@@ -33,7 +33,7 @@
   <hd1>First Example: CDG Logo</hd1>
   <div class="chapter">
     <p>
-      Now it's time to see our first example in Sketchpad<small>14</small>.
+      Now it's time to see our first example in Sketchpad<small>14</small>. You may click the <img width="4%"  height="4%" src="img/play-icon.png" onclick="alert('this itself is not a button Einstein!')"></img> icon on each image to view a short video demonstration.
     </p>
     <table>
       <tr>
@@ -62,15 +62,15 @@
 
 	addConstraint(new LengthConstraint(p1, p2, 100))
 	addConstraint(new LengthConstraint(p2, p3, 100))
-	addConstraint(new OrientationConstraint(p2, p1, p2, 3,  Math.PI / 2))
+	addConstraint(new OrientationConstraint(p2, p1, p2, p3,  Math.PI / 2))
     </code></pre>
     <p>
-      Finally, we need to define the reactive aspect of the program: if the user has the mouse clicked on an object, we'd want to add a <mono>CoordinateConstraint</mono> to also require that it follows the mouse dragging:
+      Finally, we need to define the reactive aspect of the program: if the user has the mouse clicked on a point, we'd want to add a <mono>CoordinateConstraint</mono> to also require that it follows the mouse dragging:
     </p>
     <pre><code class="language-javascript">
 
     registerEvent('mousedown', function(e) {
-    if (e.pointedObject !== undefined)
+    if (e.pointedObject instanceof Point)
         dragConstraint = addConstraint(
             new CoordinateConstraint(e.pointedObject.position,
                                      e.mousePosition))
@@ -107,7 +107,7 @@
   <hd1>Exploring A Program's Behavior</hd1>
   <div class="chapter">
     <p>
-      In the demo figure above we saw the a feature that helps understanding a program: the set of active constraints are shown at the top right of the screen. Notice that the one <mono>CoordinateConstraint</mono> temporarily appears during the user dragging event. The number of instances of each constraint type is also shown.
+      In the demo figure above we saw the a feature that helps understanding a program: the set of active constraints are shown at the top right of the screen. Notice that one <mono>CoordinateConstraint</mono> temporarily appears during the user dragging event. The number of instances of each constraint type is also shown.
     </p>
     <table>
       <tr>
@@ -134,7 +134,7 @@
       </tr>
     </table>
     <p>
-      The inspector has several features. The properties belonging to the object (in this case the constraint) are listed. For those properties which are objects (in this case <mono>Point</mono>s p1 and p2), pointer arrows are drawn to the objects in the scene. Note that properties of objects are typed.
+      The inspector has several features. The properties belonging to the object (in this case the constraint) are listed. For those properties which are objects (in this case <mono>Point</mono>s <mono>p1</mono> and <mono>p2</mono>), pointer arrows are drawn to the objects in the scene. Note that properties of objects are typed.
     </p>
     <p>
       Another feature is an English sentence summarizing the constraint. In the figure above it reads <i>"points p1 & p2 always maintain a distance of 110."</i> We'll get into how these are generated later. 
@@ -149,7 +149,7 @@
       </tr>
     </table>
     <p>
-      We can also modify the object properties of the inspected constraint or object. For example, in the animated figure below we modify one of the length constraints by changing one of the points it operates on. Notice that when each listed property is clicked on, all compatible values (of same type) in the scene are highlighted. By clicking on one of them we can change the property to point to the clicked object (this is done using a concept in Sketchpad called <i>merging</i>, we'll visit it later):
+      We can also modify the object properties of the inspected constraint or object. For example, in the animated figure below we modify one of the length constraints by changing one of the points it operates on. Notice that when each listed property is clicked on, all compatible values (of same type) in the scene are highlighted. By clicking on one of them we can change the property to point to the clicked object (the option here was to use a concept in Sketchpad called <i>merging</i>, which we'll visit later):
     </p>
     <table>
       <tr>

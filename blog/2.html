@@ -9,7 +9,7 @@
   <script src="./lib/prism.js"></script>
   <hd>Half-Century Later:
     <br>
-    "From Sketchpad<small>61</small> to Sketchpad<small>14</small>"
+    "From Sketchpad<small><u>61</u></small> to Sketchpad<small><u>14</u></small>"
     <br>
     <small>
       Part II: Constraint Reactive Programming (CRP) in Sketchpad<small>14</small>
@@ -23,18 +23,18 @@
   <hd1>53 Years Later: Sketchpad<small>14</small></hd1>
   <div class="chapter">
     <p>
-      Overveld's alternative relaxation constraint solving approach for the geometric constraints a la Sketchpad inspired us to build a fully general programming model around it. We call it Sketchpad<small>14</small>. Our intention was to go back and honor and implement most of the cool things about Sutherland's Sketchpad, yet build a realistic system to build interactive web applications, declaratively. Our main observations were:
+      Overveld's alternative relaxation constraint solving approach for the geometric constraints a la Sketchpad inspired us to build a fully general programming model around it. We call it <i>Sketchpad<small>14</small></i>. Our intention was to go back and honor and implement most of the cool things about Sutherland's Sketchpad, yet build a realistic system to build interactive web applications, declaratively. Our main observations were:
     </p>
     <ul>
       <li>
-	Sketchpad, as well as Overveld's tweak on its solving strategy, were quite limited on the set of constraint types handled and only are suited for real valued arithmetic constraints. Nonetheless, they paint a beautiful picture for how beautiful can design, explaination, and modification of a computer program can be. Each program is organized as a set of individual constraints declaratively specified. It's the job of the system to combine the result of all constraints, rather than leaving the user the often much more complicated task of defining what the aggregate behavior will be. Modifying and extending a program means simply removing and adding constraints. Based on our experiments, this way of programming makes the whole process quite <i>linear</i> and gistible for the human mind.
+	Sketchpad, as well as Overveld's tweak on its solving strategy, were quite limited on the set of constraint types handled and only are suited for real valued arithmetic constraints. Nonetheless, they paint a beautiful picture for how elegant can design, implementation, explanation, and modification of a computer program can be. Each program is organized as a set of individual constraints declaratively specified. It's the job of the system to combine the result of all constraints, rather than leaving the user the often much more complicated task of defining what the aggregate behavior will be. Modifying and extending a program means simply removing and adding constraints. Based on our experiments, this way of programming makes the whole process quite <i>linear</i> and digestible for the human mind.
       </li>
       <li>
-	Overveld's approach of deligating the responsibility for solving the individual constraint types from the system to the constraints themselves has a much higher chance of being extended to general programming. In its model the user is in charge and can employ domain specific knowledge and own data structures and abstractions to describe and efficiently solve a particular constraint. For example, almost always building applications from scratch means needing new behaviors (constraint types) which haven't been defined yet, and it is fequently the case that the needed behavior wouldn't be something expressible or solvable by the system without help. Say, the user has access to a Fast Fourier Transform library function. Then she can invoke it as part of solving a given problem that requires it, rather than leaving it at the mercy of what solving capabilities is built into the system.
+	Overveld's approach of delegating the responsibility for solving the individual constraint types from the system to the constraints themselves has a much higher chance of being extended to general programming. In its model the user is in charge and can employ domain specific knowledge and own data structures and abstractions to describe and efficiently solve a particular constraint. For example, almost always building applications from scratch means needing new behaviors (constraint types) which haven't been defined yet, and it is frequently the case that the needed behavior wouldn't be something expressible or solvable by the system without help. Consider, for example, that the user has access to a Fast Fourier Transform library function. Then she can invoke it as part of solving a given problem that requires it, rather than leaving it at the mercy of the expressive limits of the constraint language and the solving capabilities built into the system.
       </li>
     </ul>
     <p>
-      As in Sketchpad and Overveld's geometric constraints, the way to define and modify the behavior of a program is to add/remove constraints, rather than the common imperative programming practice of "writing code." We take Overveld's approach, however, and require that the condition and solution to individual constraint types be defined beforehand. This means we let the user define constraint types as well as how to solve them in isolation. This is what's empowering about the approach as the user is put in the driver seat to use the programming language of the program itself to define the constraint and also provide an "algorithm" to solve it.
+      As in Sketchpad and Overveld's geometric constraints, the way to define and modify the behavior of a program is to add/remove constraints, rather than the common imperative programming practice of "adding or modifying some code." We take Overveld's approach, however, and require that the statement and the solution to individual constraint types be defined beforehand. This means we let the user define constraint types as well as how to solve them in isolation. This setup puts the programmer in the driver seat to use the programming language of the program itself to define the constraint and also provide an "algorithm" to solve it. Note that there's nothing stopping that algorithm to be simply an invocation of an external solver!
     </p>
     <p>
       Another aspect of Sketchpad<small>14</small> is that it gives a principled mechanism for the user to define the <i>reactive</i> part of an interactive program. The next section explains a semi-formal programming model implemented by the tool that we call <i>Constraint Reactive Programming</i>.
@@ -47,7 +47,7 @@
     <p>
       Sketchpad<small>14</small> is hosted in JavaScript, so we will explain the Constraint Reactive Programming (CRP) model in the context of the JS language.
     </p>
-    In this language, primitive types as well as functions and objects serve as values. Objects can be instantiated and referenced, as usual. However, imperative style programming, e.g. assignments for computation, isn't done.
+    In this language, primitive types as well as functions and objects serve as values. Objects can be instantiated and referenced, as usual. However, imperative style programming, e.g. assignments and looping constructs for computation, isn't done.
     <p>
       Constructing a program in the CRP model involves describing four parts:
       <ul>
@@ -76,7 +76,7 @@
       </li>
     </p>
       <p>
-      The model restricts what can be done in a handler, and it will be primarily used to add/remove data or continuous constraints to/from the store. Another thing that can occur in the event handler is a <i>discrete constraint</i>, i.e. one that is only solved once at the time even is triggered, but it doesn't get added to the store unlike the continuous constraints.
+      The model restricts what can be done in a handler, and it will be primarily used to add/remove data or continuous constraints to/from the store. Another thing that can occur in the event handler is a <i>discrete constraint</i>, i.e. one that is only solved once at the time the event is triggered, but it doesn't get added to the store with the rest of the continuous constraints.
     </p>
     <p>
 Therefore, the execution model is unlike the imperative style, i.e., statement by statement. The program is assumed to be <i>reactive</i>. All present constraints are assumed to be continuously operating over the data, affecting them any time they are left unsatisfied. The events are always assumed to be ready to be triggered.

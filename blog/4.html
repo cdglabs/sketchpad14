@@ -9,7 +9,7 @@
   <script src="./lib/prism.js"></script>
   <hd>Half-Century Later:
     <br>
-    "From Sketchpad<small>61</small> to Sketchpad<small>14</small>"
+    "From Sketchpad<small><u>61</u></small> to Sketchpad<small><u>14</u></small>"
     <br>
     <small>
       Part IV: Execution Model in CRP
@@ -26,7 +26,7 @@
       As we saw in the overview of the Overveld approach, each individual constraint has provided the appropriate methods to measure the current error based on the current state, expressed in terms of a set of <i>deltas</i> on variables. Thus a single function (recall we called it <mono>computeDeltas</mono>) is used to both <i>state</i> and <i>solve</i> the constraint.
     </p>
     <p>
-      In CRP, we separate the function that defines the constraint and the one that solves it. Constraint is stated here using a function here called <mono>computeDeltas</mono>, which still expresses the constraint as a numerical error from a solution that fully satisfies it. Another function named <mono>solve</mono> is used to return a set of <i>patches</i> on variables, i.e., a set of new values for those variables in the program state it would like to change in order to become satisfied. Let's discuss these a bit more.
+      In CRP, we separate the function that defines the constraint and the one that solves it. Constraint is stated here using a function here called <mono>computeError</mono>, which still expresses the constraint as a numerical error from a solution that fully satisfies it. Another function named <mono>solve</mono> is used to return a set of <i>patches</i> on variables, i.e., a set of new values for those variables in the program state it would like to change in order to become satisfied. Let's discuss these in more detail.
     </p>
   </div>
     <img src="img/1.png"></img>
@@ -34,7 +34,7 @@
   <hd1>Required Functions for Constraint and Data Classes</hd1>
   <div class="chapter">
     <p>
-      All the predefined constraints have a defined a few methods implemented and if the user wants to define a new constraint type they must be implemented as well. For constraint types the most important variables and methods are shown on the top:
+      All the predefined constraints implement a few standard methods, and if the user wants to define a new constraint type they must be implemented as well. For constraint types the most important variables and methods are (shown on the top when browsing the class):
     </p>
     <ul>
       <li>
@@ -42,15 +42,15 @@
       </li>
       <br>
       <li>
-	<mono>computeError</mono>: is a function that given the current <i>pseudo-time</i> of the system (some constraints are temporal) as well as the state of the properties of the constraints, returns a numeric <i>error</i> value as an indicator for how close the state is from a solution (depends on <mono>epsilon</mono>, a parameter that sets this threshold).
+	<mono>computeError</mono>: is a function that given the current <i>pseudo-time</i> of the system (some constraints are temporal) as well as the state of the properties of the constraints, returns a numeric <i>error</i> value as an indicator for how close the state is from a solution. A constraint is assumed satisfied when it returns an error value less than <mono>epsilon</mono>, a parameter of the system.
       </li>
       <br>	    
       <li>
-	<mono>solve</mono>: which the system calls once it deems the error too high (thus constraint unsatisfied). This function returns a dictionary object as a solution to the constraint. This solution is essentially interpreted as a set of <i>patches</i> to the current state, indicating the set of variables that need to be changed and the values they need to be changed to. The set of patches are organized as a dictionary where the keys are the names of the property objects belonging to the constraint (e.g., in the <mono>LengthConstraint</mono> they are called <mono>p1</mono>  and  <mono>p2</mono>) and the values are themselves dictionaries, mapping the name of a property beloning to an object to a new value. 
+	<mono>solve</mono>: which the system calls once it deems the constraint unsatisfied. This function returns a dictionary object as a solution to the constraint. This solution is essentially interpreted as a set of <i>patches</i> to the current state, indicating the set of variables that need to be changed and the values they need to be changed to. The set of patches are organized as a dictionary where the keys are the names of the property objects belonging to the constraint (e.g., in the <mono>LengthConstraint</mono> they are called <mono>p1</mono>  and  <mono>p2</mono>) and the values are themselves dictionaries, mapping the name of a property belonging to an object to a new value. 
       </li>
     </ul>
     <p>
-      Here is how these properties of defined for an instance of <mono>LengthConstraint</mono>:
+      Here is how these properties of defined for an instance of <mono>LengthConstraint</mono> (note that auxiliary functions <mono>plus</mono>, <mono>normalized</mono>, etc. operate over and return <mono>Point</mono> types, which are themselves essentially dictionary objects with <mono>x</mono> and <mono>y</mono> keys):
     </p>
     <pre><code class="language-javascript">
 	// propertyTypes:
@@ -72,48 +72,48 @@
 	}	
     </code></pre>
     <p>
-      Contrast the above with the <mono>computeDeltas</mono> function for the <mono>LengthConstraint</mono> in the Overveld approach, given previously. In Overveld way the solution was a set of deltas, but here the solution is the set of new values the constraint is proposing on the two points' coordinates. It so happens that these new values are obtained by computing delta values and adding to the current values. What's important is that this was left a choice to the implementor of the constraint type, rather than the system assuming so. Next, we try to elaborate on this.
+      Contrast the above with the <mono>computeDeltas</mono> function for the <mono>LengthConstraint</mono> in the Overveld approach, given previously. In Overveld way the solution was a set of deltas, but here the solution is the set of new values the constraint is proposing on the two points' coordinates. It so happens that these new values are obtained by computing delta values and adding to the current values. What's important is that this was left a choice to the implementer of the constraint type, rather than the system assuming so. We elaborate on this next.
     </p>
     <p>
-      But how are individual solutions consolidated in the presence of multiple constraints? CRP employs the approach of Overveld (see <a href="1.html">Part I</a>) to collect the solutions from unsatisfied constraints and <i>join</i> them in order to come up with a <i>single consolidated solution</i>. Unlike the Overveld approach, however, where the joining is always simply <i>averaging</i> numeric values per variable, CRP generalizes this and allows the user to define a <mono>solutionJoin</mono> function per class property that decides how multiple solutions are combined. 
+      How are individual solutions consolidated in the presence of multiple constraints? CRP employs the approach of Overveld (see <a href="1.html">Part I</a>) to collect the solutions from unsatisfied constraints and <i>join</i> them in order to come up with a <i>single consolidated solution</i>. Unlike the Overveld approach, however, where the joining is always simply <i>averaging</i> numeric values per variable, CRP generalizes this and allows the user to define a <mono>solutionJoin</mono> function per class property that decides how multiple solutions are combined. 
     </p>
     <p>
-      This generality is essential to accomodate numerious scenarios that arise during programming applications. Firstly, we cannot assume the patches proposed by the constraint are numeric real values, as they might be on finite data types, etc. Secondly, the right way to combine two competing solutions from two individual constraints maybe to raise a conflict and stop, prefer one to other because of priorities, or even apply some custom merge function not at all captured by averaging the values. We'll see examples later.
+      This generality is essential to accommodate numerous scenarios that arise in program development. Firstly, we cannot assume the patches proposed by the constraint are numeric real values, as they might be on finite data types, etc. Secondly, the right way to combine two competing solutions from two individual constraints maybe to raise a conflict and stop, prefer one to other because of priorities, or even apply some custom merge function not at all captured by averaging the values. We'll see examples later.
     </p>
     <p>
-      Therefore, let us review the important methods that data classes must define:
+      This leads us to a place where we need to review the important methods that data classes must define:
     </p>
     <ul>
       <li>
-	<mono>solutionJoins</mono>: given the current value (<mono>curr</mono>) of each class property (a.k.a., instance variable) and the set of collected new values from constraints that have proposed a new value for it (<mono>solutions</mono>), this function decides how to join the solutions to determine the new value for the variable. For example, to perform the Overveld style averaging and damping the deltas (happens to be the <i>default</i> join function for all variables) we can define the following:
+	<mono>solutionJoins</mono>: Given the current value (<mono>curr</mono>) of each class property (a.k.a., instance variable) and the set of collected new values from constraints that have proposed to update it (<mono>solutions</mono>), this function decides how to combine the solutions to determine the new value for the variable. For example, to perform the Overveld style averaging and damping the deltas (happens to be the <i>default</i> join function for all variables) we can define the following:
 	<pre><code class="language-javascript">
 	// Overveld style (damped avg) (default) solution join fn:
-	dampedAverageJoin = function(curr, solutions) {
+	dampedAverageJoinFn = function(curr, solutions) {
 	    var damping = 0.25
 	    var sum = 0
 	    solutions.forEach(function(v) { sum += v })
 	    var avg = sum / solutions.length
 	    return curr + (damping * (avg - curr))
 	}
-	</code></pre>
+</code></pre>
 	For non-real values the above joining function does not make sense. In the simple case where we know there is exactly one constraint acting on a variable, we can simply return that single solution (or pick a random choice among multiple ones):
 	<pre><code class="language-javascript">
 	// Pick a solution join fn:
-	pickOneJoin = function(curr, solutions) {
+	pickOneJoinFn = function(curr, solutions) {
 	    return solutions[0]
 	}
-	</code></pre>
-	For example, the <mono>Point</mono> class with properties <mono>x, y: Number</mono>  and <mono>color: String</mono>, lets the <mono>x</mono> and <mono>y</mono> properties use the default solution join function (<mono>dampedAverageJoin</mono>), yet overwrites the function for its <mono>color</mono> property:
+</code></pre>
+	For example, the <mono>Point</mono> class with properties <mono>x, y: Number</mono>  and <mono>color: String</mono>, lets the <mono>x</mono> and <mono>y</mono> properties use the default solution join function (<mono>dampedAverageJoinFn</mono>), yet overwrites the function for its <mono>color</mono> property:
 	<pre><code class="language-javascript">
 	Point.prototype.solutionJoins = function() { 
-	    return {color: pickOneJoin}
+	    return {color: pickOneJoinFn}
 	}
-	</code></pre>
-	In reality, <mono>solutions</mono> also has a reference to the constraint responsible for producing each solution, thus if this function chooses to distinguish solutions based on constraint priorities, etc. it may do so.
+</code></pre>
+	In reality, <mono>solutions</mono> also has a reference to the constraint responsible for producing each solution, thus if this function chooses to distinguish solutions based on constraint priorities, etc. it may do so. The default procedure, however, is that the system automatically sorts the collected solutions per variable and if there is a mismatch in priorities, only solutions from top priority constraints are counted.
       </li>
       <br>
       <li>
-	<mono>draw</mono>: uses HTML canvas to define how the object should be displayed on the screen. The system redraws the entire scene at a certain rate, e.g. at 65 frames per second.
+	<mono>draw</mono>: This method uses HTML canvas to define how the object should be displayed on the screen. The system redraws the entire scene at a certain rate, e.g. at 65 frames per second.
       </li>
     </ul>
     <p>
@@ -144,27 +144,27 @@ In order to support responsive interactive and animated programs, we adopt a two
     <table>
       <tr>
 	<td><img src="img/17.png" width="175%" style="margin-left: 15%"></img></td>
-	<td><p class="side" style="margin-left: 100%; margin-top: -2%">Two-phase execution model in CRP</p></td>
+	<td><p class="side" style="margin-left: 100%; margin-top: -2%">Two-phase execution model in CRP <br>(A/D: add/delete,<br>R/W: read/write)</p></td>
       </tr>
     </table>    
     </p>
 <b>(A) Event Handling Phase</b>
     <p>
-      The system starts in phase <i>A</i>. It's at the top of this phase where the system is considered to be at a "good" state and the current state is drawn on the canvas (should changes have occurred). The <b>rendering</b> step calls the <mono>draw</mono> methods for all objects to refresh the frame. At this time the system updates its pseudo-time to reflect the time passed since last cycle. The handlers for any cached events that may have occurred during the previous (<i>B</i>) phase are executed next. During such step the data and constraint stores may be modified. As a result (or despite of the fact), some constraints in the constraint store may have been unsatisfied. In any case, once all relevant handlers are executed, the system moves onto the phase <i>B</i>.
+      The system starts in this phase, at top of which the system is considered to be at a "good" state and the current state is drawn on the canvas (should changes have occurred). The <b>rendering</b> step calls the <mono>draw</mono> methods for all objects to refresh the frame. At this time the system updates its pseudo-time to reflect the time passed since last cycle. The handlers for any cached events that may have occurred during the previous (<i>B</i>) phase are executed next. During such step the data and constraint stores may be modified. As a result, or despite of the fact, some constraints in the constraint store may have been unsatisfied. In any case, once all relevant handlers are executed, the system moves onto the phase <i>B</i>.
       </p>
     <b>(B) Solving Phase</b>
     <p>
-      During the solving phase <i>B</i> (illustrated in figure below) the system invokes the <mono>computeError</mono> function belonging to each of the existing constraints. As long as the value is more than a an <i>epsilon</i> error threshold (specified by the user), the system invokes the <mono>solve</mono> function associated with each unsatisfied constraint. Each solution returned by each such function is organized as a dictionary of dictionaries, mapping each object's each property to a proposed value. Thus the value returned by a <mono>solve</mono> function could be interpreted as a <i>patch</i>: a subset of the current state that the constraint would like to change indicating the proposed new values.
+      During the solving phase <i>B</i> (illustrated in figure below) the system invokes the <mono>computeError</mono> function belonging to each of the existing constraints. As long as the value is more than a an <mono>epsilon</mono> error threshold (specified by the user), the system invokes the <mono>solve</mono> function associated with each unsatisfied constraint. Each solution returned by each such function is organized as a dictionary of dictionaries, mapping each object's each property to a proposed value. Thus the value returned by a <mono>solve</mono> function could be interpreted as a <i>patch</i>: a subset of the current state that the constraint would like to change indicating the proposed new values.
     </p>
     <p>
-      At this point the system applies the consolidated values to each variable. However, since these values aren't exactly what each constraint had asked for, after this step all or some of the previously unhappy constraints are likely to remain unhappy (or even previously happy constraints may have now turned unhappy). This is were the <i>iterative relaxation</i>  approach comes in. As long as that is the case, the system repeats the process above, until either:
+      At this point the system uses the designated <i>join</i> function to combine all solutions to each variable into one consolidated new value, and then applies it to the variable. However, since these values aren't exactly what each constraint had asked for, after this step all or some of the previously unhappy constraints are likely to remain unhappy (or even previously happy constraints may have now turned unhappy). This is were the <i>iterative relaxation</i>  approach comes in. As long as that is the case, the system repeats the process above, until either:
     </p>
     <ul>
       <li>
-	(1) no unsatisfied constraints (computed error of larger than <i>epsilon</i>) remain
+	(1) no unsatisfied constraints (computed error of larger than <mono>epsilon</mono>) remain.
       </li>
       <li>
-	(2) the sum total error from all constraints remains unchanged from the previous iteration(s) (reached a <i>fixed-point</i>)
+	(2) the sum total error from all constraints remains unchanged for several consecutive iterations (reached a <i>fixed-point</i>).
       </li>
       <li>
 	(3) phase <i>B</i> times out, that is, the system has remained in the solving phase for longer than the frame rate value.
@@ -185,10 +185,10 @@ In order to support responsive interactive and animated programs, we adopt a two
 <hd1>Enabling Backtracking Search</hd1>
 <div class="chapter">
   <p>
-    Classical <i>backtracking search</i> isn't accomodiated by the CRP model as described. However, we have made a modification that allows programmers to rely on search as part of a program (see the <i>Pentominoes</i> demo). 
+    Classical <i>backtracking search</i> isn't accommodated by the CRP model as described. However, we have made a modification that allows programmers to rely on search as part of a program (see the <i>pentominoes</i> and <i>send money</i> demos). 
   </p>
   <p>   
-    We let a constraint type to be marked as <i>searchable</i>. A searchable constraint's <mono>solve</mono> function returns a set of solutions rather than one. Thus a user can communicate to the system that it wants to try either one of the solutions and search for the right combination of solutions from all constraints that will result in a globally acceptable solution.
+    We let a constraint type to be marked as <mono>searchable</mono>. A searchable constraint's <mono>solve</mono> function returns a set of solutions rather than one. Thus a user can communicate to the system that it wants to try either one of the solutions and search for the right combination of solutions from all constraints that will result in a globally acceptable solution.
   </p>
   <p>
     During the first iteration of the solving phase (<i>B</i>), the system collects the set of solutions from each searchable constraint, as well as the usual one solution from others. It then constructs a search tree that gives all possible combinations of choosing a single solution from each constraint. (When no searchable constraint exists this tree has a single branch as the only combination to explore.) At this point the system engages in a traditional backtracking search to find the combination that leads to a satisfiable place. For each combination choice, it does the usual relaxing-style iterative solving up to some timeout duration, except that searchable constraints do not participate during those iterations. Should a fixed-point be reached with all constraints satisfied, the solution is committed and the model cycles back to the reactive phase <i>A</i>. Otherwise, solutions in the last attempt are discarded and the search of all possible combinations continues on.
@@ -199,11 +199,12 @@ In order to support responsive interactive and animated programs, we adopt a two
   <pre><code class="language-javascript">
 NumListSortConstraint.prototype.searchable = true
 
-NumListSortConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
-    return sorted(this.list) && isPermutationOf(this.list, scratch.oldList) ? 0 : 1
+NumListSortConstraint.prototype.computeError = function(pseudoTime) {
+    return sorted(this.list)
+        && isPermutationOf(this.list, scratch.oldList) ? 0 : 1
 }
 
-NumListSortConstraint.prototype.solve = function(pseudoTime, prevPseudoTime) {
+NumListSortConstraint.prototype.solve = function(pseudoTime) {
     return allPermutations(this.list).map(function (l) { return {list: l} })
 }
 </code></pre>
