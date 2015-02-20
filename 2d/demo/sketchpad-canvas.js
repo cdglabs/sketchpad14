@@ -29,9 +29,6 @@ function SketchpadCanvas(sketchpad, canvas, dontStart) {
     this.selectionChoiceIdx = 0
     this.selectionPoints = []
     this.__origin = new Point(0, 0)
-    this.tileConstructors = {
-	//"Run": {}
-    }
 
     this.keyShortcuts = {
 	"object click: Select single": {},
@@ -1421,12 +1418,6 @@ SketchpadCanvas.prototype.newInstantiationTile = function(name, isConstraint) {
     var addFn = isConstraint ? 'addNewConstraint' : 'add'
     this[addFn](proto)
     this.inspectState(proto)
-}
-
-SketchpadCanvas.prototype.newPrimitiveTile = function(name) {
-    var doButtonFn = function() { this.run(); rc.removeTemp(this) }
-    rc.addTemp(new SketchpadTile(name, [], undefined, [{name: '!', onclick:  doButtonFn, style: {background: '#66ff66'}}], undefined, false))
-    rc.redraw()
 }
 
 SketchpadCanvas.prototype.unparseJS = function(value, hideThingTypes, hideNonThingTypes) {
