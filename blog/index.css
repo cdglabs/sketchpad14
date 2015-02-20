@@ -12,8 +12,8 @@ body,button {
 }
 
 table.centered {
-    margin-left: 8%;
-    text-align: center;   
+    margin: 0 auto;
+    text-align: center;
 }
 
 mono {
@@ -70,6 +70,15 @@ a {
 
 a:hover {
     color: #B2B2CC;
+}
+
+
+.black {
+    color: black;
+}
+
+a.black:hover {
+    color: black;
 }
 
 .lefty {
