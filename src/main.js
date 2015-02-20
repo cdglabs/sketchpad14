@@ -131,6 +131,7 @@ Sketchpad.prototype.addConstraint = function(constraint, wasDisabled) {
 		this.objMap[obj.__id] = obj
 	}
     }
+    this.converged = false    
     return constraint
 }
 
@@ -159,6 +160,7 @@ Sketchpad.prototype.removeConstraint = function(unwantedConstraint, markAsDisabl
     })
     if (this.solveEvenWithoutErrorOnPriorityDifferences)
 	this.computePerThingPerPropertyEffectors()
+    this.converged = false    
 }
 
 Sketchpad.prototype.clear = function() {

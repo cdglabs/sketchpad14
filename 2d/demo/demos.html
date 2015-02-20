@@ -19,11 +19,9 @@
       <demos id="demos"></demos>
       <constraints id="constraints"></constraints>
       <classes id="classes"></classes>
-      <tiles id="tiles"></tiles>
     </lists>
     <bins id="bins">
       <bin id='KeBin' key='KeCBin' kind='shortcut'>Shortcuts</bin>
-      <!--<bin id='TiBin' key='TiBin' kind='tile'>Tile Bin</bin>-->
       <bin id='ClBin' key='ClBin' kind='class'>Class Bin</bin>
       <bin id='CoBin' key='CoBin' kind='constraint'>Constraint Bin</bin>
       <bin id='DeBin' key='DeBin' kind='demo'>Example Bin</bin>
@@ -49,9 +47,8 @@
 var demos = document.getElementById('demos')
 var constraints = document.getElementById('constraints')
 var classes = document.getElementById('classes')
-var tiles = document.getElementById('tiles')
 var shortcuts = document.getElementById('shortcuts')
-var lists = [demos, constraints, classes, tiles, shortcuts]
+var lists = [demos, constraints, classes, shortcuts]
 
 var User = {classes: {}, constraints: {}}
 var Examples = {}
@@ -79,10 +76,6 @@ function(name) {
     function(name) {
       rc.rightButtonsBusy = true
       rc.newInstantiationTile(name, false)
-    },
-  tile: 
-    function(name) {
-      rc.newPrimitiveTile(name)
     },
   shortcut: 
     function(name) {
@@ -117,10 +110,7 @@ for (var idx = 0; idx < bins.length; idx++) {
   } else if (binName === 'ClBin') {
      itemDOMNodes = classes
      itemNames = sketchpad.thingConstructors
-  } /*else if (binName === 'TiBin') {
-     itemDOMNodes = tiles
-     itemNames = rc.tileConstructors
-  }*/ else {
+  } else {
      itemDOMNodes = shortcuts
      itemNames = rc.keyShortcuts
   }
