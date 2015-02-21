@@ -12,7 +12,6 @@ function SketchpadScene(sketchpad, canvas, dontStart) {
     this.optionsRequiringSIILableUpdate = ['renderMode', 'millisecondsPerFrame',  'onlyRenderOnConvergence', 'onlyRenderOnNoError', 'showEachIteration']
     this.renderMode = 0
     this.onlyRenderOnConvergence = false
-    this.renderEvenOnConvergence = false
     this.onlyRenderOnNoError = false
     this.showConstraints = false
     this.showEachIteration = false
@@ -129,27 +128,18 @@ SketchpadScene.prototype.setRenderMode = function(mode) {
     if (this.renderMode == 0) {
 	this.showEachIteration = false
 	this.onlyRenderOnConvergence = false
-	this.renderEvenOnConvergence = false
 	this.onlyRenderOnNoError = false
     } else if (this.renderMode == 1) {
-	this.showEachIteration = false
-	this.onlyRenderOnConvergence = false
-	this.renderEvenOnConvergence = true
-	this.onlyRenderOnNoError = false
-    } else if (this.renderMode == 2) {
 	this.showEachIteration = true	
 	this.onlyRenderOnConvergence = false
-	this.renderEvenOnConvergence = false
 	this.onlyRenderOnNoError = false
-    } else if (this.renderMode == 3) {
+    } else if (this.renderMode == 2) {
 	this.showEachIteration = false
 	this.onlyRenderOnConvergence = true
-	this.renderEvenOnConvergence = false
 	this.onlyRenderOnNoError = false
     } else {
 	this.showEachIteration = false
 	this.onlyRenderOnConvergence = true
-	this.renderEvenOnConvergence = false
 	this.onlyRenderOnNoError = true
     }
     this.updateSIILabel()
@@ -528,6 +518,7 @@ SketchpadScene.prototype.forEachFinger = function(fn) {
 }
 
 SketchpadScene.prototype.step = function() {
+    var doRedraw = false
     if (!(sketchpad.converged || this.paused)) {
 	if (this.dragFingersCount > 0)
 	    this.updateCoordinateConstraints()
@@ -546,7 +537,6 @@ SketchpadScene.prototype.step = function() {
 	    this.iterationsPerFrame = iterations.count
 	}
 	this.updateIPFLabel()
-	var doRedraw
 	if (this.onlyRenderOnConvergence) {
 	    if (sketchpad.converged) {
 		if (!this.alreadyRenderedConvergence) {
@@ -556,20 +546,27 @@ SketchpadScene.prototype.step = function() {
 	    } else
 		this.alreadyRenderedConvergence = false
 	} else
-	    doRedraw = this.renderEvenOnConvergence || !sketchpad.converged || this.inDragSelectMode
-	if (doRedraw)
-	    this.redraw()
+	    doRedraw = !sketchpad.converged || this.inDragSelectMode
     }
+    if (this.needRedraw) {
+	doRedraw = true
+	this.needRedraw = false
+    }
+    if (doRedraw)
+	this.redraw()
     requestAnimationFrame(this.stepFn)
 }
 
 SketchpadScene.prototype.togglePause = function() {
     this.paused = !this.paused
+    if (this.paused)
+	this.needRedraw = false
     this.updateSIILabel()
 }
 
 SketchpadScene.prototype.pause = function() {
     this.paused = true
+    this.needRedraw = false
     this.updateSIILabel()
 }
 
@@ -663,6 +660,7 @@ SketchpadScene.prototype.add = function(t, container, toEnd) {
 	this.sketchpad.thingsWithOnEachTimeStepFn.push(t)
     if (t.afterEachTimeStep)
 	this.sketchpad.thingsWithAfterEachTimeStepFn.push(t)
+    this.needRedraw = true
     return t
 }
 
@@ -672,6 +670,7 @@ SketchpadScene.prototype.addTemp = function(t) {
     this.markIfNew(t)
     this.temps.push(t)
     t.__isTemp = true
+    this.needRedraw = true
     return t
 }
 
@@ -817,6 +816,7 @@ SketchpadScene.prototype.remove = function(unwanted, notInvolvingConstraintsOrOw
     this.sketchpad.thingsWithOnEachTimeStepFn = this.sketchpad.thingsWithOnEachTimeStepFn.filter(function(thing) { return thing !== unwanted })
     this.sketchpad.thingsWithAfterEachTimeStepFn = this.sketchpad.thingsWithAfterEachTimeStepFn.filter(function(thing) { return thing !== unwanted })
     this.clearSelections()
+    this.needRedraw = true
     this.redraw()
 }
 
@@ -850,6 +850,7 @@ SketchpadScene.prototype.removeTemp = function(unwanted) {
 	toRemove.forEach(function(b) { buttons.removeChild(b) })
     }
     this.clearSelections()
+    this.needRedraw = true
     this.redraw()
 }
 
@@ -914,8 +915,9 @@ SketchpadScene.prototype.resetOptions = function() {
     this.millisecondsPerFrame = 1000 / 4//65
     this.dragConstraintPriority = 10
     this.onlyRenderOnConvergence = false   
-    this.renderEvenOnConvergence = false    
     this.onlyRenderOnNoError = false
+    this.renderMode = 0
+    this.setRenderMode(0)
 }
 
 SketchpadScene.prototype.clear = function() {
@@ -950,6 +952,7 @@ SketchpadScene.prototype.clear = function() {
     this.constraintInstancesViewElements = []
     this.constraintInstancesViewSelected = undefined
     this.rightButtonsBusy = false
+    this.needRedraw = false
 }
 
 SketchpadScene.prototype.resetScene = function() {
@@ -1408,7 +1411,7 @@ SketchpadScene.prototype.updateSIILabel = function() {
     sii.innerHTML = this.paused ? 'paused' : 
 	(this.showEachIteration ? ' rendering each iteration'
 	 : (this.onlyRenderOnConvergence ? (' rendering only on convergence' + (this.onlyRenderOnNoError ? ' and no error' : '')) :	    
-	    ' rendering every ' + Math.floor(this.millisecondsPerFrame) + ' ms.' + (this.renderEvenOnConvergence ? '' : ' until convergence')))
+	    ' rendering every ' + Math.floor(this.millisecondsPerFrame) + ' ms.' + ( ' until convergence')))
 }
 
 SketchpadScene.prototype.updateIPFLabel = function() {

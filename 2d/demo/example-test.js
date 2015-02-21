@@ -1,5 +1,5 @@
 examples.test = function() {
-    rc.setOption('renderMode', 2)
+    rc.setOption('renderMode', 1)
     var center = {x: 700, y: 500}
     var py = new Point(center.x, center.y - 500)
     var px = new Point(center.x + 500, center.y)

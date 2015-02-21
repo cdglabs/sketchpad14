@@ -525,7 +525,7 @@ examples['text layout'] = function() {
     rc.showGrabPoints = true
     rc.grabPointOpacity = 0
     sketchpad.solveEvenWithoutErrorOnPriorityDifferences = true
-    rc.setOption('renderMode', 3)
+    rc.setOption('renderMode', 2)
     sketchpad.scratch.wordWrapModes = ['greedy', 'optimal', 'justify']
     sketchpad.scratch.wordWrapMode = 0
 

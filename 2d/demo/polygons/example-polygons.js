@@ -1,10 +1,12 @@
-Examples.polygons = { }
+Examples.polygons = {
+    urls: {meh_triangle: './polygons/img/meh_triangle.png', meh_square: './polygons/img/meh_square.png', sad_triangle: './polygons/img/sad_triangle.png', sad_square: './polygons/img/sad_square.png', yay_triangle: './polygons/img/yay_triangle.png', yay_square: './polygons/img/yay_square.png', dragging: './polygons/img/dragging.png'}
+}
 
 var plus = Sketchpad.geom.plus
 var minus = Sketchpad.geom.minus
 var magnitude = Sketchpad.geom.magnitude
 var scaledBy = Sketchpad.geom.scaledBy
-var urls = {meh_triangle: './polygons/img/meh_triangle.png', meh_square: './polygons/img/meh_square.png', sad_triangle: './polygons/img/sad_triangle.png', sad_square: './polygons/img/sad_square.png', yay_triangle: './polygons/img/yay_triangle.png', yay_square: './polygons/img/yay_square.png', dragging: './polygons/img/dragging.png'}
+
  
 // --- Classes -------------------------------------------------------
 
@@ -30,7 +32,7 @@ Examples.polygons.Shape.prototype.center = function() { return this.image.center
 Examples.polygons.Shape.prototype.containsPoint = function(x, y) { return this.image.containsPoint(x, y) }
 Examples.polygons.Shape.prototype.getUrl = function(mood) {    
     var kindMood = (mood == 0 ? 'meh' :  (mood == 1 ? 'yay' : 'sad')) + '_' + (this.kind == 1 ? 'square' : 'triangle')
-    return urls[kindMood]
+    return Examples.polygons.urls[kindMood]
 }
 Examples.polygons.Shape.prototype.getMood = function() { return this.board.getMood(this) }
 
@@ -332,7 +334,6 @@ examples['polygons'] = function() {
     rc.preventBrowserDefaultKeyEvents()
     sketchpad.setOption('solveEvenWithoutErrorOnPriorityDifferences', true)
     rc.setOption('dragConstraintPriority', 0)
-    rc.setOption('renderMode', 1)
     rc.canvas.height = window.innerHeight * 5
 
     // ==================== Intro =================
@@ -449,7 +450,7 @@ examples['polygons'] = function() {
     // --- Data ----------------------------------------------------------------    
     var frame3 = {x: 370, y: frame2.endy + 50, cols: 12, rows: 5, width: 12 * 65, height: 5 * 65, squareLength: 65}
     frame3.endy = frame3.y + frame3.height
-    rc.add(new Image1(new Point(frame3.x + (frame3.width / 2) - 390, frame3.y), urls.dragging, undefined, 1, 1), undefined, undefined, undefined, {unselectable: true, unmovable: true})
+    rc.add(new Image1(new Point(frame3.x + (frame3.width / 2) - 390, frame3.y), Examples.polygons.urls.dragging, undefined, 1, 1), undefined, undefined, undefined, {unselectable: true, unmovable: true})
     var grid1 = [
 	1,1,1,0,0,0,0,0,0,2,1,2,
 	1,1,1,0,0,0,0,0,0,1,2,1,

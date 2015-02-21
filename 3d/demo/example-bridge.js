@@ -1,7 +1,5 @@
 examples['bridge']= function() {
 
-    rc.setOption('renderMode', 1)
-    
     // --- Data ----------------------------------------------------------------
 
     var massCount = 26, springCount = 52, center = [0, 0, 0]

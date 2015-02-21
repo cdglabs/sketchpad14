@@ -1,7 +1,5 @@
 examples['pendulum']= function() {
 
-    rc.setOption('renderMode', 1)
-
     // --- Data ----------------------------------------------------------------
     
     var p1 = new Point3D(0, 0, 0) 
