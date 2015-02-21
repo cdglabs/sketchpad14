@@ -1,5 +1,4 @@
 examples['orbit'] = function() {
-    rc.setOption('renderMode', 1)
     //rc.setOption('renderStateTrace', true)
  
     // facts

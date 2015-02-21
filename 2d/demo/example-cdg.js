@@ -19,6 +19,5 @@ examples.cdg = function() {
 	rc.addConstraint(Sketchpad.geom.LengthConstraint, undefined, p2, p3, width)
 	rc.addConstraint(Sketchpad.geom.OrientationConstraint, undefined, p2, p1, p2, p3, Math.PI / 2)
     })
-    //rc.setOption('renderMode', 1)
 };
 

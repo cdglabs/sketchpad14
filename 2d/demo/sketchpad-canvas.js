@@ -10,7 +10,6 @@ function SketchpadCanvas(sketchpad, canvas, dontStart) {
     this.optionsRequiringSIILableUpdate = ['renderMode', 'millisecondsPerFrame',  'onlyRenderOnConvergence', 'onlyRenderOnNoError', 'showEachIteration']
     this.renderMode = 0
     this.onlyRenderOnConvergence = false
-    this.renderEvenOnConvergence = false
     this.onlyRenderOnNoError = false
     this.showConstraints = false
     this.listConstraints = true
@@ -106,7 +105,7 @@ SketchpadCanvas.prototype.initCanvas = function(canvas) {
     this.ctxt.shadowBlur = 1
     this.initThingCodeInspector()
     var sii = document.getElementById('sii')
-    sii.onclick = function() { this.setRenderMode((this.renderMode + 1) % 5) }.bind(this)
+    sii.onclick = function() { this.setRenderMode((this.renderMode + 1) % 4) }.bind(this)
 }
  
 SketchpadCanvas.prototype.setRenderMode = function(mode) {
@@ -114,27 +113,18 @@ SketchpadCanvas.prototype.setRenderMode = function(mode) {
     if (this.renderMode == 0) {
 	this.showEachIteration = false
 	this.onlyRenderOnConvergence = false
-	this.renderEvenOnConvergence = false
 	this.onlyRenderOnNoError = false
     } else if (this.renderMode == 1) {
-	this.showEachIteration = false
-	this.onlyRenderOnConvergence = false
-	this.renderEvenOnConvergence = true
-	this.onlyRenderOnNoError = false
-    } else if (this.renderMode == 2) {
 	this.showEachIteration = true	
 	this.onlyRenderOnConvergence = false
-	this.renderEvenOnConvergence = false
 	this.onlyRenderOnNoError = false
-    } else if (this.renderMode == 3) {
+    } else if (this.renderMode == 2) {
 	this.showEachIteration = false
 	this.onlyRenderOnConvergence = true
-	this.renderEvenOnConvergence = false
 	this.onlyRenderOnNoError = false
     } else {
 	this.showEachIteration = false
 	this.onlyRenderOnConvergence = true
-	this.renderEvenOnConvergence = false
 	this.onlyRenderOnNoError = true
     }
     this.updateSIILabel()
@@ -221,6 +211,7 @@ SketchpadCanvas.prototype.remove = function(unwanted, notInvolvingConstraintsOrO
     this.sketchpad.thingsWithOnEachTimeStepFn = this.sketchpad.thingsWithOnEachTimeStepFn.filter(function(thing) { return thing !== unwanted })
     this.sketchpad.thingsWithAfterEachTimeStepFn = this.sketchpad.thingsWithAfterEachTimeStepFn.filter(function(thing) { return thing !== unwanted })
     this.clearSelections(true)
+    this.needRedraw = true
 }
 
 SketchpadCanvas.prototype.keyup = function(e) {
@@ -597,6 +588,7 @@ SketchpadCanvas.prototype.updateCoordinateConstraints = function() {
 }
 
 SketchpadCanvas.prototype.step = function() {
+    var doRedraw = false
     if (!(sketchpad.converged || this.paused)) {
 	if (this.dragFingersCount > 0)
 	    this.updateCoordinateConstraints()
@@ -615,7 +607,6 @@ SketchpadCanvas.prototype.step = function() {
 	    this.iterationsPerFrame = iterations.count
 	}
 	this.updateIPFLabel()
-	var doRedraw
 	if (this.onlyRenderOnConvergence) {
 	    if (sketchpad.converged) {
 		if (!this.alreadyRenderedConvergence) {
@@ -625,20 +616,27 @@ SketchpadCanvas.prototype.step = function() {
 	    } else
 		this.alreadyRenderedConvergence = false
 	} else
-	    doRedraw = this.renderEvenOnConvergence || this.showEachIteration || !sketchpad.converged || this.inDragSelectMode
-	if (doRedraw)
-	    this.redraw()
+	    doRedraw = this.showEachIteration || !sketchpad.converged || this.inDragSelectMode
     }
+    if (this.needRedraw) {
+	doRedraw = true
+	this.needRedraw = false
+    }
+    if (doRedraw)
+	this.redraw()
     requestAnimationFrame(this.stepFn)
 }
 
 SketchpadCanvas.prototype.togglePause = function() {
     this.paused = !this.paused
+    if (this.paused)
+	this.needRedraw = false
     this.updateSIILabel()
 }
 
 SketchpadCanvas.prototype.pause = function() {
     this.paused = true
+    this.needRedraw = false
     this.updateSIILabel()
 }
 
@@ -741,6 +739,7 @@ SketchpadCanvas.prototype.add = function(t, container, addGrabPoint, toEnd, para
 	this.sketchpad.thingsWithOnEachTimeStepFn.push(t)
     if (t.afterEachTimeStep)
 	this.sketchpad.thingsWithAfterEachTimeStepFn.push(t)
+    this.needRedraw = true
     return t
 }
 
@@ -750,6 +749,7 @@ SketchpadCanvas.prototype.addTemp = function(t) {
     this.markIfNew(t)
     this.temps.push(t)
     t.__isTemp = true
+    this.needRedraw = true
     return t
 }
 
@@ -911,6 +911,7 @@ SketchpadCanvas.prototype.removeTemp = function(unwanted) {
 	toRemove.forEach(function(b) { buttons.removeChild(b) })
     }
     this.clearSelections(true)
+    this.needRedraw = true
 }
 
 SketchpadCanvas.prototype.removeConstraintsInvolving = function(unwanted) {
@@ -937,8 +938,9 @@ SketchpadCanvas.prototype.resetOptions = function() {
     this.millisecondsPerFrame = 1000 / 65
     this.dragConstraintPriority = 10
     this.onlyRenderOnConvergence = false   
-    this.renderEvenOnConvergence = false    
     this.onlyRenderOnNoError = false
+    this.renderMode = 0
+    this.setRenderMode(0)
 }
 
 SketchpadCanvas.prototype.clear = function() {
@@ -974,7 +976,8 @@ SketchpadCanvas.prototype.clear = function() {
     this.disableDefaultKeyEvents = false
     this.constraintInstancesViewElements = []
     this.constraintInstancesViewSelected = undefined
-    this.rightButtonsBusy = false    
+    this.rightButtonsBusy = false
+    this.needRedraw = false
 }
 
 SketchpadCanvas.prototype.clearSelections = function(andRedraw) {    
@@ -1471,7 +1474,7 @@ SketchpadCanvas.prototype.updateSIILabel = function() {
     sii.innerHTML = this.paused ? 'paused' : 
 	(this.showEachIteration ? ' rendering each iteration'
 	 : (this.onlyRenderOnConvergence ? (' rendering only on convergence' + (this.onlyRenderOnNoError ? ' and no error' : '')) :	    
-	    ' rendering every ' + Math.floor(this.millisecondsPerFrame) + ' ms.' + (this.renderEvenOnConvergence ? '' : ' until convergence')))
+	    ' rendering every ' + Math.floor(this.millisecondsPerFrame) + ' ms.' + (' until convergence')))
 }
 
 SketchpadCanvas.prototype.updateIPFLabel = function() {

@@ -1,7 +1,5 @@
 examples['hard geodesic']= function() {
 
-    rc.setOption('renderMode', 1)
-    
     // --- Data ----------------------------------------------------------------
 
     var coords  =	

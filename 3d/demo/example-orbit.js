@@ -1,7 +1,5 @@
 examples['orbit'] = function() {
 
-    rc.setOption('renderMode', 1)
- 
     // facts
     var masses = {sun: 2e30, earth: 6e24, emoon: 7.3e22, venus: 4.9e24, vmoon: 7.3e22} // kg
     var distances = {earth_emoon: 4e8, sun_earth: 1.5e11, sun_emoon: 1.5e11, sun_venus: 1e11, sun_vmoon: 1e11, venus_vmoon: 4e8} // m

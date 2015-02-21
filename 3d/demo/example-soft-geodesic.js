@@ -1,6 +1,6 @@
 examples['soft geodesic']= function() {
 
-    rc.setOption('renderMode', 2)
+    rc.setOption('renderMode', 1)
     
     // --- Data ----------------------------------------------------------------
 
