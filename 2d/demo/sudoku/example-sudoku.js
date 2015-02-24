@@ -20,10 +20,11 @@ var scaledBy = Sketchpad.geom.scaledBy
 
 // --- Classes -------------------------------------------------------------
 
-Examples.sudoku.Shape = function Examples__sudoku__Shape(position, kind, optRotation, optBoard, optSize) {
+Examples.sudoku.Shape = function Examples__sudoku__Shape(position, kind, optRotation, optBoard, optSize, optColor) {
     this.position = position
     this.kind = kind
-    this.image = new Image1(position, this.getUrl(this.kind), optRotation /*|| randomRotation()*/, optSize || 0.6)
+    this.image = //new Image1(position, this.getUrl(this.kind), optRotation /*|| randomRotation()*/, optSize || 0.6)
+    new TextBox(position, kind, false, (optSize || 1) * 40, optBoard ? optBoard.squareLength : 50, optBoard ? optBoard.squareLength : 50, undefined,  undefined , optColor, true)
     if (optBoard) {
 	this.board = optBoard
 	this.boardPos = optBoard.getCoord(position)
@@ -41,10 +42,11 @@ Examples.sudoku.Shape.prototype.center = function() { return this.image.center()
 Examples.sudoku.Shape.prototype.containsPoint = function(x, y) { return this.image.containsPoint(x, y) }
 Examples.sudoku.Shape.prototype.getUrl = function(kind) { return Examples.sudoku.urls[kind] }
 
-Examples.sudoku.Board = function Examples__sudoku__Board(position, width, height, squareLength, cells, visible) {
+Examples.sudoku.Board = function Examples__sudoku__Board(position, width, height, regionSize, squareLength, cells, visible) {
     this.position = position
     this.width = width
     this.height = height
+    this.regionSize = regionSize
     this.squareLength = squareLength
     this.cells = cells
     this.visible = visible
@@ -60,19 +62,31 @@ Examples.sudoku.Board.prototype.solutionJoins = function() {
 
 Examples.sudoku.Board.prototype.draw = function(canvas, origin) {
     if (this.visible) {
-	var position = this.position, squareLength = this.squareLength, width = this.width, height = this.height
+	var position = this.position, regionSize = this.regionSize, squareLength = this.squareLength, width = this.width, height = this.height
 	var x = position.x, y = position.y
 	var w = width * squareLength, h = height * squareLength
-	for (var i = 0; i <= height; i++) {	
-	    new Line(new Point(x, y, 'white'), new Point(x + w, y, 'white')).draw(canvas, origin)
-	    y += squareLength
+	for (var i = 0; i <= height; i+=regionSize) {
+	    new Line(new Point(x, y, 'white'), new Point(x + w, y, 'white'), 'black').draw(canvas, origin)
+	    y += squareLength * regionSize
 	}
 	y = position.y
-	for (var i = 0; i <= width; i++) {	
-	    new Line(new Point(x, y, 'white'), new Point(x, y + h, 'white')).draw(canvas, origin)
-	    x += squareLength	
+	for (var i = 0; i <= width; i+=regionSize) {	
+	    new Line(new Point(x, y, 'white'), new Point(x, y + h, 'white'), 'black').draw(canvas, origin)
+	    x += squareLength * regionSize	
 	}
     }
+    x = position.x
+    y = position.y
+    var conflicts = this.getConflicts()
+    for (var i = 0; i < height; i++) {
+	var rowConflict = conflicts.rows[i]
+	for (var j = 0; j < width; j++) {
+	    var colConflict = conflicts.cols[j]
+	    var color = rowConflict || colConflict ? '#FFB2B2' : 'white'
+	    new Box(new Point(x + (j *  squareLength), y + (i *  squareLength)), squareLength, squareLength, undefined, undefined, undefined, color, undefined, undefined, 0.5).draw(canvas, origin)
+	}
+    }
+    
 }
 
 Examples.sudoku.Board.prototype.border = function() {  return new Box(this.position, this.width * this.squareLength, this.height * this.squareLength) }
@@ -81,9 +95,55 @@ Examples.sudoku.Board.prototype.containsPoint = function(x, y) {
     return this.border().containsPoint(x, y)
 }
 
+Examples.sudoku.Board.prototype.positionIsInside = function(pos) {
+    var hl = this.squareLength / 2
+    var res = this.containsPoint(pos.x + hl, pos.y + hl)
+    return res
+}
+
+
 Examples.sudoku.Board.prototype.fits = function(shape, pos) {
     var there = this.getCell(pos.i, pos.j)
     return there == 0 || there === shape
+}
+
+Examples.sudoku.Board.prototype.getConflicts = function() {
+    var regionSize = this.regionSize, width = this.width, height = this.height, cells = this.cells
+    var conflicts = {rows: {}, cols: {}}
+    for (var i = 0; i < height; i++) {
+	var es = {}
+	for (var j = 0; j < width; j++) {
+	    var e = this.getCell(i, j)
+	    if (e !== 0) {
+		e = e.kind
+		var old = es[e]
+		if (old === undefined) {
+		    es[e] = true
+		} else if (old !== e) {
+		    conflicts.rows[i] = true
+		    break
+		}
+	    }
+	}
+    }
+    for (var j = 0; j < width; j++) {
+	var es = {}
+	for (var i = 0; i < height; i++) {
+	    var e = this.getCell(i, j)
+	    if (e !== 0) {
+		e = e.kind
+		var old = es[e]
+		if (old === undefined) {
+		    es[e] = true
+		} else if (old !== e) {
+		    conflicts.cols[j] = true
+		    break
+		}
+	    }
+	}
+    }
+    //log(conflicts)
+    return conflicts
 }
 
 Examples.sudoku.Board.prototype.getCell = function(i, j) { return this.cells[i * this.width + j] }
@@ -91,11 +151,16 @@ Examples.sudoku.Board.prototype.setCell = function(i, j, p) { this.cells[i * thi
 Examples.sudoku.Board.prototype.getCoordFromIndex = function(k) { var i = Math.floor(k / this.width), j = k % this.width; return {i: i, j: j} }
 
 Examples.sudoku.Board.prototype.getCoord = function(pos) {
-    var unit = this.squareLength
-    var offset = minus(pos.plus({x: unit / 2, y: unit / 2}), this.position)
-    var offX = Math.floor(offset.x / unit)
-    var offY = Math.floor(offset.y / unit)
-    return {i: offY, j: offX}
+    var res = undefined
+    if (this.positionIsInside(pos)) {
+	var unit = this.squareLength
+	pos  = pos.plus({x: unit / 2, y: unit / 2})
+	var offset = minus(pos, this.position)
+	var offX = Math.floor(offset.x / unit)
+	var offY = Math.floor(offset.y / unit)
+	res = {i: offY, j: offX}
+    }
+    return res
 }
 
 Examples.sudoku.Board.prototype.getPos = function(coord) {
@@ -120,6 +185,17 @@ Examples.sudoku.Board.prototype.getEmptyCoord = function(shape) {
 	res = {i: ij.i, j: ij.j}
     }
     return res
+}
+
+Examples.sudoku.Board.prototype.remove = function(shape) {
+    for (var j = 0; j < this.width; j++) {
+	for (var i = 0; i < this.height; i++) {
+	    if (this.getCell(i, j) === shape) {
+		this.setCell(i, j, 0)
+		return
+	    }
+	}
+    }
 }
 
 // --- Constraint Defs -------------------------------------------------------
@@ -193,17 +269,16 @@ Examples.sudoku.ShapePlacementConstraint.prototype.computeError = function(pseud
     var shapePos = this.shapePos
     var board = this.board
     var boardPoint = board.position
-    var inside = board.containsPoint(shapePos.x, shapePos.y)
     var diff = 0
     var unit = board.squareLength
     var posCoord = board.getCoord(shapePos)
     var offY = posCoord.i
     var offX = posCoord.j 
-    if (inside && board.fits(this.shape, {i: offY, j: offX})) {
+    if (posCoord && board.fits(this.shape, {i: offY, j: offX})) {
 	this._offX = offX
 	this._offY = offY
 	this._placing = true
-	this._target = plus(boardPoint, {x: offX * unit, y: offY * unit})
+	this._target = plus(boardPoint, {x: offX * unit - 2, y: offY * unit + 5})
     } else {
 	this._placing = false
 	this._target = this.shape._origPos
@@ -217,12 +292,16 @@ Examples.sudoku.ShapePlacementConstraint.prototype.solve = function(pseudoTime, 
     var dict = {}
     var sol = {shapePos: {x: this._target.x, y: this._target.y}}
     if (this._placing) {
-	var posCoord = shape.boardPos
-	var offY = posCoord.i
-	var offX = posCoord.j 
 	var dict = {}
 	dict[((this._offY * board.width) + this._offX)] = shape
-	dict[((offY * board.width) + offX)] = 0
+	if (shape._origPos) {
+	    var posCoord = board.getCoord(shape._origPos)
+	    if (posCoord) {
+		var offY = posCoord.i
+		var offX = posCoord.j 	    
+		dict[((offY * board.width) + offX)] = 0
+	    }
+	}
 	sol.board = {cells: dict}
 	sol.shapeBoardPos = {i: this._offY, j: this._offX}
     }
@@ -275,21 +354,21 @@ examples['sudoku'] = function() {
 	    rc.remove(currBoard)
 	}
 	var boardShapes = []
-	var board = rc.add(new Examples.sudoku.Board(new Point(frame.x, frame.y), frame.cols, frame.rows, frame.squareLength, grid, true), undefined, undefined, false, {unselectable: true, unmovable: true})
+	var board = rc.add(new Examples.sudoku.Board(new Point(frame.x, frame.y), frame.cols, frame.rows, frame.regionSize, frame.squareLength, grid, true), undefined, undefined, false, {unselectable: true, unmovable: true})
 	for (var i = 0; i < frame.rows; i++) {
 	    for (var j = 0; j < frame.cols; j++) {
 		var cell = board.getCell(i, j)
 		if (cell == 0) continue
-		var x = frame.x + j * frame.squareLength
-		var y = frame.y + i * frame.squareLength
-		var shape = rc.add(new Examples.sudoku.Shape(new Point(x, y), cell, undefined, board, shapeSize), undefined, undefined, true)
+		var x = frame.x + j * frame.squareLength - 2
+		var y = frame.y + i * frame.squareLength + 5
+		var shape = rc.add(new Examples.sudoku.Shape(new Point(x, y), cell, undefined, board, shapeSize, 'gray'), undefined, undefined, true, {unselectable: true, unmovable: true})
 		board.setCell(i, j, shape)
 		boardShapes.push(shape)
 	    }
 	}
-	boardShapes.forEach(function(shape) {
-	    rc.addConstraint(Examples.sudoku.ImageSwingConstraint, undefined, shape, true)
-	})
+	//boardShapes.forEach(function(shape) {
+	//    rc.addConstraint(Examples.sudoku.ImageSwingConstraint, undefined, shape, true)
+	//})
 	return board
     }
 
@@ -309,47 +388,54 @@ examples['sudoku'] = function() {
     // --- Data ----------------------------------------------------------------    
     scratch = sketchpad.scratch
     
-    var frame1 = {x: 300, y: 100, width: 1150, height: 500, cols: 10, rows: 10, squareLength: 50}
+    var frame1 = {x: 500, y: 120, width: 1150, height: 500, cols: 9, rows: 9, regionSize: 3, squareLength: 50}
     frame1.midx = frame1.x + (frame1.width / 2)
     frame1.endx = frame1.x + frame1.width
     frame1.endx = frame1.x + (frame1.width)
     frame1.endy = frame1.y + (frame1.height)
     
     var grid1 = [
-	0,0,0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,0,0,0,0,
+	3,0,0,1,0,2,9,0,4,
+	2,7,0,0,0,9,1,0,0,
+	0,9,1,0,0,8,7,3,0,
+	8,6,7,0,5,1,2,0,0,
+	9,5,3,0,0,4,0,0,0,
+	1,0,0,3,0,0,0,6,0,
+	7,0,2,8,4,5,0,0,1,
+	0,1,8,7,0,3,4,2,5,
+	5,0,0,2,0,6,0,7,8
     ];
 
-    var board1 = addBoard(frame1, grid1, .6)
+    var board1 = addBoard(frame1, grid1, 1)
     var shapeIcons = []
-    for (var i = 0; i <= 9; i++)  {
-	shapeIcons.push(rc.add(new Examples.sudoku.Shape(new Point(frame1.x + (frame1.squareLength * frame1.cols) + 25 , frame1.y - 0 + (i * frame1.squareLength)), i,  undefined, undefined, .25), undefined, undefined, undefined, {unselectable: true, unmovable: true}))
+    for (var i = 1; i <= 9; i++)  {
+	shapeIcons.push(rc.add(new Examples.sudoku.Shape(new Point(frame1.x + (frame1.squareLength * frame1.cols) + 25 , frame1.y - 40 + (i * frame1.squareLength)), i,  undefined, undefined, 1), undefined, undefined, undefined, {unselectable: true, unmovable: true}))
     }
     
     // --- Time / Event Handling ---------------------------------------------
     var distance = Sketchpad.geom.distance
-
    
     sketchpad.registerEvent('pointerup',
 			    function(e) {
 				var thing = rc.selection
 				if (thing instanceof Examples.sudoku.Shape && thing.board) {
-				    scratch.dragPlacementConstraint = rc.addConstraint(Examples.sudoku.ShapePlacementConstraint, undefined, thing)
-				    thing.image._swingSpeed = 2
+				    var pos = thing.position
+				    if (thing.board.positionIsInside(pos)) {
+					thing.boardPos = thing.board.getCoord(pos)
+					scratch.dragPlacementConstraint = rc.addConstraint(Examples.sudoku.ShapePlacementConstraint, undefined, thing)
+					//thing.image._swingSpeed = 2
+				    } else {
+					board1.remove(thing)
+					rc.remove(thing)					
+				    }
 				}
+				/*
 				if (scratch.dragDangleConstraint !== undefined) {
 				    rc.removeConstraint(scratch.dragDangleConstraint)
 				    thing.image._swingSpeed = 2
 				    scratch.dragDangleConstraint = undefined
 				}
+				*/
 			    }, 'add shape placement constraint when shape is dropped')
     
     sketchpad.registerEvent('pointerdown',
@@ -370,7 +456,7 @@ examples['sudoku'] = function() {
 					var t = shapeIcons[idx]
 					if (t.containsPoint(x, y)) {
 					    pos = t.position.copy()
-					    thing = rc.add(new Examples.sudoku.Shape(pos, t.kind,  undefined, board1, .25))
+					    thing = rc.add(new Examples.sudoku.Shape(pos, t.kind,  undefined, board1, 1, 'blue'))
 					    thing._origPos = thing.position.copy()
 					    rc.pointerdown(e)
 					    break
