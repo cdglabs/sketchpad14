@@ -7,9 +7,9 @@
   </style>
 <body>
   <script src="./lib/prism.js"></script>
-  <hd>Back to Half-Century Later:
+  <hd>Back to a Half-Century Later:
     <br>
-    "From Sketchpad<small><u>61</u></small> to Sketchpad<small><u>14</u></small>"
+    "From Sketchpad<u>61</u> to Sketchpad<u>14</u>"
     <br>
     <small>
       Part I: Background
@@ -56,11 +56,11 @@
     <p>
       To illustrate the approach, consider the single constraint that the distance between two points <i>p(x1,y1)</i> and <i>q(x2,y2)</i> must be maintained at <i>1</i>. Also assume the current values are <i>p(1,1)</i> and <i>q(2,2)</i>. Thus the error value (<i>e</i>) is given as:
     </p>
-    <img src="img/10.gif" style="margin-left: 22%"></img>
+    <img class="chapter" src="img/10.gif" style="width: 50%; margin-left: 22%"></img>
     <p>
       Now if we plot this error as a function of the first variable, say <i>x1</i>, where all other variables are fixed at their current values, we obtain the red graph in the figure below. We get the current error value <i>e<small>0</small></i> based on the current value of <i>x1</i>, i.e., <i>1</i>. As the linear approximation of the red graph, we tweak <i>x1</i> by a small amount, say <i>0.01</i> and obtain the new error <i>e<small>1</small></i>. The two points give us the linear approximate blue line below:
     </p>    
-    <img src="img/11.png" style="margin-left: -5%"></img>
+    <img class="chapter" src="img/11.png" style="margin-left: 0%"></img>
     <p>
       Now we can use <i>x1</i>'s value where the line crosses the x-axis (zero error) as an approximation for what should <i>x1</i> be changed to in order to minimize the error associated with this constraint. We then repeat this process by moving on to the other three variables (<i>y1</i>, <i>x2</i>, and <i>x2</i>) involved in the constraint and then wrapping around back to the first variable.
     </p>    
@@ -175,7 +175,7 @@ function computeDeltas() {
   <img src="img/1.png"></img>
   <br>
   <p>
-    Read <a href="2.html">Part II: Constraint Reactive Programming (CRP) in Sketchpad<small>14</small></a><br>
+    Read <a href="2.html">Part II: Constraint Reactive Programming (CRP) in Sketchpad14</a><br>
     Back to <a href="index.html">Table of Contents</a>
   </p>
   <script src="./lib/click-to-play-gif.js"></script>

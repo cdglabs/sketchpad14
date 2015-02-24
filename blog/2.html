@@ -7,12 +7,12 @@
   </style>
 <body>
   <script src="./lib/prism.js"></script>
-  <hd>Back to Half-Century Later:
+  <hd>Back to a Half-Century Later:
     <br>
-    "From Sketchpad<small><u>61</u></small> to Sketchpad<small><u>14</u></small>"
+    "From Sketchpad<u>61</u> to Sketchpad<u>14</u>"
     <br>
     <small>
-      Part II: Constraint Reactive Programming (CRP) in Sketchpad<small>14</small>
+      Part II: Constraint Reactive Programming (CRP) in Sketchpad14
     </small>
   </hd>
   <br><br>
@@ -20,10 +20,10 @@
   <br><br>
   <img src="img/1.png"></img>
   <br>
-  <hd1>53 Years Later: Sketchpad<small>14</small></hd1>
+  <hd1>53 Years Later: Sketchpad14</hd1>
   <div class="chapter">
     <p>
-      Overveld's alternative relaxation constraint solving approach for the geometric constraints a la Sketchpad inspired us to build a fully general programming model around it. We call it <i>Sketchpad<small>14</small></i>. Our intention was to go back and honor and implement most of the cool things about Sutherland's Sketchpad, yet build a realistic system to build interactive web applications, declaratively. Our main observations were:
+      Overveld's alternative relaxation constraint solving approach for the geometric constraints a la Sketchpad inspired us to build a fully general programming model around it. We call it <i>Sketchpad14</i>. Our intention was to go back and honor and implement most of the cool things about Sutherland's Sketchpad, yet build a realistic system to build interactive web applications, declaratively. Our main observations were:
     </p>
     <ul>
       <li>
@@ -37,7 +37,7 @@
       As in Sketchpad and Overveld's geometric constraints, the way to define and modify the behavior of a program is to add/remove constraints, rather than the common imperative programming practice of "adding or modifying some code." We take Overveld's approach, however, and require that the statement and the solution to individual constraint types be defined beforehand. This means we let the user define constraint types as well as how to solve them in isolation. This setup puts the programmer in the driver seat to use the programming language of the program itself to define the constraint and also provide an "algorithm" to solve it. Note that there's nothing stopping that algorithm to be simply an invocation of an external solver!
     </p>
     <p>
-      Another aspect of Sketchpad<small>14</small> is that it gives a principled mechanism for the user to define the <i>reactive</i> part of an interactive program. The next section explains a semi-formal programming model implemented by the tool that we call <i>Constraint Reactive Programming</i>.
+      Another aspect of Sketchpad14 is that it gives a principled mechanism for the user to define the <i>reactive</i> part of an interactive program. The next section explains a semi-formal programming model implemented by the tool that we call <i>Constraint Reactive Programming</i>.
     </p>
   </div>
   <img src="img/1.png"></img>
@@ -45,7 +45,7 @@
   <hd1>Constraint Reactive Programming</hd1>
   <div class="chapter">
     <p>
-      Sketchpad<small>14</small> is hosted in JavaScript, so we will explain the Constraint Reactive Programming (CRP) model in the context of the JS language.
+      Sketchpad14 is hosted in JavaScript, so we will explain the Constraint Reactive Programming (CRP) model in the context of the JS language.
     </p>
     In this language, primitive types as well as functions and objects serve as values. Objects can be instantiated and referenced, as usual. However, imperative style programming, e.g. assignments and looping constructs for computation, isn't done.
     <p>
@@ -82,13 +82,13 @@
 Therefore, the execution model is unlike the imperative style, i.e., statement by statement. The program is assumed to be <i>reactive</i>. All present constraints are assumed to be continuously operating over the data, affecting them any time they are left unsatisfied. The events are always assumed to be ready to be triggered.
     </p>
     <p>
-      OK, enough talking! We'll come back to CRP later. Let's jump to some Sketchpad<small>14</small> examples in the <a href="3.html">next part</a>.
+      OK, enough talking! We'll come back to CRP later. Let's jump to some Sketchpad14 examples in the <a href="3.html">next part</a>.
     </p>
   </div>
   <img src="img/1.png"></img>
   <br>
   <p>
-    Read <a href="3.html">Part III: Using Sketchpad<small>14</small> with Predefined Types</a><br>
+    Read <a href="3.html">Part III: Using Sketchpad14 with Predefined Types</a><br>
     Back to <a href="index.html">Table of Contents</a><br>
   </p>  
 </body>

@@ -17,9 +17,9 @@
     div.appendChild(iframe)
     }
   </script>
-  <hd>Back to Half-Century Later:
+  <hd>Back to a Half-Century Later:
     <br>
-    "From Sketchpad<small><u>61</u></small> to Sketchpad<small><u>14</u></small>"
+    "From Sketchpad<u>61</u> to Sketchpad<u>14</u>"
     <br>
     <small>
       Part V: Creating Applications from Scratch in CRP, <br>(Remaking the "Parables of the Polygons" Demo)
@@ -33,22 +33,22 @@
   <hd1>Parable of the Polygons</hd1>
   <div class="chapter">
     <p>
-      Recently, CDG's <a href="http://vihart.com/">Vi Hart</a> and web programmer <a href="http://www.patreon.com/ncase">Niky Case</a> relased a highly cited and praised web page called <a href="http://ncase.me/polygons/">Parables of the Polygons</a>. Not only beautifully designed, the page explains a mathematics concept in an explorable way and leads to conveying a positive social lesson for tolerance of all. We took the task of remaking the web page in Sketchpad<small>14</small> and the CRP model to understand the advantages and limitations of our approach. This chapter summarizes what it took to make the demo. 
+      Recently, CDG's <a href="http://vihart.com/">Vi Hart</a> and web programmer <a href="http://www.patreon.com/ncase">Niky Case</a> relased a highly cited and praised web page called <a href="http://ncase.me/polygons/">Parables of the Polygons</a>. Not only beautifully designed, the page explains a mathematics concept in an explorable way and leads to conveying a positive social lesson for tolerance of all. We took the task of remaking the web page in Sketchpad14 and the CRP model to understand the advantages and limitations of our approach. This chapter summarizes what it took to make the demo. 
     </p>
-    <img src="img/18.png" width="150%" style="margin-left: -30%"></img>
+    <img class="chapter" src="img/18.png" style="width: 125%; margin-left: -15%"></img>
     <p>
-      Figure above is a snapshot of the demo done in Sketchpad<small>14</small>. Though this demo does not fully implement the original page, most interesting and interactive behaviors are present. Surprisingly, only three new constraint types had to be defined, two of which can be seen in the constraint list view in the figure above. The other five type of constraints were already part of our predefined set of constraints or present in previous demos.
+      Figure above is a snapshot of the demo done in Sketchpad14. Though this demo does not fully implement the original page, most interesting and interactive behaviors are present. Surprisingly, only three new constraint types had to be defined, two of which can be seen in the constraint list view in the figure above. The other five type of constraints were already part of our predefined set of constraints or present in previous demos.
     </p>
   </div>
   <img src="img/1.png"></img>
   <br>
-  <hd1>What's it take to program in CRP/Sketchpad<small>14</small>?</hd1>
+  <hd1>What's it take to program in CRP/Sketchpad14?</hd1>
   <div class="chapter">
     <p>
       You could find the source code for this demo at <small>"<a href="../2d/demo/polygons/example-polygons.js">../2d/demo/polygons/example-polygons.js</a>"</small> or scroll down to the <a href="#sketchpad-playground-div">bottom</a> of this page to play it. Let's examine it. It should be possible to develop it all within the tool itself, but at the moment the UI just isn't usable yet.
     </p>
     <p>
-      All CRP programs are conventionally organized in the same way. <b>Data classes</b> are defined first, then <b>constraint classes</b>. Afterwards <b>data</b> objects are created and then <b>constraints</b> are instantiated to operate on them. Finally, should this be an interactive program (all Sketchpad<small>14</small> are because objects are draggable), <b>events</b> are registered, whose job is to modify the data and constraint stores.
+      All CRP programs are conventionally organized in the same way. <b>Data classes</b> are defined first, then <b>constraint classes</b>. Afterwards <b>data</b> objects are created and then <b>constraints</b> are instantiated to operate on them. Finally, should this be an interactive program (all Sketchpad14 programs are because objects are draggable), <b>events</b> are registered, whose job is to modify the data and constraint stores.
     </p>
   </div>
   <img src="img/1.png"></img>
@@ -395,7 +395,7 @@ registerEvent('mousedown', function(e) {
   <hd1>Click to view this demo!</hd1>
   <br>
   <br>
-  <div id="sketchpad-playground-div"><img src="img/19.png" onclick="startSketchpadPlayground()" style="margin-left: -5%"></img></div>    
+  <div id="sketchpad-playground-div"><img class="clicktoembed" src="img/19.png" onclick="startSketchpadPlayground()" style="margin-left: -5%"></img></div>    
   <script src="./lib/click-to-play-gif.js"></script>
 </body>
 </html>

@@ -17,12 +17,12 @@
     div.appendChild(iframe)
     }
   </script>
-  <hd>Back to Half-Century Later:
+  <hd>Back to a Half-Century Later:
     <br>
-    "From Sketchpad<small><u>61</u></small> to Sketchpad<small><u>14</u></small>"
+    "From Sketchpad<u>61</u> to Sketchpad<u>14</u>"
     <br>
     <small>
-      Part III: Using Sketchpad<small>14</small> with Predefined Types
+      Part III: Using Sketchpad14 with Predefined Types
     </small>
   </hd>
   <br><br>
@@ -33,7 +33,7 @@
   <hd1>First Example: CDG Logo</hd1>
   <div class="chapter">
     <p>
-      Now it's time to see our first example in Sketchpad<small>14</small>. You may click the <img width="4%"  height="4%" src="img/play-icon.png" onclick="alert('this itself is not a button Einstein!')"></img> icon on each image to view a short video demonstration.
+      Now it's time to see our first example in Sketchpad14. You may click the <img src="img/play-icon.png" style="width: 4%"  onclick="alert('this itself is not a button Einstein!')"></img> icon on each image to view a short video demonstration.
     </p>
     <table>
       <tr>
@@ -45,7 +45,7 @@
       Consider the program above that displays our group (CDG)'s interim logo, which consists of three points and two line sections. This is a reactive application. The user can drag one of these objects around, however, the structure of the logo needs to be maintained.
     </p>
     <p>
-      Sketchpad<small>14</small> allows the user to define new data or constraint types. However, it does come with a set of standard shapes and constraint types, which we will make use of here. To capture this program, we instantiate three <mono>Point</mono>s and two <mono>Line</mono>s with the correct radius, text, color, etc. to match the figure below. 
+      Sketchpad14 allows the user to define new data or constraint types. However, it does come with a set of standard shapes and constraint types, which we will make use of here. To capture this program, we instantiate three <mono>Point</mono>s and two <mono>Line</mono>s with the correct radius, text, color, etc. to match the figure below. 
     </p>
     <pre><code class="language-javascript">
 
@@ -167,7 +167,7 @@
       </tr>
     </table>
     <p>
-      Sketchpad<small>14</small> can generate a whole English summary of the program. This involves giving a parameterized description of each involved constraint type, as well as a summary of individual active constraints as we showed before, along with a listing of existing objects and their states, and finally the set of active events. The figure below shows the constraints portion of the summary:
+      Sketchpad14 can generate a whole English summary of the program. This involves giving a parameterized description of each involved constraint type, as well as a summary of individual active constraints as we showed before, along with a listing of existing objects and their states, and finally the set of active events. The figure below shows the constraints portion of the summary:
     </p>
     <table>
       <tr>
@@ -195,14 +195,14 @@
   <p>    
     Read <a href="4.html">Part IV: Execution Model in CRP</a><br>
     Back to <a href="index.html">Table of Contents</a><br>
-    Try <a href="../index.html">Sketchpad<small>14</small></a> (or just play below)
+    Try <a href="../index.html">Sketchpad14</a> (or just play below)
   </p>  
   <img src="img/1.png"></img>
   <br>
   <hd1>Click to start playing!</hd1>
   <br>
   <br>
-  <div id="sketchpad-playground-div"><img src="img/12.png" onclick="startSketchpadPlayground()"></img></div>
+  <div id="sketchpad-playground-div"><img class="clicktoembed" src="img/12.png" onclick="startSketchpadPlayground()"></img></div>
   <script src="./lib/click-to-play-gif.js"></script>
 </body>
 </html>

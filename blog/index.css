@@ -22,9 +22,11 @@ mono {
     color: #8904B1;
 }
 
+/*
 i {
     color: #086A87;
 }
+*/
 
 b {
     color: #990000;
@@ -51,9 +53,20 @@ img {
     margin-left: 0%;
 }
 
+img.chapter {
+    width: 800px;
+}
+
 /* Click-to-play GIFs */
 img.clicktoplay {
-  cursor: pointer;
+    cursor: pointer;
+    width: auto;
+}
+
+/* Click-to-play iframe */
+img.clicktoembed {
+    cursor: pointer;
+    width: auto;
 }
 
 hd{
@@ -88,15 +101,15 @@ a.black:hover {
 
 .chapter{
     margin: 50px auto;
-    width:800px;
+    width: 800px;
     text-align: left;   
 }
 
 .video {
-    margin-left: 10%;
+    margin-left: 0%;
     align: middle;
-    width: 630;
-    height: 473;
+    width: 800/*630*/;
+    height: 600/*473*/;
 }
 
 iframe {
