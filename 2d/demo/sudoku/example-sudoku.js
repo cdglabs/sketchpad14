@@ -63,7 +63,7 @@ Examples.sudoku.Board = function Examples__sudoku__Board(position, width, height
     var x = position.x, y = position.y
     for (var i = 0; i < height; i++) {
 	for (var j = 0; j < width; j++) {
-	    this.squares.push(rc.add(new Box(new Point(x + (j *  squareLength), y + (i *  squareLength)), squareLength, squareLength, undefined, undefined, undefined, 'white', undefined, undefined, 0.5), undefined, undefined, false, {unselectable: true, unmovable: true}))
+	    this.squares.push(rc.add(new Box(new Point(x + (j *  squareLength), y + (i *  squareLength)), squareLength, squareLength, undefined, undefined, undefined, 'white', undefined, undefined, 0.5), undefined, undefined, true, {unselectable: true, unmovable: true}))
 	}
     }
 
@@ -366,7 +366,6 @@ examples['sudoku'] = function() {
     sketchpad.setOption('solveEvenWithoutErrorOnPriorityDifferences', true)
     rc.setOption('dragConstraintPriority', 0)
 
-
     function shuffleArray(array) {
 	for (var i = array.length - 1; i > 0; i--) {
             var j = Math.floor(Math.random() * (i + 1));
@@ -417,7 +416,7 @@ examples['sudoku'] = function() {
 	    rc.remove(currBoard)
 	}
 	var boardShapes = []
-	var board = rc.add(new Examples.sudoku.Board(new Point(frame.x, frame.y), frame.cols, frame.rows, frame.regionSize, frame.squareLength, grid, true), undefined, undefined, false, {unselectable: true, unmovable: true})
+	var board = rc.add(new Examples.sudoku.Board(new Point(frame.x, frame.y), frame.cols, frame.rows, frame.regionSize, frame.squareLength, grid, true), undefined, undefined, true, {unselectable: true, unmovable: true})
 	for (var i = 0; i < frame.rows; i++) {
 	    for (var j = 0; j < frame.cols; j++) {
 		var cell = board.getCell(i, j)
@@ -433,7 +432,7 @@ examples['sudoku'] = function() {
 	    var pos = new Point(frame.x + (frame.squareLength * frame.cols) + 25 , frame.y + 5 + (i * frame.squareLength))
 	    var dig = i + 1
 	    for (var j = 0; j < unuseds[dig]; j++)  {
-    		var shape = rc.add(new Examples.sudoku.Shape(pos.copy(), dig,  undefined, board, 1, 'blue'))
+    		var shape = rc.add(new Examples.sudoku.Shape(pos.copy(), dig,  undefined, board, 1, 'blue'), undefined, undefined, true)
 		shape._origPos = shape.position.copy()
 		shape._initPos = shape.position.copy()
 	    }
@@ -473,13 +472,17 @@ examples['sudoku'] = function() {
     frame.endx = frame.x + (frame.width)
     frame.endy = frame.y + (frame.height)
 
+    var bg = rc.add(new Image1(new Point(frame.x, frame.y), './sudoku/img/1.png', undefined, 1.06), undefined, undefined, false, {unselectable: true, unmovable: true})
+
     var puzzle = newPuzzle(numBlanks)
     var board = newBoard(frame, puzzle, 1)
     var resetButton = rc.add(new TextBox(new Point(frame.x - 300, frame.y), ('   NEW BOARD'), false, 30, 220, 50, 'white', 'sans-serif', 'black', false, 'lighter', true, 16), undefined, undefined, true)
 
+
     // --- Time / Event Handling ---------------------------------------------
     var distance = Sketchpad.geom.distance
-   
+
+    
     sketchpad.registerEvent('pointerup',
 			    function(e) {
 				var thing = rc.selection
