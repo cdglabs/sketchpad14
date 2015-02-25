@@ -212,6 +212,11 @@ Box.dummy = function(x, y) {
     return new Box(new Point(x, y), 200, 200)
 }
 
+Box.prototype.solutionJoins = function() { 
+    var lastGuyWinsJoinFn = sketchpad.lastOneWinsJoinSolutions
+    return {bgColor: lastGuyWinsJoinFn}
+}
+
 Box.prototype.addMaintainSizeConstraints = function() {
     this.maintainWidthConstraint = new Sketchpad.arith.ValueConstraint({obj: this, prop: 'width'}, this.width) 
     this.maintainHeightConstraint = new Sketchpad.arith.ValueConstraint({obj: this, prop: 'height'}, this.height) 
