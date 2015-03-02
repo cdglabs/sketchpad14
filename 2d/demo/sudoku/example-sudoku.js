@@ -621,8 +621,8 @@ function newPuzzle(options, frame) {
 }
 
 examples['sudoku'] = function() {
-    //sketchpad.setOption('debug', true)
-    //rc.setOption('renderMode', 1)
+    sketchpad.setOption('solveEvenWithoutErrorOnPriorityDifferences', true)
+    rc.setOption('dragConstraintPriority', 0)
 
     // --- Data ----------------------------------------------------------------    
     scratch = sketchpad.scratch
