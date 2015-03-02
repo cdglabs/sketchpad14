@@ -15,9 +15,9 @@ examples.cdg = function() {
 	rc.add(new Line(p1, p2, color, thickness, undefined, opacity))
 	rc.add(new Line(p2, p3, color, thickness, undefined, opacity))
 	
-	rc.addConstraint(Sketchpad.geom.LengthConstraint, undefined, p1, p2, width)
-	rc.addConstraint(Sketchpad.geom.LengthConstraint, undefined, p2, p3, width)
-	rc.addConstraint(Sketchpad.geom.OrientationConstraint, undefined, p2, p1, p2, p3, Math.PI / 2)
+	rc.addConstraint(Sketchpad.geom.FixedLength, undefined, p1, p2, width)
+	rc.addConstraint(Sketchpad.geom.FixedLength, undefined, p2, p3, width)
+	rc.addConstraint(Sketchpad.geom.FixedAngle, undefined, p2, p1, p2, p3, Math.PI / 2)
     })
 };
 

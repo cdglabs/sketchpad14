@@ -18,13 +18,13 @@ examples.chain = function() {
     rc.add(new Line(p7, p8));
     rc.add(new Line(p8, p9));
 
-    rc.addConstraint(Sketchpad.geom.LengthConstraint, undefined, p1, p2, 100);
-    rc.addConstraint(Sketchpad.geom.LengthConstraint, undefined, p2, p3, 100);
-    rc.addConstraint(Sketchpad.geom.LengthConstraint, undefined, p3, p4, 100);
-    rc.addConstraint(Sketchpad.geom.LengthConstraint, undefined, p4, p5, 100);
-    rc.addConstraint(Sketchpad.geom.LengthConstraint, undefined, p5, p6, 100);
-    rc.addConstraint(Sketchpad.geom.LengthConstraint, undefined, p6, p7, 100);
-    rc.addConstraint(Sketchpad.geom.LengthConstraint, undefined, p7, p8, 100);
-    rc.addConstraint(Sketchpad.geom.LengthConstraint, undefined, p8, p9, 100);
+    rc.addConstraint(Sketchpad.geom.FixedLength, undefined, p1, p2, 100);
+    rc.addConstraint(Sketchpad.geom.FixedLength, undefined, p2, p3, 100);
+    rc.addConstraint(Sketchpad.geom.FixedLength, undefined, p3, p4, 100);
+    rc.addConstraint(Sketchpad.geom.FixedLength, undefined, p4, p5, 100);
+    rc.addConstraint(Sketchpad.geom.FixedLength, undefined, p5, p6, 100);
+    rc.addConstraint(Sketchpad.geom.FixedLength, undefined, p6, p7, 100);
+    rc.addConstraint(Sketchpad.geom.FixedLength, undefined, p7, p8, 100);
+    rc.addConstraint(Sketchpad.geom.FixedLength, undefined, p8, p9, 100);
 };
 

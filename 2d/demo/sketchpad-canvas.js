@@ -157,6 +157,7 @@ SketchpadCanvas.prototype.preventBrowserDefaultKeyEvents = function() {
     window.onkeydown = function(event) {
 	var tag = event.target.tagName
 	if (preventKeys.indexOf(event.keyCode) >= 0 && ['CANVAS', 'BODY'].indexOf(tag) >= 0) {
+	    sketchpad.converged = false	  
             event.preventDefault()
 	    event.stopPropagation()
 	}
@@ -503,7 +504,7 @@ SketchpadCanvas.prototype.pointerdown = function(e) {
 	    var offset = pointedToThing.offset	
 	    var x = e.clientX + window.scrollX
 	    var y = e.clientY + window.scrollY
-	    var constraint = this.addConstraint(Sketchpad.geom.CoordinateConstraint, this.dragConstraintPriority, point, x, y)
+	    var constraint = this.addConstraint(Sketchpad.geom.FixedCoordinate, this.dragConstraintPriority, point, x, y)
 	    constraint._offset = offset
 	    this.points.splice(pointIdx, 1)
 	    this.points.push(point)
@@ -571,10 +572,10 @@ SketchpadCanvas.prototype.forEachFinger = function(fn) {
     }
 }
 
-SketchpadCanvas.prototype.updateCoordinateConstraints = function() {
+SketchpadCanvas.prototype.updateFixedCoordinates = function() {
     var self = this
     this.sketchpad.constraints.forEach(function(constraint) {
-	if (constraint instanceof Sketchpad.geom.CoordinateConstraint) {
+	if (constraint instanceof Sketchpad.geom.FixedCoordinate) {
 	    self.forEachFinger(function(finger) {
 		if (finger.point === constraint.p) {
 		    var offset = constraint._offset
@@ -591,7 +592,7 @@ SketchpadCanvas.prototype.step = function() {
     var doRedraw = false
     if (!(sketchpad.converged || this.paused)) {
 	if (this.dragFingersCount > 0)
-	    this.updateCoordinateConstraints()
+	    this.updateFixedCoordinates()
 	if (this.showEachIteration) {
 	    var t0 = this.sketchpad.currentTime()
 	    this.sketchpad.doTasksOnEachTimeStep(t0)
@@ -1242,7 +1243,7 @@ function SketchpadTile(name, inputs, ownRun, buttonsInfo, inspectorOfObj, fixedI
 	    var objPointerLine = new Line(objPointerLinePt, objPointerLinePt2, 'gray', 2, 4)
 	    self.parts.push(objPointerLine)
 	    if (inspectorOfObj.center)
-		self.isOwnerOf.push(rc.addConstraint(Sketchpad.arith.OneWayEqualityConstraint, undefined, {obj: objPointerLine, prop: 'p2'}, {obj: inspectorOfObj, prop: 'center'}, true))	    
+		self.isOwnerOf.push(rc.addConstraint(Sketchpad.arith.OneWayEqualProperties, undefined, {obj: objPointerLine, prop: 'p2'}, {obj: inspectorOfObj, prop: 'center'}, true))	    
 	}
 	if (inspectorOfObj.description) {
 	    var tb = new TextBox(new Point(20, y), '"' + inspectorOfObj.description.call(inspectorOfObj) + '"', true, 18, width - 100, undefined, undefined, undefined, 'black', true, undefined, true)
@@ -1315,10 +1316,10 @@ function SketchpadTile(name, inputs, ownRun, buttonsInfo, inspectorOfObj, fixedI
 		var propPointerLine = new Line(propPointerLinePt, inputValue.center ? inputValue.center() : inputValue.grabPoint(), 'orange', 2, 4)
 		input.pointerLine = propPointerLine
 		self.parts.push(propPointerLine)
-		self.isOwnerOf.push(rc.addConstraint(Sketchpad.arith.SumConstraint, undefined, {obj: self.position, prop: 'x'}, {obj: inputCoord, prop: 'x'}, {obj: propPointerLinePt, prop: 'x'}, [3]))
-		self.isOwnerOf.push(rc.addConstraint(Sketchpad.arith.SumConstraint, undefined, {obj: self.position, prop: 'y'}, {obj: inputCoord, prop: 'y'}, {obj: propPointerLinePt, prop: 'y'}, [3]))
+		self.isOwnerOf.push(rc.addConstraint(Sketchpad.arith.SumRelation, undefined, {obj: self.position, prop: 'x'}, {obj: inputCoord, prop: 'x'}, {obj: propPointerLinePt, prop: 'x'}, [3]))
+		self.isOwnerOf.push(rc.addConstraint(Sketchpad.arith.SumRelation, undefined, {obj: self.position, prop: 'y'}, {obj: inputCoord, prop: 'y'}, {obj: propPointerLinePt, prop: 'y'}, [3]))
 		if (inputValue.center)
-		    self.isOwnerOf.push(rc.addConstraint(Sketchpad.arith.OneWayEqualityConstraint, undefined, {obj: propPointerLine, prop: 'p2'}, {obj: inputValue, prop: 'center'}, true))
+		    self.isOwnerOf.push(rc.addConstraint(Sketchpad.arith.OneWayEqualProperties, undefined, {obj: propPointerLine, prop: 'p2'}, {obj: inputValue, prop: 'center'}, true))
 	    }
 	}
     })

@@ -149,25 +149,25 @@ Examples.pentominoes.Piece.prototype.squarePositions = function(canvas, origin) 
 
 // --- Constraint Defs -------------------------------------------------------
 
-//  PiecePlacementConstraint
+//  PieceSnappingToBoard
 
-Examples.pentominoes.PiecePlacementConstraint = function Examples__pentominoes__PiecePlacementConstraint(piece, board) {
+Examples.pentominoes.PieceSnappingToBoard = function Examples__pentominoes__PieceSnappingToBoard(piece, board) {
     this.board = board
     this.piece = piece
     this.piecePos = piece.position
 }
 
-sketchpad.addClass(Examples.pentominoes.PiecePlacementConstraint, true)
+sketchpad.addClass(Examples.pentominoes.PieceSnappingToBoard, true)
 
-Examples.pentominoes.PiecePlacementConstraint.description = function() {
-    return "Examples.pentominoes.PiecePlacementConstraint(Piece P, Board B) states that if P is moved inside the board and it fits in the current square it should be placed nicely on the board B and B should add it in its list of placed pieces."
+Examples.pentominoes.PieceSnappingToBoard.description = function() {
+    return "Examples.pentominoes.PieceSnappingToBoard(Piece P, Board B) states that if P is moved inside the board and it fits in the current square it should be placed nicely on the board B and B should add it in its list of placed pieces."
 }
 
-Examples.pentominoes.PiecePlacementConstraint.prototype.description = function() {
+Examples.pentominoes.PieceSnappingToBoard.prototype.description = function() {
     return "if piece " + this.piece.__toString + " is moved inside the board and it fits in the current square it should be placed nicely on the board  and board should add it in its list of placed pieces."
 }
 
-Examples.pentominoes.PiecePlacementConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
+Examples.pentominoes.PieceSnappingToBoard.prototype.computeError = function(pseudoTime, prevPseudoTime) {
     var piecePos = this.piecePos
     var board = this.board
     var boardPoint = board.position
@@ -188,16 +188,16 @@ Examples.pentominoes.PiecePlacementConstraint.prototype.computeError = function(
     return diff
 }
 
-Examples.pentominoes.PiecePlacementConstraint.prototype.solve = function(pseudoTime, prevPseudoTime) {
+Examples.pentominoes.PieceSnappingToBoard.prototype.solve = function(pseudoTime, prevPseudoTime) {
     var dict = {}
     dict[this.piece.kind] = {x: this._offX, y: this._offY}
     var sol = {piecePos: {x: this._target.x, y: this._target.y}, board: {piecesOn: dict}}
     return sol
 }
 
-// PentominoesConstraint
+// PentominoesSolved
 
-Examples.pentominoes.PentominoesConstraint = function Examples__pentominoes__PentominoesConstraint(board) {
+Examples.pentominoes.PentominoesSolved = function Examples__pentominoes__PentominoesSolved(board) {
     this.board = board
     this.pieces = board.pieces
     for (var p in this.pieces) {
@@ -205,19 +205,19 @@ Examples.pentominoes.PentominoesConstraint = function Examples__pentominoes__Pen
     }
 }
 
-sketchpad.addClass(Examples.pentominoes.PentominoesConstraint, true)
+sketchpad.addClass(Examples.pentominoes.PentominoesSolved, true)
 
-Examples.pentominoes.PentominoesConstraint.description = function() {
-    return "Examples.pentominoes.PentominoesConstraint(Board B) states the definition of a solution for the Pentominoes problem: all pieces should be placed on the board."
+Examples.pentominoes.PentominoesSolved.description = function() {
+    return "Examples.pentominoes.PentominoesSolved(Board B) states the definition of a solution for the Pentominoes problem: all pieces should be placed on the board."
 }
 
-Examples.pentominoes.PentominoesConstraint.prototype.description = function() {
+Examples.pentominoes.PentominoesSolved.prototype.description = function() {
     return "Pentominoes problem should be solved: all pieces should be placed on the board."
 }
 
-Examples.pentominoes.PentominoesConstraint.prototype.__searchable = true
+Examples.pentominoes.PentominoesSolved.prototype.__searchable = true
 
-Examples.pentominoes.PentominoesConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
+Examples.pentominoes.PentominoesSolved.prototype.computeError = function(pseudoTime, prevPseudoTime) {
     var board = this.board, width = board.width, height = board.height
     var count = width * height
     var filtered = []
@@ -233,7 +233,7 @@ Examples.pentominoes.PentominoesConstraint.prototype.computeError = function(pse
     return filtered.length == count ? 0 : 1
 }
 
-Examples.pentominoes.PentominoesConstraint.prototype.solve = function(pseudoTime, prevPseudoTime) {
+Examples.pentominoes.PentominoesSolved.prototype.solve = function(pseudoTime, prevPseudoTime) {
     var board = this.board
     var width =  2//board.width
     var height = 2//board.height
@@ -346,12 +346,12 @@ examples['pentominoes'] = function() {
     for (o in orients) {
 	var piece = rc.add(new Examples.pentominoes.Piece(o, orients[o], 0, 0, colors[o], rc.getRandomPoint(200, 150, 400, 400), squareLength), undefined, true)
 	pieces[o] = piece
-	rc.addConstraint(Examples.pentominoes.PiecePlacementConstraint, undefined, piece, board)
+	rc.addConstraint(Examples.pentominoes.PieceSnappingToBoard, undefined, piece, board)
     }
     rc.add(new TextBox(new Point(350, 50), "Select piece by clicking on its shape. Press 'space' to rotate & 'shift' to flip.", false, 20, 670, 40, '#81f781'))
     scratch.solveButton = rc.add(new TextBox(new Point(420, 100), "Click to toggle solve mode (wait a while...):", false, 20, 450, 40, '#81f781'))
     scratch.modeLabel = rc.add(new TextBox(new Point(880, 100), ('"off"'), false, 20, 50, 40, '#f6ceec'))
-    scratch.pentominoesConstraint = new Examples.pentominoes.PentominoesConstraint(board)
+    scratch.pentominoesConstraint = new Examples.pentominoes.PentominoesSolved(board)
 
         // --- Time / Event Handling ---------------------------------------------
     sketchpad.registerEvent('pointermove',

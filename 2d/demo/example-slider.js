@@ -13,11 +13,16 @@ Examples.slider.Slider = function Examples__slider__Slider(valueView, isHoriz, f
     var m = Math.max(2, (this.range.end - this.range.start) / 10)
     var w = this.frame.width / (isHoriz ? m : 1)
     var h = this.frame.height / (isHoriz ? 1 : m)
-    this.button = new Box(new Point(this.frame.position.x, this.frame.position.y), w, h, undefined, undefined, undefined, '#bdbdbd')
+    var buttonPosition = new Point(this.frame.position.x, this.frame.position.y)
+    this.button = new Box(buttonPosition, w, h, undefined, undefined, undefined, '#bdbdbd')    
     this.position = this.button.position
+    if (!valueToSliderPositionMode)
+	this.position[this._prop1] = this.positionFromValue(valueView.obj[valueView.prop])
     this.valueToSliderPositionMode = valueToSliderPositionMode
     var p = this.button.position   
     this._buttonLine = new Line(p.plus({x: w/2, y: 5}), p.plus({x: w/2, y: h - 5}))
+    this._constraints = []
+
 }
 
 sketchpad.addClass(Examples.slider.Slider)
@@ -26,11 +31,13 @@ Examples.slider.Slider.prototype.propertyTypes = {framePosition: 'Point'}
 
 Examples.slider.Slider.prototype.init = function() {
     // higher priority than drag coordinate constraint to ensure never goes out of frame
-    rc.addConstraint(Sketchpad.arith.EqualityConstraint, 2, {obj: this.frame.position, prop: this._prop2}, {obj: this.position, prop: this._prop2}, [2]) 
-    rc.addConstraint(Sketchpad.arith.InequalityConstraint, 0, {obj: this.position, prop: this._prop1}, {obj: this.frame.position, prop: this._prop1}, true)
-    rc.addConstraint(Sketchpad.arith.SumInequalityConstraint, 0, {obj: this.position, prop: this._prop1}, {obj: this.frame.position, prop: this._prop1}, {obj: this.frame, prop: this._prop3}, false, 1, 1, 1, -this.button[this._prop3])
-    if (this.valueView)
-	this.valueConstraint = rc.addConstraint(Examples.slider.SliderValueConstraint, undefined, this, this.valueView)
+    this._constraints.push(rc.addConstraint(Sketchpad.arith.EqualProperties, 2, {obj: this.frame.position, prop: this._prop2}, {obj: this.position, prop: this._prop2}, [2]))
+    this._constraints.push(rc.addConstraint(Sketchpad.arith.InequalityRelation, 0, {obj: this.position, prop: this._prop1}, {obj: this.frame.position, prop: this._prop1}, true))
+    this._constraints.push(rc.addConstraint(Sketchpad.arith.SumInequalityRelation, 0, {obj: this.position, prop: this._prop1}, {obj: this.frame.position, prop: this._prop1}, {obj: this.frame, prop: this._prop3}, false, 1, 1, 1, -this.button[this._prop3]))
+    if (this.valueView) {
+	this.valueConstraint = rc.addConstraint(Examples.slider.SliderValueBehavior, undefined, this, this.valueView)
+	this._constraints.push(this.valueConstraint)
+    }
 }
 
 Examples.slider.Slider.prototype.valueFromPosition = function() {
@@ -77,29 +84,29 @@ Examples.slider.Slider.prototype.border = function() {
 
 // --- Constraint Defs -------------------------------------------------------
 
-Examples.slider.SliderValueConstraint = function Examples__slider__SliderValueConstraint(slider, sliderValueView) {
+Examples.slider.SliderValueBehavior = function Examples__slider__SliderValueBehavior(slider, sliderValueView) {
     this.slider = slider
     this.sliderValueViewObj = sliderValueView.obj
     this.sliderValueViewProp = sliderValueView.prop
     this.sliderPos = slider.button.position    
 }
 
-sketchpad.addClass(Examples.slider.SliderValueConstraint, true)
+sketchpad.addClass(Examples.slider.SliderValueBehavior, true)
 
-Examples.slider.SliderValueConstraint.description = function() { return "Examples.slider.SliderValueConstraint(Box slider, {obj: viewObj, prop: viewProp}) states that slider position corresponds with value of property viewProp of object viewObj" }
+Examples.slider.SliderValueBehavior.description = function() { return "Examples.slider.SliderValueBehavior(Box slider, {obj: viewObj, prop: viewProp}) states that slider position corresponds with value of property viewProp of object viewObj" }
 
-Examples.slider.SliderValueConstraint.prototype.description = function() { return "slider " + this.slider.__toString + " position corresponds with the value of " + this.sliderValueViewObj.__toString + "." + this.sliderValueViewProp + " ." }
+Examples.slider.SliderValueBehavior.prototype.description = function() { return "slider " + this.slider.__toString + " position corresponds with the value of " + this.sliderValueViewObj.__toString + "." + this.sliderValueViewProp + " ." }
 
-Examples.slider.SliderValueConstraint.prototype.propertyTypes = {slider: 'Examples.slider.Slider'}
+Examples.slider.SliderValueBehavior.prototype.propertyTypes = {slider: 'Examples.slider.Slider'}
 
-Examples.slider.SliderValueConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
+Examples.slider.SliderValueBehavior.prototype.computeError = function(pseudoTime, prevPseudoTime) {
     var slider = this.slider
     var sliderValueViewObj = this.sliderValueViewObj
     var sliderValueViewProp = this.sliderValueViewProp
     return sliderValueViewObj[sliderValueViewProp] - slider.valueFromPosition()
 }
 
-Examples.slider.SliderValueConstraint.prototype.solve = function(pseudoTime, prevPseudoTime) {
+Examples.slider.SliderValueBehavior.prototype.solve = function(pseudoTime, prevPseudoTime) {
     var slider = this.slider
     var p1 = slider._prop1
     var sliderValueViewObj = this.sliderValueViewObj

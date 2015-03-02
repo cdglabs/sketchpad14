@@ -188,8 +188,8 @@ function Box(position, width, height, resizable, optMaintainBottomCorner, optCol
     this.opacity = optOpacity
     if (optMaintainBottomCorner || resizable) {
 	this.bottomCorner = new Point(position.x + width, position.y + height, 'gray', 6)
-	this.bottomCornerConstraint1 = rc.addConstraint(Sketchpad.arith.SumConstraint, undefined, {obj: position, prop: 'x'}, {obj: this, prop: 'width'}, {obj: this.bottomCorner, prop: 'x'}, [3])
-	this.bottomCornerConstraint2 = rc.addConstraint(Sketchpad.arith.SumConstraint, undefined, {obj: position, prop: 'y'}, {obj: this, prop: 'height'}, {obj: this.bottomCorner, prop: 'y'}, [3])
+	this.bottomCornerConstraint1 = rc.addConstraint(Sketchpad.arith.SumRelation, undefined, {obj: position, prop: 'x'}, {obj: this, prop: 'width'}, {obj: this.bottomCorner, prop: 'x'}, [3])
+	this.bottomCornerConstraint2 = rc.addConstraint(Sketchpad.arith.SumRelation, undefined, {obj: position, prop: 'y'}, {obj: this, prop: 'height'}, {obj: this.bottomCorner, prop: 'y'}, [3])
 	this.addMaintainSizeConstraints()
     }
     if (resizable) {
@@ -218,8 +218,8 @@ Box.prototype.solutionJoins = function() {
 }
 
 Box.prototype.addMaintainSizeConstraints = function() {
-    this.maintainWidthConstraint = new Sketchpad.arith.ValueConstraint({obj: this, prop: 'width'}, this.width) 
-    this.maintainHeightConstraint = new Sketchpad.arith.ValueConstraint({obj: this, prop: 'height'}, this.height) 
+    this.maintainWidthConstraint = new Sketchpad.arith.FixedProperty({obj: this, prop: 'width'}, this.width) 
+    this.maintainHeightConstraint = new Sketchpad.arith.FixedProperty({obj: this, prop: 'height'}, this.height) 
     rc.addNewConstraint(this.maintainWidthConstraint)
     rc.addNewConstraint(this.maintainHeightConstraint)
     this.bottomCornerConstraint1.onlyWriteTo = [3]

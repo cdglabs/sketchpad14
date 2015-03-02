@@ -71,35 +71,35 @@ Examples.hello.Box.prototype.snapshot = function() {
 
 // constructor
 
-Examples.hello.StackedBoxesConstraint = function Examples__hello__StackedBoxesConstraint(b1, b2) {
+Examples.hello.StackedBoxes = function Examples__hello__StackedBoxes(b1, b2) {
     this.b1 = b1
     this.b2 = b2
     this.p1 = b1.position
     this.p2 = b2.position
 }
 
-sketchpad.addClass(Examples.hello.StackedBoxesConstraint, true)
+sketchpad.addClass(Examples.hello.StackedBoxes, true)
 
-Examples.hello.StackedBoxesConstraint.description = function() { return "Examples.hello.StackedBoxesConstraint(Box b1, Box b2) states b2 should be just below b1 and aligned along X-axis." }
+Examples.hello.StackedBoxes.description = function() { return "Examples.hello.StackedBoxes(Box b1, Box b2) states b2 should be just below b1 and aligned along X-axis." }
 
-Examples.hello.StackedBoxesConstraint.prototype.description = function() { return "box " + this.b1.__toString + " should be just below box " + this.b2.__toString + " and aligned along X-axis." }
+Examples.hello.StackedBoxes.prototype.description = function() { return "box " + this.b1.__toString + " should be just below box " + this.b2.__toString + " and aligned along X-axis." }
 
-Examples.hello.StackedBoxesConstraint.prototype.propertyTypes = {b1: 'Box', b2: 'Box', p1: 'Point', p2: 'Point'}
+Examples.hello.StackedBoxes.prototype.propertyTypes = {b1: 'Box', b2: 'Box', p1: 'Point', p2: 'Point'}
 
-Examples.hello.StackedBoxesConstraint.dummy = function(x, y) {
-    return new Examples.hello.StackedBoxesConstraint(Examples.hello.Box.dummy(x, y), Examples.hello.Box(x + 100, y + 100))
+Examples.hello.StackedBoxes.dummy = function(x, y) {
+    return new Examples.hello.StackedBoxes(Examples.hello.Box.dummy(x, y), Examples.hello.Box(x + 100, y + 100))
 }
 
 // specification: compute error
 
-Examples.hello.StackedBoxesConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
+Examples.hello.StackedBoxes.prototype.computeError = function(pseudoTime, prevPseudoTime) {
     var b1 = this.b1, b2 = this.b2, p1 = this.p1, p2 = this.p2
     return (p1.x - p2.x) + (p1.y + b1.height - p2.y)
 }
 
 // solver
 
-Examples.hello.StackedBoxesConstraint.prototype.solve = function(pseudoTime, prevPseudoTime) {	
+Examples.hello.StackedBoxes.prototype.solve = function(pseudoTime, prevPseudoTime) {	
     var b1 = this.b1, b2 = this.b2, p1 = this.p1, p2 = this.p2
     var soln1 = {x: (p2.x + p1.x) / 2, y: (p2.y + (p1.y - b1.height)) / 2}
     var soln2 = {x: soln1.x, y: (p2.y + (p1.y + b1.height)) / 2}
@@ -155,5 +155,5 @@ examples['hello world'] = function() {
 
 // --- Constraints ---------------------------------------------------------
     
-    rc.addConstraint(Examples.hello.StackedBoxesConstraint, undefined, b1, b2)
+    rc.addConstraint(Examples.hello.StackedBoxes, undefined, b1, b2)
 }
