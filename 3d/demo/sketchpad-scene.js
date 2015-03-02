@@ -455,7 +455,7 @@ SketchpadScene.prototype.pointerdown = function(e) {
 	var x = point.x
 	var y = point.y
 	var z = point.z
-	this.mouseDragCoordConstraint = this.addConstraint(Sketchpad.geom3d.CoordinateConstraint, this.dragConstraintPriority, point, x, y, z)
+	this.mouseDragCoordConstraint = this.addConstraint(Sketchpad.geom3d.FixedCoordinate, this.dragConstraintPriority, point, x, y, z)
     } 
     this.redraw()
 }
@@ -521,7 +521,7 @@ SketchpadScene.prototype.step = function() {
     var doRedraw = false
     if (!(sketchpad.converged || this.paused)) {
 	if (this.dragFingersCount > 0)
-	    this.updateCoordinateConstraints()
+	    this.updateFixedCoordinates()
 	if (this.showEachIteration) {
 	    var t0 = this.sketchpad.currentTime()
 	    this.sketchpad.doTasksOnEachTimeStep(t0)
@@ -1179,7 +1179,7 @@ function SketchpadTile(name, inputs, ownRun, buttonsInfo, inspectorOfObj, fixedI
 	    var objPointerLine = new Line(objPointerLinePt, objPointerLinePt2, 'gray', 2, 4)
 	    self.parts.push(objPointerLine)
 	    if (inspectorOfObj.center)
-		self.isOwnerOf.push(rc.addConstraint(Sketchpad.arith.OneWayEqualityConstraint, undefined, {obj: objPointerLine, prop: 'p2'}, {obj: inspectorOfObj, prop: 'center'}, true))	    
+		self.isOwnerOf.push(rc.addConstraint(Sketchpad.arith.OneWayEqualProperties, undefined, {obj: objPointerLine, prop: 'p2'}, {obj: inspectorOfObj, prop: 'center'}, true))	    
 	}
 	if (inspectorOfObj.description) {
 	    var tb = new TextBox(new Point(20, y), '"' + inspectorOfObj.description.call(inspectorOfObj) + '"', true, 18, width - 100, undefined, undefined, undefined, 'black', true, undefined, true)
@@ -1251,10 +1251,10 @@ function SketchpadTile(name, inputs, ownRun, buttonsInfo, inspectorOfObj, fixedI
 		var pointerLine = new Line(pointerLinePt, inputValue.center ? inputValue.center() : (inputValue.grabPoint ? inputValue.grabPoint() : new Point(0, 0)), 'orange', 2, 4)
 		input.pointerLine = pointerLine
 		self.parts.push(pointerLine)
-		self.isOwnerOf.push(rc.addConstraint(Sketchpad.arith.SumConstraint, undefined, {obj: self.position, prop: 'x'}, {obj: inputCoord, prop: 'x'}, {obj: pointerLinePt, prop: 'x'}, [3]))
-		self.isOwnerOf.push(rc.addConstraint(Sketchpad.arith.SumConstraint, undefined, {obj: self.position, prop: 'y'}, {obj: inputCoord, prop: 'y'}, {obj: pointerLinePt, prop: 'y'}, [3]))
+		self.isOwnerOf.push(rc.addConstraint(Sketchpad.arith.SumRelation, undefined, {obj: self.position, prop: 'x'}, {obj: inputCoord, prop: 'x'}, {obj: pointerLinePt, prop: 'x'}, [3]))
+		self.isOwnerOf.push(rc.addConstraint(Sketchpad.arith.SumRelation, undefined, {obj: self.position, prop: 'y'}, {obj: inputCoord, prop: 'y'}, {obj: pointerLinePt, prop: 'y'}, [3]))
 		if (inputValue.center)
-		    self.isOwnerOf.push(rc.addConstraint(Sketchpad.arith.OneWayEqualityConstraint, undefined, {obj: propPointerLine, prop: 'p2'}, {obj: inputValue, prop: 'center'}, true))
+		    self.isOwnerOf.push(rc.addConstraint(Sketchpad.arith.OneWayEqualProperties, undefined, {obj: propPointerLine, prop: 'p2'}, {obj: inputValue, prop: 'center'}, true))
 	    }
 	}
     })

@@ -8,8 +8,8 @@ examples.test = function() {
     var p2 = rc.add(new Point(center.x + 200, center.y - 200))
     rc.add(new Line(po, py))
     rc.add(new Line(po, px))
-    var c1 = new Sketchpad.geom.LengthConstraint(p1, p2, 100)
-    var c2 = new Sketchpad.geom.CoordinateConstraint(p1, center.x, center.y)
+    var c1 = new Sketchpad.geom.FixedLength(p1, p2, 100)
+    var c2 = new Sketchpad.geom.FixedCoordinate(p1, center.x, center.y)
     rc.addNewConstraint(c1)
     rc.addNewConstraint(c2)
 

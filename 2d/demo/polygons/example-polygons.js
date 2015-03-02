@@ -151,7 +151,7 @@ Examples.polygons.Board.prototype.firstSadShape = function() {
 
 // --- Constraint Defs -------------------------------------------------------
 
-Examples.polygons.ImageSwingConstraint = function Sketchpad__geom__ImageSwingConstraint(shape, optSwingOnlyWhenUnhappy, onlyOnDangle) {
+Examples.polygons.SwingingImage = function Sketchpad__geom__SwingingImage(shape, optSwingOnlyWhenUnhappy, onlyOnDangle) {
     this.shape = shape
     this.swingOnlyWhenUnhappy = optSwingOnlyWhenUnhappy
     this.onlyOnDangle = onlyOnDangle
@@ -162,15 +162,15 @@ Examples.polygons.ImageSwingConstraint = function Sketchpad__geom__ImageSwingCon
     this._lastPos = shape.position
 }
 
-sketchpad.addClass(Examples.polygons.ImageSwingConstraint, true)
+sketchpad.addClass(Examples.polygons.SwingingImage, true)
 
-Examples.polygons.ImageSwingConstraint.description = function() { return  "Examples.polygons.ImageSwingConstraint(Shape S) causes image of S to swing." } 
+Examples.polygons.SwingingImage.description = function() { return  "Examples.polygons.SwingingImage(Shape S) causes image of S to swing." } 
 
-Examples.polygons.ImageSwingConstraint.prototype.description = function() { return  "image of shape" + this.shape.__toString + " should swing." } 
+Examples.polygons.SwingingImage.prototype.description = function() { return  "image of shape" + this.shape.__toString + " should swing." } 
 
-Examples.polygons.ImageSwingConstraint.prototype.propertyTypes = {image: 'Shape'}
+Examples.polygons.SwingingImage.prototype.propertyTypes = {image: 'Shape'}
 
-Examples.polygons.ImageSwingConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
+Examples.polygons.SwingingImage.prototype.computeError = function(pseudoTime, prevPseudoTime) {
     var shape = this.shape, pos = shape.position
     if (this.swingOnlyWhenUnhappy && shape.getMood() >= 0)
 	return 0
@@ -180,11 +180,11 @@ Examples.polygons.ImageSwingConstraint.prototype.computeError = function(pseudoT
     return this._targetRotation - image.rotation
 }
 
-Examples.polygons.ImageSwingConstraint.prototype.solve = function(pseudoTime, prevPseudoTime) {
+Examples.polygons.SwingingImage.prototype.solve = function(pseudoTime, prevPseudoTime) {
     return {image: {rotation: this._targetRotation}}
 }
 
-Examples.polygons.ImageSwingConstraint.prototype.onEachTimeStep = function(pseudoTime, prevPseudoTime) {
+Examples.polygons.SwingingImage.prototype.onEachTimeStep = function(pseudoTime, prevPseudoTime) {
     if (this.onlyOnDangle) {
 	var movement = this.shape.position.x - this._lastPos.x
 	var movementA = Math.abs(movement)
@@ -199,9 +199,9 @@ Examples.polygons.ImageSwingConstraint.prototype.onEachTimeStep = function(pseud
     }
 }
 
-//  ShapePlacementConstraint
+//  ShapeSnapsToBoard
 
-Examples.polygons.ShapePlacementConstraint = function Examples__polygons__ShapePlacementConstraint(shape) {
+Examples.polygons.ShapeSnapsToBoard = function Examples__polygons__ShapeSnapsToBoard(shape) {
     this.shape = shape
     this.board = shape.board
     this.shapePos = shape.position
@@ -209,17 +209,17 @@ Examples.polygons.ShapePlacementConstraint = function Examples__polygons__ShapeP
     this.boardCells = this.board.cells
 }
 
-sketchpad.addClass(Examples.polygons.ShapePlacementConstraint, true)
+sketchpad.addClass(Examples.polygons.ShapeSnapsToBoard, true)
 
-Examples.polygons.ShapePlacementConstraint.description = function() {
-    return "Examples.polygons.ShapePlacementConstraint(Shape P) states that if P is moved inside the board and it fits in the current square it should be placed nicely on the P's board B and B should add it in its list of placed shapes."
+Examples.polygons.ShapeSnapsToBoard.description = function() {
+    return "Examples.polygons.ShapeSnapsToBoard(Shape P) states that if P is moved inside the board and it fits in the current square it should be placed nicely on the P's board B and B should add it in its list of placed shapes."
 }
 
-Examples.polygons.ShapePlacementConstraint.prototype.description = function() {
+Examples.polygons.ShapeSnapsToBoard.prototype.description = function() {
     return "if shape " + this.shape.__toString + " is moved inside the board " + this.board.__toString + "and it fits in the current square it should be placed nicely on the shapes's board and board should add it in its list of placed shapes."
 }
 
-Examples.polygons.ShapePlacementConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
+Examples.polygons.ShapeSnapsToBoard.prototype.computeError = function(pseudoTime, prevPseudoTime) {
     var shapePos = this.shapePos
     var board = this.board
     var boardPoint = board.position
@@ -242,7 +242,7 @@ Examples.polygons.ShapePlacementConstraint.prototype.computeError = function(pse
     return diff
 }
 
-Examples.polygons.ShapePlacementConstraint.prototype.solve = function(pseudoTime, prevPseudoTime) {
+Examples.polygons.ShapeSnapsToBoard.prototype.solve = function(pseudoTime, prevPseudoTime) {
     var board = this.board, shape = this.shape
     var dict = {}
     var sol = {shapePos: {x: this._target.x, y: this._target.y}}
@@ -259,55 +259,59 @@ Examples.polygons.ShapePlacementConstraint.prototype.solve = function(pseudoTime
     return sol
 }
 
-Examples.polygons.ShapeMoodConstraint = function Examples__polygons__ShapeMoodConstraint(shape) {
+// ShapeMoodRelation
+
+Examples.polygons.ShapeMoodRelation = function Examples__polygons__ShapeMoodRelation(shape) {
     this.shape = shape
     this.shapeImage = shape.image
 }
 
-sketchpad.addClass(Examples.polygons.ShapeMoodConstraint, true)
+sketchpad.addClass(Examples.polygons.ShapeMoodRelation, true)
 
-Examples.polygons.ShapeMoodConstraint.description = function() {
-    return "Examples.polygons.ShapeMoodConstraint(Shape P) states that shapes image should reflect its sadness or happiness."
+Examples.polygons.ShapeMoodRelation.description = function() {
+    return "Examples.polygons.ShapeMoodRelation(Shape P) states that shapes image should reflect its sadness or happiness."
 }
 
-Examples.polygons.ShapeMoodConstraint.prototype.description = function() {
+Examples.polygons.ShapeMoodRelation.prototype.description = function() {
     return "shape " + this.shape.__toString + " image should reflect its sadness or happiness."
 }
 
-Examples.polygons.ShapeMoodConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
+Examples.polygons.ShapeMoodRelation.prototype.computeError = function(pseudoTime, prevPseudoTime) {
     var shape = this.shape
     this._targetMood = shape.getMood()
     return (shape.mood ==  this._targetMood && this.shapeImage.url === this.shape.getUrl(this._targetMood)) ? 0 : 1
 }
 
-Examples.polygons.ShapeMoodConstraint.prototype.solve = function(pseudoTime, prevPseudoTime) {
+Examples.polygons.ShapeMoodRelation.prototype.solve = function(pseudoTime, prevPseudoTime) {
     var sol = {shape: {mood: this._targetMood},  shapeImage: {url: this.shape.getUrl(this._targetMood)}}
     return sol
 }
 
-Examples.polygons.ShapeMoveWhenSadConstraint = function Examples__polygons__ShapeMoveWhenSadConstraint(shape) {
+// ShapeMoveWhenSad
+
+Examples.polygons.ShapeMoveWhenSad = function Examples__polygons__ShapeMoveWhenSad(shape) {
     this.shape = shape
     this.board = shape.board
     this.shapePos = shape.position
     this.shapeBoardPos = shape.boardPos
 }
 
-sketchpad.addClass(Examples.polygons.ShapeMoveWhenSadConstraint, true)
+sketchpad.addClass(Examples.polygons.ShapeMoveWhenSad, true)
 
-Examples.polygons.ShapeMoveWhenSadConstraint.description = function() {
-    return "Examples.polygons.ShapeMoveWhenSadConstraint(Shape P) states that shapes moves when its sad."
+Examples.polygons.ShapeMoveWhenSad.description = function() {
+    return "Examples.polygons.ShapeMoveWhenSad(Shape P) states that shapes moves when its sad."
 }
 
-Examples.polygons.ShapeMoveWhenSadConstraint.prototype.description = function() {
+Examples.polygons.ShapeMoveWhenSad.prototype.description = function() {
     return "shape " + this.shape.__toString + " swings when its sad."
 }
 
-Examples.polygons.ShapeMoveWhenSadConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
+Examples.polygons.ShapeMoveWhenSad.prototype.computeError = function(pseudoTime, prevPseudoTime) {
     var shape = this.shape
     return (shape.mood ==  -1 && shape === shape.board.firstSadShape()) ? 1 : 0
 }
 
-Examples.polygons.ShapeMoveWhenSadConstraint.prototype.solve = function(pseudoTime, prevPseudoTime) {
+Examples.polygons.ShapeMoveWhenSad.prototype.solve = function(pseudoTime, prevPseudoTime) {
     var shape = this.shape
     var oldCell = shape.boardPos
     var board = shape.board
@@ -381,7 +385,7 @@ examples['polygons'] = function() {
 
     // --- Constraints ---------------------------------------------------------
       swingingShapes.forEach(function(shape) {
-	  rc.addConstraint(Examples.polygons.ImageSwingConstraint, undefined, shape)
+	  rc.addConstraint(Examples.polygons.SwingingImage, undefined, shape)
       })
     
     // ==================== Chapter1 =================
@@ -417,8 +421,8 @@ examples['polygons'] = function() {
 	    }
 	}
 	boardShapes.forEach(function(shape) {
-	    rc.addConstraint(Examples.polygons.ShapeMoodConstraint, undefined, shape)
-	    rc.addConstraint(Examples.polygons.ImageSwingConstraint, undefined, shape, true)
+	    rc.addConstraint(Examples.polygons.ShapeMoodRelation, undefined, shape)
+	    rc.addConstraint(Examples.polygons.SwingingImage, undefined, shape, true)
 	})
 	if (addSlider) {
 	    slider = rc.add(new Examples.slider.Slider({obj: board, prop: 'kindPercentage'}, true, new Point(frame.x + (frame.width / 2) + 335, frame.endy - 160), 430, 40, {start: 0 , end:100}, true), undefined, undefined, true)
@@ -428,7 +432,7 @@ examples['polygons'] = function() {
 	    var text9b = rc.add(new TextBox(new Point(frame.x + (frame.width / 2) + 495, frame.endy - 200), board.kindPercentage, false, 16, 20, 30, '#151515', 'sans-serif', '#ff0000', false, 'lighter', false), undefined, undefined, true)
 	    board.sliderText1 = text9a
 	    board.sliderText2 = text9b
-	    rc.addConstraint(Sketchpad.arith.EqualityConstraint, undefined,  {obj: board, prop: 'kindPercentage'}, {obj: text9b, prop: 'text'}, [2], 1, 1)
+	    rc.addConstraint(Sketchpad.arith.EqualProperties, undefined,  {obj: board, prop: 'kindPercentage'}, {obj: text9b, prop: 'text'}, [2], 1, 1)
 	}
 	return board
     }
@@ -541,7 +545,7 @@ examples['polygons'] = function() {
 
     // --- Constraints ---------------------------------------------------------
 
-    rc.addConstraint(Sketchpad.simulation.TimerConstraint, undefined, rc.add(new Timer(.3), undefined, undefined, undefined, {invisible: true}))
+    rc.addConstraint(Sketchpad.simulation.TickingTimer, undefined, rc.add(new Timer(.3), undefined, undefined, undefined, {invisible: true}))
 
     // --- Time / Event Handling ---------------------------------------------
     var distance = Sketchpad.geom.distance
@@ -561,7 +565,7 @@ examples['polygons'] = function() {
 			    function(e) {
 				var thing = rc.selection
 				if (thing instanceof Examples.polygons.Shape && thing.board) {
-				    scratch.dragPlacementConstraint = rc.addConstraint(Examples.polygons.ShapePlacementConstraint, undefined, thing)
+				    scratch.dragPlacementConstraint = rc.addConstraint(Examples.polygons.ShapeSnapsToBoard, undefined, thing)
 				    thing.image._swingSpeed = 2
 				}
 				if (scratch.dragDangleConstraint !== undefined) {
@@ -581,7 +585,7 @@ examples['polygons'] = function() {
 				slider.valueToSliderPositionMode = thing != slider
 				if (thing instanceof Examples.polygons.Shape) {
 				    thing._origPos = thing.position.copy()
-				    scratch.dragDangleConstraint = rc.addConstraint(Examples.polygons.ImageSwingConstraint, undefined, thing, false, true)
+				    scratch.dragDangleConstraint = rc.addConstraint(Examples.polygons.SwingingImage, undefined, thing, false, true)
 				} else if (thing === resetButton1) {
 				    board5 = resetBoard(frame7, .5, board5)
 				} else if (thing === resetButton2) {
@@ -590,7 +594,7 @@ examples['polygons'] = function() {
 				    // give each shape constraint to move when unhappy
 				    board6.cells.forEach(function(s) {
 					if (s !== 0)
-					    rc.addConstraint(Examples.polygons.ShapeMoveWhenSadConstraint, undefined, s)
+					    rc.addConstraint(Examples.polygons.ShapeMoveWhenSad, undefined, s)
 				    })
 				} else if (thing === link) {
 				    location.href = 'http://ncase.me/polygons/'

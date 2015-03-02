@@ -546,7 +546,7 @@ Sketchpad.prototype.defaultJoinSolutions = function(curr, solutions) {
 Sketchpad.prototype.registerEvent = function(name, callback, optDescription) {
     var id = this.eventHandlers.length
     this.eventHandlers.push(callback)
-    var handler = function(e) { this.events.push([id, e]) }.bind(this)
+    var handler = function(e) { 	this.converged = false; this.events.push([id, e]) }.bind(this)
     if (!this.eventHandlersInternal[name]) {
 	this.eventHandlersInternal[name] = []
 	this.eventDescriptions[name] = []
@@ -557,8 +557,6 @@ Sketchpad.prototype.registerEvent = function(name, callback, optDescription) {
 }
 
 Sketchpad.prototype.handleEvents = function() {
-    if (this.events.length > 0)
-	this.converged = false
     this.events.forEach(function(nameAndE) { 
 	var id = nameAndE[0]; 
 	var e = nameAndE[1]; 

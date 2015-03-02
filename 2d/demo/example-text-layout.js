@@ -26,10 +26,10 @@ Examples.textlayout.TextArea.prototype.init = function() {
     rc.add(this.cursor, this)
     this.slider = rc.add(new Examples.slider.Slider({obj: this, prop: 'viewOffset'}, false, new Point(0, 0), 20, this.box.height, {start: 0, end: 1}, true))
     this.slider.init()
-    rc.addConstraint(Sketchpad.arith.EqualityConstraint, undefined, {obj: this.box.bottomCorner, prop: 'x'}, {obj: this.slider.frame.position, prop: 'x'}, [2])
-    rc.addConstraint(Sketchpad.arith.EqualityConstraint, undefined, {obj: this.box.position, prop: 'y'}, {obj: this.slider.frame.position, prop: 'y'}, [2])
-    rc.addConstraint(Sketchpad.arith.EqualityConstraint, undefined, {obj: this.box, prop: 'height'}, {obj: this.slider.frame, prop: 'height'}, [2])
-    this.cursorConstraint = rc.addConstraint(Examples.textlayout.CharFollowAdjacentsConstraint, undefined, this.cursor, this)
+    rc.addConstraint(Sketchpad.arith.EqualProperties, undefined, {obj: this.box.bottomCorner, prop: 'x'}, {obj: this.slider.frame.position, prop: 'x'}, [2])
+    rc.addConstraint(Sketchpad.arith.EqualProperties, undefined, {obj: this.box.position, prop: 'y'}, {obj: this.slider.frame.position, prop: 'y'}, [2])
+    rc.addConstraint(Sketchpad.arith.EqualProperties, undefined, {obj: this.box, prop: 'height'}, {obj: this.slider.frame, prop: 'height'}, [2])
+    this.cursorConstraint = rc.addConstraint(Examples.textlayout.CharPositioning, undefined, this.cursor, this)
     this.optimalBreaksConstraint = new Examples.textlayout.WordWrapOptimalBreaks(this)
     this.optimalBreaksConstraint.__priority = 2
     this.justifyConstraint = new Examples.textlayout.WordWrapJustify(this)
@@ -109,7 +109,7 @@ Examples.textlayout.TextArea.prototype.addChar = function(chr) {
     }
     cursor.prev = newChar
 
-    var constraint = rc.addConstraint(Examples.textlayout.CharFollowAdjacentsConstraint, undefined, newChar, this)
+    var constraint = rc.addConstraint(Examples.textlayout.CharPositioning, undefined, newChar, this)
     constraint.___container = this.box
     var mode = sketchpad.scratch.wordWrapModes[sketchpad.scratch.wordWrapMode]
     if (mode === 'optimal' || mode === 'justify') {
@@ -170,7 +170,6 @@ Examples.textlayout.TextArea.prototype.computePerSpaceCharPaddingForEvenColumns 
 	    var empty = colWidth - takenSp - (idx > 0 ? this.columnMargin : 0)
 	    var paddingNeeded = empty > 0 && sps.length > 0 ? (empty / sps.length) : 0
 	    if (paddingNeeded) {
-		//console.log(c, i, colWidth, takenSp, paddingNeeded, sps.length)
 		sps.forEach(function(s) { res.push({character: s, padding: paddingNeeded}) })
 	    }
 	    next = newLines[++idx]
@@ -267,9 +266,7 @@ Examples.textlayout.TextArea.prototype.wordJustifyWrapFirstInLineWords = functio
 Examples.textlayout.TextArea.prototype.wordJustifyWrapNewLineCharIndices = function(text, L) {
     var res = ''
     var words = text.split(' ')
-    //console.log(words)
     var F = this.wordJustifyWrapFirstInLineWords(words, L)
-    //console.log(JSON.stringify(F))
     var cIdx = 0, wIdx = 0
     var res = []
     F.forEach(function(f) { 
@@ -303,7 +300,6 @@ Examples.textlayout.Char.prototype.center = function() {
 
 Examples.textlayout.Char.prototype.draw = function(canvas, origin) {
     var position = origin.plus(this.position)
-    //var hSize = this.fontSize / 2, hWidth = this.width / 2, hHeight = this.height / 2
     var text = this.chr
     var space = text.length
     var font = canvas.ctxt.font
@@ -325,23 +321,23 @@ Examples.textlayout.Char.prototype.revertWidth = function() { this.width = this.
 
 // --- Constraint Defs -------------------------------------------------------
 
-//  CharFollowAdjacentsConstraint
+//  CharPositioning
 
-Examples.textlayout.CharFollowAdjacentsConstraint = function Examples__textlayout__CharFollowAdjacentsConstraint(character, textArea) {
+Examples.textlayout.CharPositioning = function Examples__textlayout__CharPositioning(character, textArea) {
     this.character = character
     this.pos = character.position
     this.textArea = textArea
 }
 
-sketchpad.addClass(Examples.textlayout.CharFollowAdjacentsConstraint, true)
+sketchpad.addClass(Examples.textlayout.CharPositioning, true)
 
-Examples.textlayout.CharFollowAdjacentsConstraint.description = function() {
+Examples.textlayout.CharPositioning.description = function() {
     var mode = sketchpad.scratch.wordWrapModes[sketchpad.scratch.wordWrapMode]
     var isGreedy = mode === 'greedy'
-    return "Examples.textlayout.CharFollowAdjacentsConstraint(Char C, TextArea T) states that character C should follow its predecessor character, or if it has none should reside on the top left corner of the T's paragraph." + (isGreedy ? "If character's word would not fit in the same line, it should be placed at the beginning of the next line." : '')
+    return "Examples.textlayout.CharPositioning(Char C, TextArea T) states that character C should follow its predecessor character, or if it has none should reside on the top left corner of the T's paragraph." + (isGreedy ? "If character's word would not fit in the same line, it should be placed at the beginning of the next line." : '')
 }
 
-Examples.textlayout.CharFollowAdjacentsConstraint.prototype.description = function() {
+Examples.textlayout.CharPositioning.prototype.description = function() {
     var mode = sketchpad.scratch.wordWrapModes[sketchpad.scratch.wordWrapMode]
     var isGreedy = mode === 'greedy'
     return "character '" + this.character.chr + "' should " + (this.character.prev ? 
@@ -350,11 +346,11 @@ Examples.textlayout.CharFollowAdjacentsConstraint.prototype.description = functi
 	+ (isGreedy ? " If character's word would not fit in the same line, it should be placed at the beginning of the next line." : '')
 }
 
-Examples.textlayout.CharFollowAdjacentsConstraint.prototype.effects = function() {
+Examples.textlayout.CharPositioning.prototype.effects = function() {
     return [{obj: this.pos, props: ['x', 'y']}]
 }
 
-Examples.textlayout.CharFollowAdjacentsConstraint.prototype.computeTarget = function(previous, character, topLeft, marginX, lineHeight) {
+Examples.textlayout.CharPositioning.prototype.computeTarget = function(previous, character, topLeft, marginX, lineHeight) {
     var target
     // nobody before me: should be at line beginning
     if (previous === undefined) {
@@ -379,32 +375,32 @@ Examples.textlayout.CharFollowAdjacentsConstraint.prototype.computeTarget = func
     return target
 }
 
-Examples.textlayout.CharFollowAdjacentsConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
+Examples.textlayout.CharPositioning.prototype.computeError = function(pseudoTime, prevPseudoTime) {
     this.targetPos = this.computeTarget(this.character.prev, this.character, this.textArea.topLeft(), this.textArea.width() - this.textArea.columnMargin, this.textArea.lineHeight)
     var res = magnitude(minus(this.targetPos, this.character.position))
     return res
 }
 
-Examples.textlayout.CharFollowAdjacentsConstraint.prototype.solve = function(pseudoTime, prevPseudoTime) {
+Examples.textlayout.CharPositioning.prototype.solve = function(pseudoTime, prevPseudoTime) {
     return {pos: this.targetPos}
 }
 
-Examples.textlayout.CharFollowAdjacentsConstraint.prototype.draw = function(canvas, origin) {
+Examples.textlayout.CharPositioning.prototype.draw = function(canvas, origin) {
     var p = new Point(this.pos.x, this.pos.y - 20, undefined, undefined, undefined, 0.5)
     p.draw(canvas, origin)
 }
 
-Examples.textlayout.CharFollowAdjacentsConstraint.prototype.containsPoint = function(x, y) {
+Examples.textlayout.CharPositioning.prototype.containsPoint = function(x, y) {
     var p = new Point(this.pos.x, this.pos.y - 20, undefined, undefined, undefined, 0.5)
     return p.containsPoint(x, y)
 }
 
-Examples.textlayout.CharFollowAdjacentsConstraint.prototype.border = function() {
+Examples.textlayout.CharPositioning.prototype.border = function() {
     var p = new Point(this.pos.x, this.pos.y - 20, undefined, undefined, undefined, 0.5)
     return p.border()
 }
 
-Examples.textlayout.CharFollowAdjacentsConstraint.prototype.grabPoint = function() {
+Examples.textlayout.CharPositioning.prototype.grabPoint = function() {
     return this.pos
 }
 
@@ -438,7 +434,6 @@ Examples.textlayout.WordWrapOptimalBreaks.prototype.computeTarget = function(pse
     var textArea = this.textArea
     var soln = {} 
     var newLines = textArea.wordJustifyWrapNewLineCharIndices(textArea.text(), textArea.lineCharLimit())    
-    //log(newLines)
     var idx = 0
     var next = newLines[idx]
     var topLeft = textArea.topLeft()
@@ -529,15 +524,15 @@ examples['text layout'] = function() {
     sketchpad.scratch.wordWrapModes = ['greedy', 'optimal', 'justify']
     sketchpad.scratch.wordWrapMode = 0
 
-    rc.sketchpad.registerEvent('keypress', function(e) { 
+    rc.sketchpad.registerEvent('keypress', function(e) {
 	textArea.slider.valueToSliderPositionMode = true
 	var k = e.keyCode
 	if (k >= 32 && k <= 126) {
 	    textArea.addChar(String.fromCharCode(k))
-	} 
+	}
     }, "If a character add character to textarea.")
     
-    rc.sketchpad.registerEvent('keydown', function(e) {	
+    rc.sketchpad.registerEvent('keydown', function(e) {
 	var k = e.keyCode
 	textArea.slider.valueToSliderPositionMode = true
 	switch (k) {
@@ -549,6 +544,8 @@ examples['text layout'] = function() {
 	    case 37: textArea.moveCursorLeft(); break
 	    // right
 	    case 39: textArea.moveCursorRight(); break
+	    // space (why not getting in keypress??)
+	    case 32: textArea.addChar(String.fromCharCode(k)); break
 	}
     }, "on 'backspace' delete character to left of cursor, 'Return' add a newline char, 'left'/'right': move cursor left/right.")
 

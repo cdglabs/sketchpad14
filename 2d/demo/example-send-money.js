@@ -42,24 +42,24 @@ Examples.sendmoney.Tile.prototype.containsPoint = function(x, y) {
 
 // --- Constraint Defs -------------------------------------------------------
 
-//  SendMoreMoneyConstraint
+//  SendMoreMoneySolved
 
-Examples.sendmoney.SendMoreMoneyConstraint = function Examples__sendmoney__SendMoreMoneyConstraint(rows, values) {
+Examples.sendmoney.SendMoreMoneySolved = function Examples__sendmoney__SendMoreMoneySolved(rows, values) {
     this.values = values
     this.rows = rows
 }
 
-sketchpad.addClass(Examples.sendmoney.SendMoreMoneyConstraint, true)
+sketchpad.addClass(Examples.sendmoney.SendMoreMoneySolved, true)
 
-Examples.sendmoney.SendMoreMoneyConstraint.description = function() {
-    return "Examples.sendmoney.SendMoreMoneyConstraint(Tile[][] Rows, Dictionary Vs) states the SEND+MORE=MONEY problem: Rows is an array of words (one for each three word here) where each word is an array of letters represented as Tile types. Vs is a mapping from a letter (one of {S, E, N, D, M, O, R, Y}) to an integer in range [0, 9]."
+Examples.sendmoney.SendMoreMoneySolved.description = function() {
+    return "Examples.sendmoney.SendMoreMoneySolved(Tile[][] Rows, Dictionary Vs) states the SEND+MORE=MONEY problem: Rows is an array of words (one for each three word here) where each word is an array of letters represented as Tile types. Vs is a mapping from a letter (one of {S, E, N, D, M, O, R, Y}) to an integer in range [0, 9]."
 }
 
-Examples.sendmoney.SendMoreMoneyConstraint.prototype.description = function() {
+Examples.sendmoney.SendMoreMoneySolved.prototype.description = function() {
     return "SEND+MORE=MONEY."
 }
 
-Examples.sendmoney.SendMoreMoneyConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
+Examples.sendmoney.SendMoreMoneySolved.prototype.computeError = function(pseudoTime, prevPseudoTime) {
     var rows = this.rows
     var values = this.values
     var seen = {}
@@ -74,35 +74,35 @@ Examples.sendmoney.SendMoreMoneyConstraint.prototype.computeError = function(pse
 	    && rows[0][0].value() != 0 && rows[1][0].value() != 0 && rows[1][0].value() != 0) ? 0 : 1
 }
 
-Examples.sendmoney.SendMoreMoneyConstraint.prototype.solve = function(pseudoTime, prevPseudoTime) {
+Examples.sendmoney.SendMoreMoneySolved.prototype.solve = function(pseudoTime, prevPseudoTime) {
     return {}
 }
 
-// ChooseLetterConstraint
+// ChooseLetter
 
-Examples.sendmoney.ChooseLetterConstraint = function Examples__sendmoney__ChooseLetterConstraint(letter, values) {
+Examples.sendmoney.ChooseLetter = function Examples__sendmoney__ChooseLetter(letter, values) {
     this.letter = letter
     this.values = values
 }
 
-sketchpad.addClass(Examples.sendmoney.ChooseLetterConstraint, true)
+sketchpad.addClass(Examples.sendmoney.ChooseLetter, true)
 
-Examples.sendmoney.ChooseLetterConstraint.description = function() {
-    return "Examples.sendmoney.ChooseLetterConstraint(String Letter, Dictionary M) says that mapping M should map Letter to an integer in range [0, 9]."
+Examples.sendmoney.ChooseLetter.description = function() {
+    return "Examples.sendmoney.ChooseLetter(String Letter, Dictionary M) says that mapping M should map Letter to an integer in range [0, 9]."
 }
 
-Examples.sendmoney.ChooseLetterConstraint.prototype.description = function() {
+Examples.sendmoney.ChooseLetter.prototype.description = function() {
     return "mapping " + JSON.stringify(this.values) + " should map letter '" + this.letter + "' to an integer in range [0, 9]."
 }
 
-Examples.sendmoney.ChooseLetterConstraint.prototype.__searchable = true
+Examples.sendmoney.ChooseLetter.prototype.__searchable = true
 
-Examples.sendmoney.ChooseLetterConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
+Examples.sendmoney.ChooseLetter.prototype.computeError = function(pseudoTime, prevPseudoTime) {
     var val = this.values[this.letter]
     return val >= 0 && val <= 9 ? 0 : 1
 }
 
-Examples.sendmoney.ChooseLetterConstraint.prototype.solve = function(pseudoTime, prevPseudoTime) {
+Examples.sendmoney.ChooseLetter.prototype.solve = function(pseudoTime, prevPseudoTime) {
     var letter = this.letter
     return [0, 1, 2, 5, 6, 7].map(function(v) { var sol = {}; sol[letter] = v; return {values: sol} })
 }
@@ -144,15 +144,15 @@ examples['send money'] = function() {
     var origin = {x: 400, y: 550}, unit = 75
     for (var letter in values) {
 	if (values[letter] == -1) {
-	    rc.addConstraint(Examples.sendmoney.ChooseLetterConstraint, undefined, letter, values)
+	    rc.addConstraint(Examples.sendmoney.ChooseLetter, undefined, letter, values)
 	}
 	var letterPos = rc.add(new Point(0, 550, 'red', 14))
 	var letterVec = new Vector(0, 0)
 	letterPos._selectionIndices.push(letter)
-	rc.addConstraint(Sketchpad.arith.EqualityConstraint, undefined, {obj: letterVec, prop: 'x'}, {obj: values, prop: letter}, [1])
-	rc.addConstraint(Sketchpad.geom.CartesianPointConstraint, undefined, letterPos, letterVec, origin, unit)
+	rc.addConstraint(Sketchpad.arith.EqualProperties, undefined, {obj: letterVec, prop: 'x'}, {obj: values, prop: letter}, [1])
+	rc.addConstraint(Sketchpad.geom.CartesianPointPlacement, undefined, letterPos, letterVec, origin, unit)
     }
-    var problemConstraint = new Examples.sendmoney.SendMoreMoneyConstraint(rows, values)
+    var problemConstraint = new Examples.sendmoney.SendMoreMoneySolved(rows, values)
     var solveOn = false
     
     // --- Time / Event Handling ---------------------------------------------

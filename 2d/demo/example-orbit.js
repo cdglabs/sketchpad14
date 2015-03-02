@@ -31,12 +31,12 @@ examples['orbit'] = function() {
     bodies.forEach(function (aSun) {
 	if (aSun !== sun)
 	    aSun.velocity.y = -1 * Math.sqrt(Sketchpad.simulation.G * masses.sun / distances['sun_' + aSun.name]) / radiusDownscale * initVelocityScale[aSun.name]
-	rc.addConstraint(Sketchpad.simulation.VelocityConstraint, undefined, aSun)
-	rc.addConstraint(Sketchpad.simulation.AccelerationConstraint, undefined, aSun, aSun.acceleration) 
+	rc.addConstraint(Sketchpad.simulation.VelocityRelation, undefined, aSun)
+	rc.addConstraint(Sketchpad.simulation.AccelerationRelation, undefined, aSun, aSun.acceleration) 
 	bodies.forEach(function (aMoon) {
 	    if (aSun !== aMoon)
-		rc.addConstraint(Sketchpad.simulation.OrbitalMotionConstraint, undefined, aSun, aMoon, distanceDownscale / distanceDownscaleCheat)
+		rc.addConstraint(Sketchpad.simulation.OrbitalMotion, undefined, aSun, aMoon, distanceDownscale / distanceDownscaleCheat)
 	})
     })
-    rc.addConstraint(Sketchpad.simulation.TimerConstraint, undefined, rc.add(new Timer(1)))
+    rc.addConstraint(Sketchpad.simulation.TickingTimer, undefined, rc.add(new Timer(1)))
 }

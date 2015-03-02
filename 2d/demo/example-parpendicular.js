@@ -3,40 +3,40 @@ var minus = Sketchpad.geom.minus
 
 // --- Constraint Defs -------------------------------------------------------
 
-Sketchpad.geom.ParPendicularConstraint = function Sketchpad__geom__ParPendicularConstraint(p1, p2, p3, p4) {
+Sketchpad.geom.ParPendicularLines = function Sketchpad__geom__ParPendicularLines(p1, p2, p3, p4) {
     this.p1 = p1
     this.p2 = p2
     this.p3 = p3
     this.p4 = p4
-    this.parC = new Sketchpad.geom.OrientationConstraint(p1, p2, p3, p4, 0)
-    this.perC = new Sketchpad.geom.OrientationConstraint(p1, p2, p3, p4, Math.PI / 2)
+    this.parC = new Sketchpad.geom.FixedAngle(p1, p2, p3, p4, 0)
+    this.perC = new Sketchpad.geom.FixedAngle(p1, p2, p3, p4, Math.PI / 2)
 }
 
-sketchpad.addClass(Sketchpad.geom.ParPendicularConstraint, true)
+sketchpad.addClass(Sketchpad.geom.ParPendicularLines, true)
 
-Sketchpad.geom.ParPendicularConstraint.description = function() {
-    return "Sketchpad.geom.ParPendicularConstraint(Point P1, Point P2, Point P3, Point P4) says line sections P1-2 & P3-4 should be either parallel or perpendicular. If in 'auto' mode, the switch happens on every 100 ticks. Else, if 'space' has been pressed ('manual' mode) the toggle happens with each hit of the 'space.'"
+Sketchpad.geom.ParPendicularLines.description = function() {
+    return "Sketchpad.geom.ParPendicularLines(Point P1, Point P2, Point P3, Point P4) says line sections P1-2 & P3-4 should be either parallel or perpendicular. If in 'auto' mode, the switch happens on every 100 ticks. Else, if 'space' has been pressed ('manual' mode) the toggle happens with each hit of the 'space.'"
 }
 
-Sketchpad.geom.ParPendicularConstraint.prototype.description = function() {
+Sketchpad.geom.ParPendicularLines.prototype.description = function() {
     return "line sections  " + this.p1.__toString + "-" + this.p2.__toString + " and  " + this.p3.__toString + "-" + this.p4.__toString + " should be either parallel or perpendicular. If in 'auto' mode, the switch happens on every 100 ticks. Else, if 'space' has been pressed ('manual' mode) the toggle happens with each hit of the 'space.'"
 }
 
-Sketchpad.geom.ParPendicularConstraint.prototype.propertyTypes = {p1: 'Point', p2: 'Point', p3: 'Point', p4: 'Point', parC: 'OrientationConstraint', perC: 'OrientationConstraint'}
+Sketchpad.geom.ParPendicularLines.prototype.propertyTypes = {p1: 'Point', p2: 'Point', p3: 'Point', p4: 'Point', parC: 'FixedAngle', perC: 'FixedAngle'}
 
-Sketchpad.geom.ParPendicularConstraint.dummy = function(x, y) {
-    return new Sketchpad.geom.ParPendicularConstraint(Point.dummy(x, y), Point.dummy(x, y), Point.dummy(x, y), Point.dummy(x, y)) 
+Sketchpad.geom.ParPendicularLines.dummy = function(x, y) {
+    return new Sketchpad.geom.ParPendicularLines(Point.dummy(x, y), Point.dummy(x, y), Point.dummy(x, y), Point.dummy(x, y)) 
 }
 
-Sketchpad.geom.ParPendicularConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
+Sketchpad.geom.ParPendicularLines.prototype.computeError = function(pseudoTime, prevPseudoTime) {
     return (scratch.toggle ? this.parC : this.perC).computeError(pseudoTime, prevPseudoTime) 
 }
 
-Sketchpad.geom.ParPendicularConstraint.prototype.solve = function(pseudoTime, prevPseudoTime) {
+Sketchpad.geom.ParPendicularLines.prototype.solve = function(pseudoTime, prevPseudoTime) {
     return (scratch.toggle ? this.parC : this.perC).solve(pseudoTime, prevPseudoTime) 
 }
 
-Sketchpad.geom.ParPendicularConstraint.prototype.draw = function(canvas, origin) {
+Sketchpad.geom.ParPendicularLines.prototype.draw = function(canvas, origin) {
     return (scratch.toggle ? this.parC : this.perC).draw(canvas, origin) 
 }
 
@@ -72,8 +72,8 @@ examples['parpendicular'] = function() {
     var l2 = rc.add(new Line(p3, p4))    
 
 // --- Constraints ---------------------------------------------------------
-    rc.addConstraint(Sketchpad.simulation.TimerConstraint, undefined, rc.add(new Timer(1)))
-    rc.addConstraint(Sketchpad.geom.LengthConstraint, undefined, p1, p2, 300)
-    rc.addConstraint(Sketchpad.geom.LengthConstraint, undefined, p3, p4, 300)	
-    rc.addConstraint(Sketchpad.geom.ParPendicularConstraint, undefined, p1, p2, p3, p4)
+    rc.addConstraint(Sketchpad.simulation.TickingTimer, undefined, rc.add(new Timer(1)))
+    rc.addConstraint(Sketchpad.geom.FixedLength, undefined, p1, p2, 300)
+    rc.addConstraint(Sketchpad.geom.FixedLength, undefined, p3, p4, 300)	
+    rc.addConstraint(Sketchpad.geom.ParPendicularLines, undefined, p1, p2, p3, p4)
 }

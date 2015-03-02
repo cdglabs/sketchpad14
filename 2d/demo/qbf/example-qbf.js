@@ -115,30 +115,30 @@ Examples.qbf.WordRack.prototype.solutionJoins = function() {
    
 //  TileActivation Constraint
 
-Examples.qbf.TileActivationConstraint = function Examples__qbf__TileActivationConstraint(tile, surfaceP1, surfaceP2) {
+Examples.qbf.TileActivation = function Examples__qbf__TileActivation(tile, surfaceP1, surfaceP2) {
     this.tile = tile
     this.surfaceP1 = surfaceP1
     this.surfaceP2 = surfaceP2
 }
 
-sketchpad.addClass(Examples.qbf.TileActivationConstraint, true)
+sketchpad.addClass(Examples.qbf.TileActivation, true)
 
-Examples.qbf.TileActivationConstraint.description = function() {
-    return "Examples.qbf.TileActivationConstraint(Tile T, Point P1, Point P2) states that tile T's 'active' property should be true when T is sitting on line section P1-2."
+Examples.qbf.TileActivation.description = function() {
+    return "Examples.qbf.TileActivation(Tile T, Point P1, Point P2) states that tile T's 'active' property should be true when T is sitting on line section P1-2."
 }
 
-Examples.qbf.TileActivationConstraint.prototype.description = function() {
+Examples.qbf.TileActivation.prototype.description = function() {
     return "tile " + this.tile.__toString + "'s 'active' property should be true when it is sitting on line section " + this.surfaceP1.__toString + "-" + this.surfaceP2.__toString + "."
 }
 
-Examples.qbf.TileActivationConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
+Examples.qbf.TileActivation.prototype.computeError = function(pseudoTime, prevPseudoTime) {
     var tile = this.tile
     var isOn = Sketchpad.simulation.detectContact(tile.length * 1.2, tile.position, {x: 0, y: 0}, this.surfaceP1, this.surfaceP2)
     var ok = (isOn && !tile.used) ? tile.active : !tile.active
     return ok ? 0 : 1    
 }
 
-Examples.qbf.TileActivationConstraint.prototype.solve = function(pseudoTime, prevPseudoTime) {
+Examples.qbf.TileActivation.prototype.solve = function(pseudoTime, prevPseudoTime) {
     var tile = this.tile
     var isOn = Sketchpad.simulation.detectContact(tile.length * 1.2, tile.position, {x: 0, y: 0}, this.surfaceP1, this.surfaceP2)
     return {tile: {active: (isOn && !tile.used)}}
@@ -146,7 +146,7 @@ Examples.qbf.TileActivationConstraint.prototype.solve = function(pseudoTime, pre
 
 //  TileChoosing Constraint
 
-Examples.qbf.TileChoosingConstraint = function Examples__qbf__TileChoosingConstraint(tile, tiles, wordRack) {
+Examples.qbf.TileChoosing = function Examples__qbf__TileChoosing(tile, tiles, wordRack) {
     this.tile = tile
     this.tiles = tiles
     this.wordRack = wordRack
@@ -155,17 +155,17 @@ Examples.qbf.TileChoosingConstraint = function Examples__qbf__TileChoosingConstr
 	this['tile' + i] = wordTiles[i]
 }
 
-sketchpad.addClass(Examples.qbf.TileChoosingConstraint, true)
+sketchpad.addClass(Examples.qbf.TileChoosing, true)
 
-Examples.qbf.TileChoosingConstraint.description = function() {
-    return "Examples.qbf.TileChoosingConstraint(Tile T, Tile[] Ts, WordRack Rack) states if tile is active and its letter matches with latest typed character (scratch.letterTyped) and there are no other matching tiles that come before this tile, then this tile T should become inactive and Rack's next character index should be incremented by 1."
+Examples.qbf.TileChoosing.description = function() {
+    return "Examples.qbf.TileChoosing(Tile T, Tile[] Ts, WordRack Rack) states if tile is active and its letter matches with latest typed character (scratch.letterTyped) and there are no other matching tiles that come before this tile, then this tile T should become inactive and Rack's next character index should be incremented by 1."
 }
 
-Examples.qbf.TileChoosingConstraint.prototype.description = function() {
+Examples.qbf.TileChoosing.prototype.description = function() {
     return "if tile" + this.tile.__toString + "is active and its letter matches with latest typed character (scratch.letterTyped) and there are no other matching tiles that come before this tile, then this tile T should become inactive and Rack's next character index should be incremented by 1."
 }
 
-Examples.qbf.TileChoosingConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
+Examples.qbf.TileChoosing.prototype.computeError = function(pseudoTime, prevPseudoTime) {
     var tile = this.tile
     var tiles = this.tiles
     var res = 0
@@ -186,7 +186,7 @@ Examples.qbf.TileChoosingConstraint.prototype.computeError = function(pseudoTime
     return res
 }
 
-Examples.qbf.TileChoosingConstraint.prototype.solve = function(pseudoTime, prevPseudoTime) {
+Examples.qbf.TileChoosing.prototype.solve = function(pseudoTime, prevPseudoTime) {
     var tile = this.tile
     var wordRack = this.wordRack
     var wordTile = wordRack.tiles[wordRack.index]
@@ -197,7 +197,7 @@ Examples.qbf.TileChoosingConstraint.prototype.solve = function(pseudoTime, prevP
 
 //  TileUnchoosing Constraint
 
-Examples.qbf.TileUnchoosingConstraint = function Examples__qbf__TileUnchoosingConstraint(tile, tiles, wordRack) {
+Examples.qbf.TileUnchoosing = function Examples__qbf__TileUnchoosing(tile, tiles, wordRack) {
     this.tile = tile
     this.tiles = tiles
     this.wordRack = wordRack
@@ -205,17 +205,17 @@ Examples.qbf.TileUnchoosingConstraint = function Examples__qbf__TileUnchoosingCo
     tiles.forEach(function(t) { this['tile' + t.id] = t }.bind(this)) 
 }
 
-sketchpad.addClass(Examples.qbf.TileUnchoosingConstraint, true)
+sketchpad.addClass(Examples.qbf.TileUnchoosing, true)
 
-Examples.qbf.TileUnchoosingConstraint.description = function() {
-    return "Examples.qbf.TileUnchoosingConstraint(Tile T, Tile[] Ts, WordRack Rack) states that if user has pressed 'backspace' and tile T happens to be the last letter put on the Rack, then it must be reactivated."
+Examples.qbf.TileUnchoosing.description = function() {
+    return "Examples.qbf.TileUnchoosing(Tile T, Tile[] Ts, WordRack Rack) states that if user has pressed 'backspace' and tile T happens to be the last letter put on the Rack, then it must be reactivated."
 }
 
-Examples.qbf.TileUnchoosingConstraint.prototype.description = function() {
+Examples.qbf.TileUnchoosing.prototype.description = function() {
     return "if user has pressed 'backspace' and tile " + this.tile.__toString + " happens to be the last letter put on the Rack, then it must be reactivated."
 }
 
-Examples.qbf.TileUnchoosingConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
+Examples.qbf.TileUnchoosing.prototype.computeError = function(pseudoTime, prevPseudoTime) {
     var tile = this.tile
     var res = 0
     if (scratch.letterDeleted && tile.ref && tile.id == scratch.wordRackIndex - 1) {
@@ -225,7 +225,7 @@ Examples.qbf.TileUnchoosingConstraint.prototype.computeError = function(pseudoTi
 
 }
 
-Examples.qbf.TileUnchoosingConstraint.prototype.solve = function(pseudoTime, prevPseudoTime) {
+Examples.qbf.TileUnchoosing.prototype.solve = function(pseudoTime, prevPseudoTime) {
     var tile = this.tile
     var soln = {tile: {text: '', ref: undefined}, wordRack: {index: wordRack.index - 1}}
     soln['tile' + tile.ref.id] = {active: true, used: false}
@@ -234,23 +234,23 @@ Examples.qbf.TileUnchoosingConstraint.prototype.solve = function(pseudoTime, pre
 
 //  Feeder Tile Count Constraint
 
-Examples.qbf.FeederTileCountConstraint = function Examples__qbf__FeederTileCountConstraint(feeder, feederBelt, tiles) {
+Examples.qbf.FeederTileCountRelation = function Examples__qbf__FeederTileCountRelation(feeder, feederBelt, tiles) {
     this.feeder = feeder
     this.feederBelt = feederBelt
     this.tiles = tiles
 }
 
-sketchpad.addClass(Examples.qbf.FeederTileCountConstraint, true)
+sketchpad.addClass(Examples.qbf.FeederTileCountRelation, true)
 
-Examples.qbf.FeederTileCountConstraint.description = function() {
-    return "Examples.qbf.FeederTileCountConstraint(Feeder F, Belt B, Tile[] Ts) states that the number displayed on the feeder should equal to the number of tiles in Ts that happen to be currently on top of belt B."
+Examples.qbf.FeederTileCountRelation.description = function() {
+    return "Examples.qbf.FeederTileCountRelation(Feeder F, Belt B, Tile[] Ts) states that the number displayed on the feeder should equal to the number of tiles in Ts that happen to be currently on top of belt B."
 }
 
-Examples.qbf.FeederTileCountConstraint.prototype.description = function() {
+Examples.qbf.FeederTileCountRelation.prototype.description = function() {
     return " the number displayed on the feeder should equal to the number of tiles in Ts that happen to be currently on top of belt " + this.feederBelt.__toString + "."
 }
 
-Examples.qbf.FeederTileCountConstraint.prototype.computeError = function(pseudoTime, prevPseudoTime) {
+Examples.qbf.FeederTileCountRelation.prototype.computeError = function(pseudoTime, prevPseudoTime) {
     var count = 0
     var feederBelt = this.feederBelt
     this.tiles.forEach(function(tile) {
@@ -261,7 +261,7 @@ Examples.qbf.FeederTileCountConstraint.prototype.computeError = function(pseudoT
     return Math.abs(count - this.feeder.text)
 }
 
-Examples.qbf.FeederTileCountConstraint.prototype.solve = function(pseudoTime, prevPseudoTime) {
+Examples.qbf.FeederTileCountRelation.prototype.solve = function(pseudoTime, prevPseudoTime) {
     return {feeder: {text: this.okCount}}
 }
 
@@ -348,7 +348,7 @@ examples['quick brown fox'] = function() {
     var groundP6 = rc.add(new Point(900, 300))
     var platform = rc.add(new Line(groundP5, groundP6))
 
-    rc.addConstraint(Sketchpad.simulation.TimerConstraint, undefined, rc.add(new Timer(.5)))
+    rc.addConstraint(Sketchpad.simulation.TickingTimer, undefined, rc.add(new Timer(.5)))
 
     rc.add(new TextBox(new Point(550, 50), "-- ( 'backspace' to delete, 'enter' to submit ) --", false, 22))
 
@@ -398,29 +398,29 @@ examples['quick brown fox'] = function() {
 	var tile = rc.add(new Examples.qbf.Tile(i, tilePos, getRandomLetter(), false))
 	tile.body = tileBody
 	tiles.push(tile)
-	rc.addConstraint(Sketchpad.simulation.HitSurfaceConstraint, undefined, tileBody, ground.p1, ground.p2)
-	rc.addConstraint(Sketchpad.simulation.HitSurfaceConstraint, undefined, tileBody, belt.position1, belt.position2)
-	rc.addConstraint(Sketchpad.simulation.HitSurfaceConstraint, undefined, tileBody, feederBelt.position1, feederBelt.position2)
-	rc.addConstraint(Sketchpad.simulation.HitSurfaceConstraint, undefined, tileBody, platform.p1, platform.p2)
-	rc.addConstraint(Sketchpad.simulation.ConveyorBeltConstraint, undefined, tileBody, belt)
-	rc.addConstraint(Sketchpad.simulation.ConveyorBeltConstraint, undefined, tileBody, feederBelt)
-	rc.addConstraint(Sketchpad.simulation.AccelerationConstraint, undefined, tileBody, {x: 0, y: Sketchpad.simulation.g})
-	rc.addConstraint(Sketchpad.simulation.VelocityConstraint, undefined, tileBody)
-	rc.addConstraint(Examples.qbf.TileActivationConstraint, undefined, tile, platform.p1, platform.p2)
-	rc.addConstraint(Examples.qbf.TileChoosingConstraint, undefined, tile, tiles, wordRack)
+	rc.addConstraint(Sketchpad.simulation.HitSurfaceBehavior, undefined, tileBody, ground.p1, ground.p2)
+	rc.addConstraint(Sketchpad.simulation.HitSurfaceBehavior, undefined, tileBody, belt.position1, belt.position2)
+	rc.addConstraint(Sketchpad.simulation.HitSurfaceBehavior, undefined, tileBody, feederBelt.position1, feederBelt.position2)
+	rc.addConstraint(Sketchpad.simulation.HitSurfaceBehavior, undefined, tileBody, platform.p1, platform.p2)
+	rc.addConstraint(Sketchpad.simulation.ConveyorBeltBehavior, undefined, tileBody, belt)
+	rc.addConstraint(Sketchpad.simulation.ConveyorBeltBehavior, undefined, tileBody, feederBelt)
+	rc.addConstraint(Sketchpad.simulation.AccelerationRelation, undefined, tileBody, {x: 0, y: Sketchpad.simulation.g})
+	rc.addConstraint(Sketchpad.simulation.VelocityRelation, undefined, tileBody)
+	rc.addConstraint(Examples.qbf.TileActivation, undefined, tile, platform.p1, platform.p2)
+	rc.addConstraint(Examples.qbf.TileChoosing, undefined, tile, tiles, wordRack)
     }
     var wrTiles = wordRack.tiles
     for (var i = 0; i < wordRack.count; i++) {
-	rc.addConstraint(Examples.qbf.TileUnchoosingConstraint, undefined, wrTiles[i], tiles, wordRack)
+	rc.addConstraint(Examples.qbf.TileUnchoosing, undefined, wrTiles[i], tiles, wordRack)
     }    
     for (var i = 0; i < qbf.tileCount; i++) {
 	var tile1 = tiles[i]
 	for (var j = i + 1; j < qbf.tileCount; j++) {
 	    var tile2 = tiles[j]
-	    rc.addConstraint(Sketchpad.simulation.NoOverlapConstraint, undefined, tile2.body, tile1.body)
+	    rc.addConstraint(Sketchpad.simulation.PairOverlapAvoidance, undefined, tile2.body, tile1.body)
 	}
     }
-    rc.addConstraint(Examples.qbf.FeederTileCountConstraint, undefined, feeder, feederBelt, tiles)
+    rc.addConstraint(Examples.qbf.FeederTileCountRelation, undefined, feeder, feederBelt, tiles)
  
 }
 
