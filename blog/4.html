@@ -12,7 +12,7 @@
     "From Sketchpad<u>61</u> to Sketchpad<u>14</u>"
     <br>
     <small>
-      Part IV: Execution Model in CRP
+      Part IV: Execution Model in CRIP
     </small>
   </hd>
   <br><br>
@@ -26,7 +26,7 @@
       As we saw in the overview of the Overveld approach, each individual constraint has provided the appropriate methods to measure the current error based on the current state, expressed in terms of a set of <i>deltas</i> on variables. Thus a single function (recall we called it <mono>computeDeltas</mono>) is used to both <i>state</i> and <i>solve</i> the constraint.
     </p>
     <p>
-      In CRP, we separate the function that defines the constraint and the one that solves it. Constraint is stated here using a function here called <mono>computeError</mono>, which still expresses the constraint as a numerical error from a solution that fully satisfies it. Another function named <mono>solve</mono> is used to return a set of <i>patches</i> on variables, i.e., a set of new values for those variables in the program state it would like to change in order to become satisfied. Let's discuss these in more detail.
+      In CRIP, we separate the function that defines the constraint and the one that solves it. Constraint is stated here using a function here called <mono>computeError</mono>, which still expresses the constraint as a numerical error from a solution that fully satisfies it. Another function named <mono>solve</mono> is used to return a set of <i>patches</i> on variables, i.e., a set of new values for those variables in the program state it would like to change in order to become satisfied. Let's discuss these in more detail.
     </p>
   </div>
     <img src="img/1.png"></img>
@@ -50,7 +50,7 @@
       </li>
     </ul>
     <p>
-      Here is how these properties of defined for an instance of <mono>LengthConstraint</mono> (note that auxiliary functions <mono>plus</mono>, <mono>normalized</mono>, etc. operate over and return <mono>Point</mono> types, which are themselves essentially dictionary objects with <mono>x</mono> and <mono>y</mono> keys):
+      Here is how these properties are defined for an instance of <mono>LengthConstraint</mono> (note that auxiliary functions <mono>plus</mono>, <mono>normalized</mono>, etc. operate over and return <mono>Point</mono> types, which are themselves essentially dictionary objects with <mono>x</mono> and <mono>y</mono> keys):
     </p>
     <pre><code class="language-javascript">
 	// propertyTypes:
@@ -75,7 +75,7 @@
       Contrast the above with the <mono>computeDeltas</mono> function for the <mono>LengthConstraint</mono> in the Overveld approach, given previously. In Overveld way the solution was a set of deltas, but here the solution is the set of new values the constraint is proposing on the two points' coordinates. It so happens that these new values are obtained by computing delta values and adding to the current values. What's important is that this was left a choice to the implementer of the constraint type, rather than the system assuming so. We elaborate on this next.
     </p>
     <p>
-      How are individual solutions consolidated in the presence of multiple constraints? CRP employs the approach of Overveld (see <a href="1.html">Part I</a>) to collect the solutions from unsatisfied constraints and <i>join</i> them in order to come up with a <i>single consolidated solution</i>. Unlike the Overveld approach, however, where the joining is always simply <i>averaging</i> numeric values per variable, CRP generalizes this and allows the user to define a <mono>solutionJoin</mono> function per class property that decides how multiple solutions are combined. 
+      How are individual solutions consolidated in the presence of multiple constraints? CRIP employs the approach of Overveld (see <a href="1.html">Part I</a>) to collect the solutions from unsatisfied constraints and <i>join</i> them in order to come up with a <i>single consolidated solution</i>. Unlike the Overveld approach, however, where the joining is always simply <i>averaging</i> numeric values per variable, CRIP generalizes this and allows the user to define a <mono>solutionJoin</mono> function per class property that decides how multiple solutions are combined. 
     </p>
     <p>
       This generality is essential to accommodate numerous scenarios that arise in program development. Firstly, we cannot assume the patches proposed by the constraint are numeric real values, as they might be on finite data types, etc. Secondly, the right way to combine two competing solutions from two individual constraints maybe to raise a conflict and stop, prefer one to other because of priorities, or even apply some custom merge function not at all captured by averaging the values. We'll see examples later.
@@ -117,7 +117,7 @@
       </li>
     </ul>
     <p>
-      So how is this information used? Let's see how constraint solving is done in the CRP model which this tool implements. 
+      So how is this information used? Let's see how constraint solving is done in the CRIP model which this tool implements. 
     </p>
   </div>
     <img src="img/1.png"></img>
@@ -144,7 +144,7 @@ In order to support responsive interactive and animated programs, we adopt a two
     <table>
       <tr>
 	<td><img class="chapter" src="img/17.png" style="width: 175%; margin-left: 15%"></img></td>
-	<td><p class="side" style="margin-left: 100%; margin-top: -2%">Two-phase execution model in CRP <br>(A/D: add/delete,<br>R/W: read/write)</p></td>
+	<td><p class="side" style="margin-left: 100%; margin-top: -2%">Two-phase execution model in CRIP <br>(A/D: add/delete,<br>R/W: read/write)</p></td>
       </tr>
     </table>    
     </p>
@@ -185,7 +185,7 @@ In order to support responsive interactive and animated programs, we adopt a two
 <hd1>Enabling Backtracking Search</hd1>
 <div class="chapter">
   <p>
-    Classical <i>backtracking search</i> isn't accommodated by the CRP model as described. However, we have made a modification that allows programmers to rely on search as part of a program (see the <i>pentominoes</i> and <i>send money</i> demos). 
+    Classical <i>backtracking search</i> isn't accommodated by the CRIP model as described. However, we have made a modification that allows programmers to rely on search as part of a program (see the <i>pentominoes</i> and <i>send money</i> demos). 
   </p>
   <p>   
     We let a constraint type to be marked as <mono>searchable</mono>. A searchable constraint's <mono>solve</mono> function returns a set of solutions rather than one. Thus a user can communicate to the system that it wants to try either one of the solutions and search for the right combination of solutions from all constraints that will result in a globally acceptable solution.
@@ -215,7 +215,7 @@ NumListSortConstraint.prototype.solve = function(pseudoTime) {
 <img src="img/1.png"></img>
 <br>
 <p>
-  Read <a href="5.html">Part V: Creating Applications from Scratch in CRP (Remaking the "Parables of the Polygons" Demo)</a><br>
+  Read <a href="5.html">Part V: Creating Applications from Scratch in CRIP (Remaking the "Parables of the Polygons" Demo)</a><br>
     Back to <a href="index.html">Table of Contents</a><br>
   </p>
   <script src="./lib/click-to-play-gif.js"></script>
