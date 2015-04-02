@@ -311,7 +311,7 @@ TextBox.dummy = function(x, y) {
 }
 
 TextBox.prototype.solutionJoins = function() { 
-    return {text: sketchpad.lastOneWinsJoinSolutions}
+    return {text: sketchpad.lastOneWinsJoinSolutions, fontColor: sketchpad.lastOneWinsJoinSolutions}
 }
 
 TextBox.prototype.draw = function(canvas, origin) {
