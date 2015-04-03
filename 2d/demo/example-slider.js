@@ -60,9 +60,14 @@ Examples.slider.Slider.prototype.draw = function(canvas, origin, options) {
     var ctxt = canvas.ctxt
     this.frame.draw(canvas, origin)
     this.button.draw(canvas, origin)
-    var p = this.button.position, w = this.button.width
-    this._buttonLine.p1 = p.plus({x: w/2, y: 5})
-    this._buttonLine.p2 = p.plus({x: w/2, y: this.button.height - 5})
+    var p = this.button.position, w = this.button.width, h = this.button.height 
+    if (this.horiz) {
+	this._buttonLine.p1 = p.plus({x: 5, y: h/2})
+	this._buttonLine.p2 = p.plus({x: w - 5, y: h/2})
+    } else {
+	this._buttonLine.p1 = p.plus({x: w/2, y: 5})
+	this._buttonLine.p2 = p.plus({x: w/2, y: h - 5})
+    }
     this._buttonLine.draw(canvas, origin)
 }
 

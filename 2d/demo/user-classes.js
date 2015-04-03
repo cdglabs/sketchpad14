@@ -276,7 +276,7 @@ Box.prototype.center = function() {
     return this.position.midPoint(new Point(this.position.x + this.width, this.position.y + this.height))
 }
 
-function TextBox(position, optText, optMultiLine, optFontSize, optWidth, optHeight, optBgColor, optFont, optFontColor, optHasNoBorder, optFontStyle, optNoCentering, optMargin) {
+function TextBox(position, optText, optMultiLine, optFontSize, optWidth, optHeight, optBgColor, optFont, optFontColor, optHasNoBorder, optFontStyle, optNoCentering, optMargin, optBorderColor) {
     var self = this
     this.position = position
     this.text = optText === undefined ? '' : optText
@@ -291,7 +291,7 @@ function TextBox(position, optText, optMultiLine, optFontSize, optWidth, optHeig
     this.hasBorder = !optHasNoBorder
     this.centering = !optNoCentering
     this.style = optFontStyle || ''
-    this.box = new Box(position, this.width, this.height, false, false, optBgColor, optBgColor, optHasNoBorder)
+    this.box = new Box(position, this.width, this.height, false, false, optBorderColor || optBgColor, optBgColor, optHasNoBorder)
     if (this.multiLine) {	
 	this.lines = []
 	if (optText) {
