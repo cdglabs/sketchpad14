@@ -16,6 +16,8 @@ Examples.cells.Sheet = function Examples__cells__Sheet(rows, cols, position, wid
     this.box = new Box(position, width, height, true, true, undefined, '#f0ee9e')
     this.rows = rows
     this.cols = cols
+    this.rowLabels = []
+    this.colLabels = []
     this.cells = []    
     this.__origin = this.box.__origin
     this.viewOffsetY = 0
@@ -25,20 +27,34 @@ Examples.cells.Sheet = function Examples__cells__Sheet(rows, cols, position, wid
 sketchpad.addClass(Examples.cells.Sheet)
 
 Examples.cells.Sheet.prototype.init = function() {
-    var rows = this.rows, cols = this.cols, cellWidth = this.cellWidth, cellHeight = this.cellHeight 
+    var rows = this.rows, cols = this.cols, cellWidth = this.cellWidth, cellHeight = this.cellHeight, width = this.width, height = this.height
+    var rowsCap = rows - Math.floor(height / cellHeight)  + 1
+    var colsCap = cols - Math.floor(width / cellWidth) + 1
     //rc.add(this.box)
-    for (var i = 0; i < rows + 1; i++) {
-	for (var j = 0; j < cols + 1; j++) { 
-	    var c = new Examples.cells.Cell(new Point(j * cellWidth, i * cellHeight), j == 0 && i !== 0 ? i - 1 : i == 0 && j != 0 ? letters[j - 1] : '', cellWidth, cellHeight, 20, i == 0 || j == 0 ? '#cccccc' : '#f0ee9e')
-	    this.cells.push(c)
-	    rc.add(c, this)
+    for (var i = 1; i <= rows; i++) {
+	var c = new Examples.cells.Cell(new Point(i * cellWidth, 0), letters[i-1], cellWidth, cellHeight, 20, '#cccccc')
+	this.colLabels.push(c)
+	//rc.add(c, this)	
+    }
+    for (var j = 1; j <= cols; j++) {
+	var c = new Examples.cells.Cell(new Point(0, j * cellHeight), j-1, cellWidth, cellHeight, 20, '#cccccc')
+	this.rowLabels.push(c)
+	//rc.add(c, this)
+    }
+    for (var i = 1; i <= rows; i++) {
+	var row = []
+	this.cells.push(row)
+	for (var j = 1; j <= cols; j++) { 
+	    var c = new Examples.cells.Cell(new Point(j * cellWidth, i * cellHeight), letters[j-1] + (i-1), cellWidth, cellHeight, 20, '#f0ee9e')
+	    row.push(c)
+	    //rc.add(c, this)
 	}
     }
 	
-    this.cursor = this.cells[0]
-    this.sliderY = rc.add(new Examples.slider.Slider({obj: this, prop: 'viewOffsetY'}, false, new Point(0, 0), 20, this.box.height, {start: 0, end: 1}, true))
+    this.cursor = this.cells[0][0]
+    this.sliderY = rc.add(new Examples.slider.Slider({obj: this, prop: 'viewOffsetY'}, false, new Point(0, 0), 20, this.box.height, {start: 0, end: rowsCap}, true))
     this.sliderY.init()
-    this.sliderX = rc.add(new Examples.slider.Slider({obj: this, prop: 'viewOffsetX'}, true, new Point(0, 0), this.box.width, 20, {start: 0, end: 1}, true))
+    this.sliderX = rc.add(new Examples.slider.Slider({obj: this, prop: 'viewOffsetX'}, true, new Point(0, 0), this.box.width, 20, {start: 0, end: colsCap}, true))
     this.sliderX.init()
     
     rc.addConstraint(Sketchpad.arith.EqualProperties, undefined, {obj: this.box.bottomCorner, prop: 'x'}, {obj: this.sliderY.frame.position, prop: 'x'}, [2])
@@ -51,20 +67,42 @@ Examples.cells.Sheet.prototype.init = function() {
 }
 
 Examples.cells.Sheet.prototype.draw = function(canvas, origin) {
+    var rows = this.rows, cols = this.cols, cellWidth = this.cellWidth, cellHeight = this.cellHeight, width = this.width, height = this.height
     if (this.sliderY.valueToSliderPositionMode) {
-	this.viewOffsetY = this.cursorLineOffset()
-	this.setSliderRange()
+	//this.viewOffsetY = this.cursorLineOffset()
+	//this.setSliderRange()
     }
     var bPos = this.box.position
-    var pos = bPos.minus({x: 0, y: this.viewOffsetY * this.rows})
+    var pos = bPos.minus({x: this.viewOffsetX * this.cellWidth, y: this.viewOffsetY * this.cellHeight})
+    var posPx = bPos.minus({x: this.viewOffsetX * this.cellWidth, y: 0})
+    var posPy = bPos.minus({x: 0, y: this.viewOffsetY * this.cellHeight})
     var box = this.box
     var posX = pos.x, posY = pos.y, cells = this.cells, size = cells.length, start = 0, end = size - 1
     // find which portion is visible within the view of page
-    for (var i = 0; i < cells.length; i++) {
-	var c = cells[i]
+    this.viewOffsetX = Math.max(this.viewOffsetX, 0)
+    this.viewOffsetY = Math.max(this.viewOffsetY, 0)
+    for (var i =  this.viewOffsetY; i < this.rowLabels.length; i++) {
+	var c = this.rowLabels[i]
 	var p = c.position
-	if (box.containsPoint(p.x + posX + c.width, p.y + posY + c.height))
-	    c.draw(canvas, pos)
+	if (box.containsPoint(p.x + bPos.x + c.width, p.y + posY + c.height))
+	    c.draw(canvas, posPy)
+    }
+    for (var i =  this.viewOffsetX; i < this.colLabels.length; i++) {
+	var c = this.colLabels[i]
+	var p = c.position
+	if (box.containsPoint(p.x + posX + c.width, p.y + bPos.y + c.height))
+	    c.draw(canvas, posPx)
+    }
+    for (var i = this.viewOffsetY; i < this.rows; i++) {
+	var row = cells[i]
+	for (var j = this.viewOffsetX; j < this.cols; j++) {	    
+	var c = row[j]
+	var p = c.position
+	    if (box.containsPoint(p.x + posX + c.width, p.y + posY + c.height)) {
+		c.tbox.box.bgColor = c === this.cursor ? '#81f781' : '#f0ee9e'
+		c.draw(canvas, pos)
+	    }
+	}
     }
 }
 
@@ -82,194 +120,11 @@ Examples.cells.Sheet.prototype.setSliderRange = function() {
     //this.sliderY.range.end = Math.max(0, Math.ceil((this.cells[this.cells.length - 1].position.y - this.box.height) / this.rows))
 }
 
-Examples.cells.Sheet.prototype.addText = function(text) { 
-    rc.pause()
-    text.split('').forEach(function(c) { this.addCell(c) }.bind(this)) 
-    rc.unpause()
-}
-
-Examples.cells.Sheet.prototype.addCell = function(text) {
-    var cursor = this.cursor
-    var newCell = new Examples.cells.Cell(new Point(0, 0, 'gray', 5), text)
-    rc.add(newCell, this)
-    this.cells.splice(cursor.next ? this.cells.indexOf(cursor.next) : this.cells.length, 0, newCell)
-    var prev = cursor.prev
-    if (prev)
-	prev.next = newCell
-    newCell.prev = prev
-    newCell.next = cursor.next    
-    if (cursor.next) {
-	cursor.next.prev = newCell
-    }
-    cursor.prev = newCell
-
-    var constraint = rc.addConstraint(Examples.cells.CellPositioning, undefined, newCell, this)
-    constraint.___container = this.box
-    var mode = sketchpad.scratch.wordWrapModes[sketchpad.scratch.wordWrapMode]
-    if (mode === 'optimal' || mode === 'justify') {
-	sheet.optimalBreaksConstraint['pos' + newCell.__id] = newCell.position
-	if (newCell.isSpace())
-	    sheet.justifyConstraint['char' + newCell.__id] = newCell
-    }
-}
-
-Examples.cells.Sheet.prototype.deleteCell = function() {
-    var cursor = this.cursor
-    var deletedCell = cursor.prev
-    if (deletedCell) {
-	var cells = this.cells
-	cells.splice(cells.indexOf(deletedCell), 1)
-	if (deletedCell.prev)
-	    deletedCell.prev.next = cursor.next
-	if (cursor.next)
-	    cursor.next.prev = deletedCell.prev
-	cursor.prev = deletedCell.prev
-	cursor.next = deletedCell.next
-	rc.remove(deletedCell, true)
-    }
-}
-
-Examples.cells.Sheet.prototype.moveCursorLeft = function() {
-    var cursor = this.cursor
-    if (cursor.prev) {
-	cursor.next = cursor.prev
-	cursor.prev = cursor.prev.prev
-    }
-}
-
-Examples.cells.Sheet.prototype.moveCursorRight = function() {
-    var cursor = this.cursor
-    if (cursor.next) {
-	cursor.prev = cursor.next
-	cursor.next = cursor.next.next
-    } 
-}
-
-Examples.cells.Sheet.prototype.computePerSpaceCellPaddingForEvenColumns = function() {
-    var res = []
-    var newLines = this.newLineIdxs
-    var colWidth = this.width() - (this.cols * 2)
-    var idx = 0
-    var next = newLines[idx]
-    var takenSp = 0, sps = []
-    for (var i = 0; i < this.cells.length; i++) {
-	var c = this.cells[i]	
-	if (i == next) {
-	    var d = c.prev
-	    while (d && d.isSpace()) {
-		sps.pop()
-		takenSp -= d.width
-		d = d.prev
-	    }
-	    var empty = colWidth - takenSp - (idx > 0 ? this.cols : 0)
-	    var paddingNeeded = empty > 0 && sps.length > 0 ? (empty / sps.length) : 0
-	    if (paddingNeeded) {
-		sps.forEach(function(s) { res.push({character: s, padding: paddingNeeded}) })
-	    }
-	    next = newLines[++idx]
-	    takenSp = 0
-	    sps = []
-	} else {
-	    if (c.isSpace())
-		sps.push(c)
-	    takenSp += c.width
-	}
-    }
-    return res
-}
-
-Examples.cells.Sheet.prototype.wordJustifyWrapSlackTable = function(W, L, n) {
-    // Initialize slack table S
-    var S = [], K = []
-    for (var i = 1; i <= n; i++) {
-	var a = []
-	for (var j = 1; j <= n; j++)
-	    a.push(0)
-	S.push(a)	
-    }
-    S[0][0] = W[0]
-    K[0] = n
-    for (k = 2; k <= n; k++)
-	S[0][k - 1] = S[0][k - 2] + W[k - 1]
-    for (var i = 2; i <= n; i++) {
-	var k = i	
-	S[i - 1][k - 1] = S[0][k - 1] - S[0][i - 2]
-	while (k <= n - 1 && (L - S[i - 1][k - 1] - (k - i) > 0)) {
-	    k = k + 1
-	    S[i - 1][k - 1] = S[0][k - 1] - S[0][i - 2]
-	}
-	K[i - 1] = k
-    }
-    // Evaluate sum-of-squares for valid entries
-    for (var i = 1; i <= n; i++) {
-	for (var k = i; k <= K[i - 1]; k++) {
-	    S[i - 1][k - 1] = L - S[i - 1][k - 1] - (k - i)
-	    if (S[i - 1][k - 1] < 0) {
-		    S[i - 1][k - 1] = Number.MAX_VALUE
-	    } else
-		S[i - 1][k - 1] = (S[i - 1][k - 1]) * (S[i - 1][k - 1]) 		    
-	}
-    }
-    for (var i = 1; i <= n; i++) {
-	if (K[i - 1] < n) {
-	    for (var m = K[i - 1]; m < n; m++)
-		S[i - 1][m] = Number.MAX_VALUE	    
-	}
-    }
-    return S
-}
-
-// return value is the indices of the first word on each line
-Examples.cells.Sheet.prototype.wordJustifyWrapFirstInLineWords = function(words, L) {
-    var W = words.map(function(w) { return w.length })
-    var n = W.length
-    var S = this.wordJustifyWrapSlackTable(W, L, n), C = [], B = []
-    // Determine the least-cost arrangement 
-    C[0] = 0
-    for (var i = 1; i <= n; i++) {
-	C[i] = Number.MAX_VALUE
-	var k = i
-	var T = C[k - 1] + S[k - 1][i - 1] 
-	if (T < C[i]) {
-	    C[i] = T
-	    B[i - 1] = k
-	}
-	while (k >= 2 && T < Number.MAX_VALUE) {
-	    k = k - 1
-	    T = C[k - 1] + S[k - 1][i - 1]
-	    if (T < C[i]) {
-		C[i] = T
-		B[i - 1] = k
-	    }
-	}
-    }
-    // Determine the first word on each line 
-    var F = []
-    F.unshift(B[n - 1])
-    var i = B[n - 1] - 1 
-    while (i > 0) {
-	F.unshift(B[i - 1])
-	i = B[i - 1] - 1
-    }
-    for (var i = 0; i < F.length; i++)
-	F[i]--
-    F.shift()
-    return F
-}
-
-Examples.cells.Sheet.prototype.wordJustifyWrapNewLineCellIndices = function(text, L) {
-    var res = ''
-    var words = text.split(' ')
-    var F = this.wordJustifyWrapFirstInLineWords(words, L)
-    var cIdx = 0, wIdx = 0
-    var res = []
-    F.forEach(function(f) { 
-	while (wIdx < f)
-	    cIdx += words[wIdx++].length + 1
-	res.push(cIdx)
-    })
-    this.newLineIdxs = res
-    return res
+Examples.cells.Sheet.prototype.setCursorByPos = function(posX, posY) {
+    var diff = new Point(posX, posY).minus(this.box.position)
+    var coord = {j: Math.floor(diff.x / this.cellWidth) - 1 + this.viewOffsetX, i: Math.floor(diff.y / this.cellHeight) - 1 + this.viewOffsetY}
+    if (coord.i >= 0 && coord.j >= 0)
+	this.cursor = this.cells[coord.i][coord.j]
 }
 
 Examples.cells.Cell = function Examples__cells__Cell(position, text, width, height, fontSize, color) {
@@ -310,7 +165,9 @@ examples['cells'] = function() {
 // --- Constraints ---------------------------------------------------------
 
     //sketchpad.solveEvenWithoutErrorOnPriorityDifferences = true
-    rc.setOption('renderMode', 2)
+    sketchpad.setOption('solveEvenWithoutErrorOnPriorityDifferences', true)
+    rc.setOption('dragConstraintPriority', 0)
+    rc.setOption('renderMode', 1)
 
     rc.sketchpad.registerEvent('keypress', function(e) {
 	sheet.sliderY.valueToSliderPositionMode = true
@@ -344,10 +201,15 @@ examples['cells'] = function() {
 
     rc.sketchpad.registerEvent('pointerdown', function(e) { 
 	var sel = rc.selection
-	if (sel == sheet.sliderY) {
-	    sheet.sliderY.valueToSliderPositionMode = false
-	} else if (sel == sheet.box) {
-	    sheet.sliderY.valueToSliderPositionMode = true
+	if (sel instanceof Examples.slider.Slider) {
+	    sel.valueToSliderPositionMode = false
+	} else {
+	    var posX = e.clientX, posY = e.clientY	    
+	    if (sheet.box.containsPoint(posX, posY)) {
+		sheet.sliderX.valueToSliderPositionMode = true
+		sheet.sliderY.valueToSliderPositionMode = true
+		sheet.setCursorByPos(posX, posY)
+	    }
 	}
     }, "...")
     

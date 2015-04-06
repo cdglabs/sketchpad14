@@ -661,12 +661,21 @@ SketchpadCanvas.prototype.redraw = function() {
     if (this.showConstraints)
 	this.sketchpad.constraints.forEach(function(c) { draw(c, self) })
     if (this.selection && this.selection.border) {
-	drawBorderOf(this.selection, 'orange', this)
+	this.drawBorderOf(this.selection, 'orange')
     }
-    this.secondarySelections.forEach(function(t) { if (t.border) { var color = (self.highlightThisThingDifferently && self.highlightThisThingDifferently === t) ? 'red' : 'green'; drawBorderOf(t, color, self) } })
+    this.secondarySelections.forEach(function(t) { if (t.border) { var color = (self.highlightThisThingDifferently && self.highlightThisThingDifferently === t) ? 'red' : 'green'; self.drawBorderOf(t, color) } })
     if (this.inDragSelectMode)
 	draw(this.selectionBox, self, {color: 'green'})
     this.ctxt.restore()
+}
+
+SketchpadCanvas.prototype.drawBorderOf = function(thing, color) {
+    var border = thing.border()
+    border.___container = thing.__container
+    var bgColor = border.bgColor
+    border.bgColor = undefined
+    draw(border, this, {color: color, lineWidth: 3})
+    border.bgColor = bgColor
 }
 
 SketchpadCanvas.prototype.drawArrow = function(from, to, origin, label, color) {
@@ -1532,16 +1541,6 @@ function drawConstraint(canvas, options) {
     var origin = this.__container.__origin
     this.__labelBox.draw(canvas, origin, options)
 }
-
-function drawBorderOf(thing, color, canvas) {
-    var border = thing.border()
-    border.___container = thing.__container
-    var bgColor = border.bgColor
-    border.bgColor = undefined
-    draw(border, canvas, {color: color, lineWidth: 3})
-    border.bgColor = bgColor
-}
-
 
 function generateMergeListH(src, dst, sofarSrcs, sofarDsts) {
     if (src.__type !== dst.__type) {
