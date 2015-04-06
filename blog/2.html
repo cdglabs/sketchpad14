@@ -12,7 +12,7 @@
     "From Sketchpad<u>61</u> to Sketchpad<u>14</u>"
     <br>
     <small>
-      Part II: Constraint Reactive within Imperative Programming (CRIP) in Sketchpad14
+      Part II: Constraints as a Design Pattern (CDP) in Sketchpad14
     </small>
   </hd>
   <br><br>
@@ -37,19 +37,19 @@
       As in Sketchpad and Overveld's geometric constraints, the way to define and modify the behavior of a program is to add/remove constraints, rather than the common imperative programming practice of "adding or modifying some code." We take Overveld's approach, however, and require that the statement and the solution to individual constraint types be defined beforehand. This means we let the user define constraint types as well as how to solve them in isolation. This setup puts the programmer in the driver seat to use the programming language of the program itself to define the constraint and also provide an "algorithm" to solve it. Note that there's nothing stopping that algorithm to be simply an invocation of an external solver!
     </p>
     <p>
-      Another aspect of Sketchpad14 is that it gives a principled mechanism for the user to define the <i>reactive</i> part of an interactive program. The next section explains a semi-formal programming model implemented by the tool that we call <i>Constraint Reactive within Imperative Programming</i>.
+      Another aspect of Sketchpad14 is that it gives a principled mechanism for the user to define the <i>reactive</i> part of an interactive program. The next section explains a semi-formal programming model implemented by the tool that we call <i>Constraints as a Design Pattern</i>.
     </p>
   </div>
   <img src="img/1.png"></img>
   <br>
-  <hd1>Constraint Reactive within Imperative Programming</hd1>
+  <hd1>Constraints as a Design Pattern</hd1>
   <div class="chapter">
     <p>
-      Sketchpad14 is hosted in JavaScript, so we will explain the Constraint Reactive within Imperative Programming (CRIP) model in the context of the JS language.
+      Sketchpad14 is hosted in JavaScript, so we will explain the Constraints as a Design Pattern (CDP) model in the context of the JS language.
     </p>
     In this language, primitive types as well as functions and objects serve as values. Objects can be instantiated and referenced, as usual. However, imperative style programming, e.g. assignments and looping constructs for computation, isn't done.
     <p>
-      Constructing a program in the CRIP model involves describing four parts:
+      Constructing a program in the CDP model involves describing four parts:
       <ul>
       <li>
       (1) data and constraint <b>class definitions</b>
@@ -83,7 +83,7 @@
 Therefore, the execution model is unlike the imperative style, i.e., statement by statement. The program is assumed to be <i>reactive</i>. All present constraints are assumed to be continuously operating over the data, affecting them any time they are left unsatisfied. The events are always assumed to be ready to be triggered.
     </p>
     <p>
-      OK, enough talking! We'll come back to CRIP later. Let's jump to some Sketchpad14 examples in the <a href="3.html">next part</a>.
+      OK, enough talking! We'll come back to CDP later. Let's jump to some Sketchpad14 examples in the <a href="3.html">next part</a>.
     </p>
   </div>
   <img src="img/1.png"></img>

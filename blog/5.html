@@ -22,7 +22,7 @@
     "From Sketchpad<u>61</u> to Sketchpad<u>14</u>"
     <br>
     <small>
-      Part V: Creating Applications from Scratch in CRIP, <br>(Remaking the "Parables of the Polygons" Demo)
+      Part V: Creating Applications from Scratch in CDP, <br>(Remaking the "Parables of the Polygons" Demo)
     </small>
   </hd>
   <br><br>
@@ -33,7 +33,7 @@
   <hd1>Parable of the Polygons</hd1>
   <div class="chapter">
     <p>
-      Recently, CDG's <a href="http://vihart.com/">Vi Hart</a> and web programmer <a href="http://www.patreon.com/ncase">Niky Case</a> relased a highly cited and praised web page called <a href="http://ncase.me/polygons/">Parables of the Polygons</a>. Not only beautifully designed, the page explains a mathematics concept in an explorable way and leads to conveying a positive social lesson for tolerance of all. We took the task of remaking the web page in Sketchpad14 and the CRIP model to understand the advantages and limitations of our approach. This chapter summarizes what it took to make the demo. 
+      Recently, CDG's <a href="http://vihart.com/">Vi Hart</a> and web programmer <a href="http://www.patreon.com/ncase">Niky Case</a> relased a highly cited and praised web page called <a href="http://ncase.me/polygons/">Parables of the Polygons</a>. Not only beautifully designed, the page explains a mathematics concept in an explorable way and leads to conveying a positive social lesson for tolerance of all. We took the task of remaking the web page in Sketchpad14 and the CDP model to understand the advantages and limitations of our approach. This chapter summarizes what it took to make the demo. 
     </p>
     <img class="chapter" src="img/18.png" style="width: 125%; margin-left: -15%"></img>
     <p>
@@ -42,13 +42,13 @@
   </div>
   <img src="img/1.png"></img>
   <br>
-  <hd1>What's it take to program in CRIP/Sketchpad14?</hd1>
+  <hd1>What's it take to program in CDP/Sketchpad14?</hd1>
   <div class="chapter">
     <p>
       You could find the source code for this demo at <small>"<a href="../2d/demo/polygons/example-polygons.js">../2d/demo/polygons/example-polygons.js</a>"</small> or scroll down to the <a href="#sketchpad-playground-div">bottom</a> of this page to play it. Let's examine it. It should be possible to develop it all within the tool itself, but at the moment the UI just isn't usable yet.
     </p>
     <p>
-      All CRIP programs are conventionally organized in the same way. <b>Data classes</b> are defined first, then <b>constraint classes</b>. Afterwards <b>data</b> objects are created and then <b>constraints</b> are instantiated to operate on them. Finally, should this be an interactive program (all Sketchpad14 programs are because objects are draggable), <b>events</b> are registered, whose job is to modify the data and constraint stores.
+      All CDP programs are conventionally organized in the same way. <b>Data classes</b> are defined first, then <b>constraint classes</b>. Afterwards <b>data</b> objects are created and then <b>constraints</b> are instantiated to operate on them. Finally, should this be an interactive program (all Sketchpad14 programs are because objects are draggable), <b>events</b> are registered, whose job is to modify the data and constraint stores.
     </p>
   </div>
   <img src="img/1.png"></img>
@@ -329,7 +329,7 @@ registerEvent('mousemove', function(e) {
 	  We'll add an instance of <mono>ShapeSwingConstraint</mono> to not only the happy swinging shapes on the page header, but also to a shape that is picked up by the user (to get a <i>dangling</i> effect). The difference is that the dangling kind's swing rate subsides with passage of time. 
 	</p>
 	<p>
-	  There is a feature we haven't talked about before, but we'll now discuss and use it. Each class (be it a data or constraint type) can define a <mono>onEachTimeStep</mono> method, which will be run by the CRIP execution model right before going to the <i>solving stage</i>, and is used to do any sort of housekeeping, property updating, etc.
+	  There is a feature we haven't talked about before, but we'll now discuss and use it. Each class (be it a data or constraint type) can define a <mono>onEachTimeStep</mono> method, which will be run by the CDP execution model right before going to the <i>solving stage</i>, and is used to do any sort of housekeeping, property updating, etc.
 	</p>
 	<p>
 	  Thus we define a <mono>onEachTimeStep</mono> for each instance of the <mono>ShapeSwingConstraint</mono> which happens to be simulating dangling, to get the effect of gradually damping and turning off the dangling speed:
@@ -387,7 +387,7 @@ registerEvent('mousedown', function(e) {
   <img src="img/1.png"></img>
   <br>
   <p>
-    Read <a href="6.html">Part VI: Comparison of CRIP and Imperative Programming</a><br>
+    Read <a href="6.html">Part VI: Comparison of CDP and Imperative Programming</a><br>
     Back to <a href="index.html">Table of Contents</a><br>
   </p>
   <img src="img/1.png"></img>
