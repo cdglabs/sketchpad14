@@ -46,24 +46,24 @@
       </li>
       <br>	    
       <li>
-	<mono>solve</mono>: which the system calls once it deems the constraint unsatisfied. This function returns a dictionary object as a solution to the constraint. This solution is essentially interpreted as a set of <i>patches</i> to the current state, indicating the set of variables that need to be changed and the values they need to be changed to. The set of patches are organized as a dictionary where the keys are the names of the property objects belonging to the constraint (e.g., in the <mono>LengthConstraint</mono> they are called <mono>p1</mono>  and  <mono>p2</mono>) and the values are themselves dictionaries, mapping the name of a property belonging to an object to a new value. 
+	<mono>solve</mono>: which the system calls once it deems the constraint unsatisfied. This function returns a dictionary object as a solution to the constraint. This solution is essentially interpreted as a set of <i>patches</i> to the current state, indicating the set of variables that need to be changed and the values they need to be changed to. The set of patches are organized as a dictionary where the keys are the names of the property objects belonging to the constraint (e.g., in the <mono>FixedLength</mono> they are called <mono>p1</mono>  and  <mono>p2</mono>) and the values are themselves dictionaries, mapping the name of a property belonging to an object to a new value. 
       </li>
     </ul>
     <p>
-      Here is how these properties are defined for an instance of <mono>LengthConstraint</mono> (note that auxiliary functions <mono>plus</mono>, <mono>normalized</mono>, etc. operate over and return <mono>Point</mono> types, which are themselves essentially dictionary objects with <mono>x</mono> and <mono>y</mono> keys):
+      Here is how these properties are defined for an instance of <mono>FixedLength</mono> (note that auxiliary functions <mono>plus</mono>, <mono>normalized</mono>, etc. operate over and return <mono>Point</mono> types, which are themselves essentially dictionary objects with <mono>x</mono> and <mono>y</mono> keys):
     </p>
     <pre><code class="language-javascript">
 	// propertyTypes:
-	LengthConstraint.prototype.propertyTypes =
+	FixedLength.prototype.propertyTypes =
 	    {p1: 'Point', p2: 'Point', l: 'Number'}
 
 	// computeError:
-	LengthConstraint.prototype.computeError = function(pseudoTime) {
+	FixedLength.prototype.computeError = function(pseudoTime) {
 	    return distance(this.p1, this.p2) - this.l
 	}
 
 	// solve:
-	LengthConstraint.prototype.solve = function(pseudoTime) {
+	FixedLength.prototype.solve = function(pseudoTime) {
 	    var p1 = this.p1, p2 = this.p2
 	    var delta = (distance(p1, p2) - this.l) / 2
 	    var e12 = scaledBy(normalized(minus(p2, p1)), delta)
@@ -72,10 +72,10 @@
 	}	
     </code></pre>
     <p>
-      Contrast the above with the <mono>computeDeltas</mono> function for the <mono>LengthConstraint</mono> in the Overveld approach, given previously. In Overveld way the solution was a set of deltas, but here the solution is the set of new values the constraint is proposing on the two points' coordinates. It so happens that these new values are obtained by computing delta values and adding to the current values. What's important is that this was left a choice to the implementer of the constraint type, rather than the system assuming so. We elaborate on this next.
+      Contrast the above with the <mono>computeDeltas</mono> function for the <mono>FixedLength</mono> in the Overveld approach, given previously. In Overveld way the solution was a set of deltas, but here the solution is the set of new values the constraint is proposing on the two points' coordinates. It so happens that these new values are obtained by computing delta values and adding to the current values. What's important is that this was left a choice to the implementer of the constraint type, rather than the system assuming so. We elaborate on this next.
     </p>
     <p>
-      How are individual solutions consolidated in the presence of multiple constraints? CDP employs the approach of Overveld (see <a href="1.html">Part I</a>) to collect the solutions from unsatisfied constraints and <i>join</i> them in order to come up with a <i>single consolidated solution</i>. Unlike the Overveld approach, however, where the joining is always simply <i>averaging</i> numeric values per variable, CDP generalizes this and allows the user to define a <mono>solutionJoin</mono> function per class property that decides how multiple solutions are combined. 
+      How are individual solutions consolidated in the presence of multiple constraints? CDP employs the approach of Overveld (see <a href="1.html">Part I</a>) to collect the solutions from unsatisfied constraints and <i>merge</i> them in order to come up with a <i>single consolidated solution</i>. Unlike the Overveld approach, however, where the merging is always simply <i>averaging</i> numeric values per variable, CDP generalizes this and allows the user to define a <mono>solutionMerge</mono> function per class property that decides how multiple solutions are combined. 
     </p>
     <p>
       This generality is essential to accommodate numerous scenarios that arise in program development. Firstly, we cannot assume the patches proposed by the constraint are numeric real values, as they might be on finite data types, etc. Secondly, the right way to combine two competing solutions from two individual constraints maybe to raise a conflict and stop, prefer one to other because of priorities, or even apply some custom merge function not at all captured by averaging the values. We'll see examples later.
@@ -85,10 +85,10 @@
     </p>
     <ul>
       <li>
-	<mono>solutionJoins</mono>: Given the current value (<mono>curr</mono>) of each class property (a.k.a., instance variable) and the set of collected new values from constraints that have proposed to update it (<mono>solutions</mono>), this function decides how to combine the solutions to determine the new value for the variable. For example, to perform the Overveld style averaging and damping the deltas (happens to be the <i>default</i> join function for all variables) we can define the following:
+	<mono>merge</mono>: Given the current value (<mono>curr</mono>) of each class property (a.k.a., instance variable) and the set of collected new values from constraints that have proposed to update it (<mono>solutions</mono>), this function decides how to combine the solutions to determine the new value for the variable. For example, to perform the Overveld style averaging and damping the deltas (happens to be the <i>default</i> merge function for all variables) we can define the following:
 	<pre><code class="language-javascript">
-	// Overveld style (damped avg) (default) solution join fn:
-	dampedAverageJoinFn = function(curr, solutions) {
+	// Overveld relaxation style (damped avg) (default) solution merge fn:
+	dampedAverageMergeFn = function(curr, solutions) {
 	    var damping = 0.25
 	    var sum = 0
 	    solutions.forEach(function(v) { sum += v })
@@ -96,17 +96,19 @@
 	    return curr + (damping * (avg - curr))
 	}
 </code></pre>
-	For non-real values the above joining function does not make sense. In the simple case where we know there is exactly one constraint acting on a variable, we can simply return that single solution (or pick a random choice among multiple ones):
+	For non-real values the above merging function does not make sense. In the simple case where we know there is exactly one constraint acting on a variable, we can simply return that single solution (or pick a random choice among multiple ones):
 	<pre><code class="language-javascript">
-	// Pick a solution join fn:
-	pickOneJoinFn = function(curr, solutions) {
+	// Pick a solution merge fn:
+	pickOneMergeFn = function(curr, solutions) {
 	    return solutions[0]
 	}
 </code></pre>
-	For example, the <mono>Point</mono> class with properties <mono>x, y: Number</mono>  and <mono>color: String</mono>, lets the <mono>x</mono> and <mono>y</mono> properties use the default solution join function (<mono>dampedAverageJoinFn</mono>), yet overwrites the function for its <mono>color</mono> property:
+	For example, the <mono>Point</mono> class with properties <mono>x, y: Number</mono>  and <mono>color: String</mono>, lets the <mono>x</mono> and <mono>y</mono> properties use the default solution merge function (<mono>dampedAverageMergeFn</mono>), yet overwrites the function for its <mono>color</mono> property:
 	<pre><code class="language-javascript">
-	Point.prototype.solutionJoins = function() { 
-	    return {color: pickOneJoinFn}
+	Point.prototype.merge = function() { 
+	    return {x: dampedAverageMergeFn,
+	            y: dampedAverageMergeFn,
+	            color: pickOneMergeFn}
 	}
 </code></pre>
 	In reality, <mono>solutions</mono> also has a reference to the constraint responsible for producing each solution, thus if this function chooses to distinguish solutions based on constraint priorities, etc. it may do so. The default procedure, however, is that the system automatically sorts the collected solutions per variable and if there is a mismatch in priorities, only solutions from top priority constraints are counted.
@@ -157,7 +159,7 @@ In order to support responsive interactive and animated programs, we adopt a two
       During the solving phase <i>B</i> (illustrated in figure below) the system invokes the <mono>computeError</mono> function belonging to each of the existing constraints. As long as the value is more than a an <mono>epsilon</mono> error threshold (specified by the user), the system invokes the <mono>solve</mono> function associated with each unsatisfied constraint. Each solution returned by each such function is organized as a dictionary of dictionaries, mapping each object's each property to a proposed value. Thus the value returned by a <mono>solve</mono> function could be interpreted as a <i>patch</i>: a subset of the current state that the constraint would like to change indicating the proposed new values.
     </p>
     <p>
-      At this point the system uses the designated <i>join</i> function to combine all solutions to each variable into one consolidated new value, and then applies it to the variable. However, since these values aren't exactly what each constraint had asked for, after this step all or some of the previously unhappy constraints are likely to remain unhappy (or even previously happy constraints may have now turned unhappy). This is were the <i>iterative relaxation</i>  approach comes in. As long as that is the case, the system repeats the process above, until either:
+      At this point the system uses the designated <i>merge</i> function to combine all solutions to each variable into one consolidated new value, and then applies it to the variable. However, since these values aren't exactly what each constraint had asked for, after this step all or some of the previously unhappy constraints are likely to remain unhappy (or even previously happy constraints may have now turned unhappy). This is were the <i>iterative relaxation</i>  approach comes in. As long as that is the case, the system repeats the process above, until either:
     </p>
     <ul>
       <li>

@@ -127,7 +127,7 @@
       <li>
 	<i><b>Programmer burdens</b></i>
 	<p>
-	  To conform to the CDP model, behaviors previously accomplished by snippets of code that directly update program state must be refactored, a source of burden to most programmers. The code must be organized to produce a dictionary object of proposed patches, rather than directly manipulating the state. The system needs to also be given a <i>join</i> function to combine solutions from individual constraints.
+	  To conform to the CDP model, behaviors previously accomplished by snippets of code that directly update program state must be refactored, a source of burden to most programmers. The code must be organized to produce a dictionary object of proposed patches, rather than directly manipulating the state. The system needs to also be given a <i>merge</i> function to combine solutions from individual constraints.
 	</p>
       </li>
       <li>
@@ -145,7 +145,7 @@
 	  <i>Break a program into a set of logically orthogonal, <br>or only loosely related, behaviors.</i>
 	</center>
 	<p>
-	  The objective is to reason about solving each constraint separately, and then in the  <mono>solutionJoin</mono> function worry about how conflicting solutions can be consolidated. There seems to be a loose analogy here with what's often said about <i>parallelism</i> vs. <i>concurrency</i>:
+	  The objective is to reason about solving each constraint separately, and then in the  <mono>solutionMerge</mono> function worry about how conflicting solutions can be consolidated. There seems to be a loose analogy here with what's often said about <i>parallelism</i> vs. <i>concurrency</i>:
 	</p>
 	<p>
 	  "Parallelism" is about performing independent computations in parallel for efficiency, while "concurrency" concerns ensuring these parallel computations don't get in the way of each other.

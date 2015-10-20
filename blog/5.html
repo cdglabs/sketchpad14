@@ -74,21 +74,21 @@
 	    denotes each board in the page. <mono>cells</mono> is an array representing what's on it, whose elements may be <mono>Shape</mono>s or none. Board elements will be indexed by <i>(row# * cols + col#)</i> zero-indexed encoding. <mono>kindPercentage</mono> is the ratio of the count of surrounding kind shapes to all surrounding shapes, which is the threshold below which the shape will feel <i>sad</i> and inclined to move.
 	  </p>
 	  <p>
-	    We will see later than one the constraint types will be affecting the <mono>cells</mono> array property of a board. Clearly the default solution join function (<mono>dampedAverageJoinFn</mono> seen in the <a href="4.html">previous part</a>) does not work on non-real values and hence unsuitable here. Instead, the class uses a different join function called <mono>dictionaryAddJoinFn</mono>:
+	    We will see later than one the constraint types will be affecting the <mono>cells</mono> array property of a board. Clearly the default solution merge function (<mono>dampedAverageMergeFn</mono> seen in the <a href="4.html">previous part</a>) does not work on non-real values and hence unsuitable here. Instead, the class uses a different merge function called <mono>dictionaryAddMergeFn</mono>:
 	  </p>
 	  <pre><code class="language-javascript">
-// Dictionary add join fn:
-dictionaryAddJoinFn = function(curr, solutions) {
+// Dictionary add merge fn:
+dictionaryAddMergeFn = function(curr, solutions) {
     solutions.forEach(function(v) { for (var k in v) curr[k] = v[k] })
     return curr
 }
 	  </code></pre>
 	<p>
-	  where each solution is a dictionary of key/value pairs that include keys (in this case indices in an array) that it wants to change. So, here is how the class defines its <mono>solutionJoins</mono> function:
+	  where each solution is a dictionary of key/value pairs that include keys (in this case indices in an array) that it wants to change. So, here is how the class defines its <mono>merge</mono> function:
 	</p>
 	  <pre><code class="language-javascript">
-Board.prototype.solutionJoins = function() { 
-    return {cells: dictionaryAddJoinSolutions}
+Board.prototype.merge = function() { 
+    return {cells: dictionaryAddMergeSolutions}
 }
 </code></pre>
 	  <p>

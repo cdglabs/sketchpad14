@@ -56,23 +56,23 @@
 	l2 := new Line(p2, p3);
     </code></pre>
     <p>
-      The next step is to add the continuous behaviors, i.e., constraints. We will add two <mono>LengthConstraint</mono>s to keep the lengths of lines fixed at 100px and one <mono>OrientationConstraint</mono> to keep the angle between them at 90 degrees, at all times:
+      The next step is to add the continuous behaviors, i.e., constraints. We will add two <mono>FixedLength</mono>s to keep the lengths of lines fixed at 100px and one <mono>FixedAngle</mono> to keep the angle between them at 90 degrees, at all times:
     </p>
     <pre><code class="language-javascript">
 
-	addConstraint(new LengthConstraint(p1, p2, 100))
-	addConstraint(new LengthConstraint(p2, p3, 100))
-	addConstraint(new OrientationConstraint(p2, p1, p2, p3,  Math.PI / 2))
+	addConstraint(new FixedLength(p1, p2, 100))
+	addConstraint(new FixedLength(p2, p3, 100))
+	addConstraint(new FixedAngle(p2, p1, p2, p3,  Math.PI / 2))
     </code></pre>
     <p>
-      Finally, we need to define the reactive aspect of the program: if the user has the mouse clicked on a point, we'd want to add a <mono>CoordinateConstraint</mono> to also require that it follows the mouse dragging:
+      Finally, we need to define the reactive aspect of the program: if the user has the mouse clicked on a point, we'd want to add a <mono>FixedCoordinate</mono> to also require that it follows the mouse dragging:
     </p>
     <pre><code class="language-javascript">
 
     registerEvent('mousedown', function(e) {
     if (e.pointedObject instanceof Point)
         dragConstraint = addConstraint(
-            new CoordinateConstraint(e.pointedObject.position,
+            new FixedCoordinate(e.pointedObject.position,
                                      e.mousePosition))
 })
     </code></pre>
@@ -80,7 +80,7 @@
       The <mono>registerEvent</mono> call internally installs a JavaScript event listener, yet ensures the callback is invoked at appropriate times (not during solving of constraints) rather than haphazardly. We'll get to details later.
     </p>
     <p>
-      And the <mono>CoordinateConstraint</mono> needs to be updated during the dragging:
+      And the <mono>FixedCoordinate</mono> needs to be updated during the dragging:
     </p>
     <pre><code class="language-javascript">
 
@@ -107,7 +107,7 @@
   <hd1>Exploring A Program's Behavior</hd1>
   <div class="chapter">
     <p>
-      In the demo figure above we saw the a feature that helps understanding a program: the set of active constraints are shown at the top right of the screen. Notice that one <mono>CoordinateConstraint</mono> temporarily appears during the user dragging event. The number of instances of each constraint type is also shown.
+      In the demo figure above we saw the a feature that helps understanding a program: the set of active constraints are shown at the top right of the screen. Notice that one <mono>FixedCoordinate</mono> temporarily appears during the user dragging event. The number of instances of each constraint type is also shown.
     </p>
     <table>
       <tr>
@@ -181,7 +181,7 @@
   <hd1>Viewing and Editing Existing Classes</hd1>
   <div class="chapter">
     <p>
-      So far we've been using a predefined set of data and constraint classes.  It is possible to view and edit the class definitions using the class <i>browser</i>. For example, in the figure below we click on the constraint type <mono>LengthConstraint</mono> to get its listing of method definitions:
+      So far we've been using a predefined set of data and constraint classes.  It is possible to view and edit the class definitions using the class <i>browser</i>. For example, in the figure below we click on the constraint type <mono>FixedLength</mono> to get its listing of method definitions:
     </p>
     <table>
       <tr>
