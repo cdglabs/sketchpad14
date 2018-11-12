@@ -543,8 +543,8 @@ SketchpadCanvas.prototype.pointermove = function(e) {
 }
 
 SketchpadCanvas.prototype.pointerup = function(e) {
-    var finger = this.fingers[e.pointerId]
-    if (finger) {
+	var finger = this.fingers[e.pointerId]
+	if (finger) {
 	finger.point._isSelected = false	
 	this.removeConstraint(finger.constraint)
 	delete this.fingers[e.pointerId]
