@@ -166,8 +166,10 @@ for (var idx = 0; idx < bins.length; idx++) {
       rc.updateSIILabel()
       var requestExampleName = params.example
       if (requestExampleName) {
-      requestExample = examples[requestExampleName]
-      if (requestExample) showFns.demo(requestExampleName)
+        requestExample = examples[requestExampleName]
+        if (requestExample) showFns.demo(requestExampleName)
+      } else {
+        rc.clear()        
       }
     </script>
   </body>
